@@ -1,0 +1,87 @@
+import { makeVar, ReactiveVar } from "@apollo/client";
+import { gql } from "../../__generated__/gql";
+
+const getCleanValueForStorage = (value: unknown) => {
+  return typeof value === "string" ? value : JSON.stringify(value);
+};
+
+const makeVarPersisted = (initialValue: any, storageName: string) => {
+  let value = initialValue;
+
+  // Try to fetch the value from local storage
+  const previousValue = localStorage.getItem(storageName);
+  if (previousValue !== null) {
+    try {
+      const parsed = JSON.parse(previousValue);
+      value = parsed;
+    } catch {
+      // It wasn't JSON, assume a valid value
+      value = previousValue as unknown;
+    }
+  }
+
+  // Create a reactive var with stored/initial value
+  const rv = makeVar(value);
+
+  const onNextChange = (newValue: any) => {
+    try {
+      // Try to add the value to local storage
+      if (newValue === undefined) {
+        localStorage.removeItem(storageName);
+      } else {
+        localStorage.setItem(storageName, getCleanValueForStorage(newValue));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Re-register for the next change
+    rv.onNextChange(onNextChange);
+  };
+
+  // Register for the first change
+  rv.onNextChange(onNextChange);
+
+  return rv;
+};
+
+export const cartItemsVar = makeVarPersisted([], "cartItems");
+
+export const GET_QUESTIONS_BY_ID = gql(`
+query GetQuestionsById($ids: [String!]) {
+  questions(
+    where: {
+        id: {_in: $ids}
+    }
+  ) {
+    answerimgs {
+      answerimgname
+      answerimgid
+    }
+    questionimgs {
+      questionimgname
+      questionimgid
+    }
+    assessment {
+      assessmentname
+    }
+    level {
+      level
+    }
+    paper {
+      paper
+    }
+    school {
+      schoolname
+    }
+    id
+    question_topics {
+      topic {
+        topicname
+      }
+    }
+  }
+}
+`);
+
+// isInCart @client

@@ -1,0 +1,17 @@
+diff --git a/node_modules/jay-peg/src/index.js b/node_modules/jay-peg/src/index.js
+index ba77471..b235131 100644
+--- a/node_modules/jay-peg/src/index.js
++++ b/node_modules/jay-peg/src/index.js
+@@ -46,6 +46,12 @@ const Marker = new r.VersionedStruct(r.uint16be, {
+   0xffe1: EXIFMarker,
+ });
+ 
++Marker.process = function (stream) {
++  if (this.version === 0xffd9) {
++    stream.pos = stream.length; // finish reading
++  }
++};
++
+ const JPEG = new r.Array(Marker);
+ 
+ const decode = (buffer) => {
