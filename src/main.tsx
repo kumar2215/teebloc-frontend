@@ -5,6 +5,7 @@ import ReactDOM from "react-dom/client";
 import { ApolloProviderWrapper } from "./ApolloProviderWrapper.tsx";
 import App from "./App.tsx";
 import { PostHogProvider } from "posthog-js/react";
+import posthog from "posthog-js";
 
 import "./index.css";
 
@@ -21,21 +22,18 @@ if (process.env.NODE_ENV !== "production") {
   loadErrorMessages();
 }
 
-const options = {
-  api_host: import.meta.env.REACT_APP_PUBLIC_POSTHOG_HOST,
-};
+posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
+  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+});
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <PostHogProvider
-      apiKey={import.meta.env.REACT_APP_PUBLIC_POSTHOG_KEY}
-      options={options}
-    >
+    <PostHogProvider client={posthog}>
       <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
         <ApolloProviderWrapper>
           <App />
         </ApolloProviderWrapper>
       </ClerkProvider>
     </PostHogProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
 );
