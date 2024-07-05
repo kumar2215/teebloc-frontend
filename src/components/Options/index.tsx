@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { OnChangeValue } from "react-select";
 import CustomSelect from "../CusomSelect";
+import { useUser } from "@clerk/clerk-react";
 import Questions from "../Questions";
 import {
   GET_ASSESSMENTS,
@@ -12,6 +14,9 @@ import {
   GET_TOPICS,
 } from "./data";
 import { useBatchQueryParamState, useQueryParamsState } from "./hook";
+import { pdf } from "@react-pdf/renderer";
+import { cartItemsVar } from "../Cart/data";
+import { PDFDocument } from "../MyWorksheets/pdf";
 
 interface Option {
   readonly value: string;
@@ -51,7 +56,14 @@ const commonSelectSettings = {
   },
 };
 
+function useIsAdmin() {
+  const { user } = useUser();
+  return user?.publicMetadata?.role === "admin";
+}
+
 export default function Options() {
+  const isAdmin = useIsAdmin();
+
   // Subjects
   const { loading, error, data } = useQuery(GET_SUBJECTS);
   // const [selectedSubject, setSelectedSubject] = useState<Option>();
@@ -101,7 +113,7 @@ export default function Options() {
   });
   const [selectedAssessments, setSelectedAssessments] = useQueryParamsState(
     "assessments",
-    []
+    [],
   );
 
   // Schools
@@ -116,7 +128,7 @@ export default function Options() {
   });
   const [selectedSchools, setSelectedSchools] = useQueryParamsState(
     "schools",
-    []
+    [],
   );
 
   // Questions
@@ -139,6 +151,31 @@ export default function Options() {
   });
 
   const setBatchQuery = useBatchQueryParamState();
+
+  const [downloadLoading, setDownloadLoading] = useState(false);
+
+  async function downloadPDF() {
+    setDownloadLoading(true);
+    const cartItems = cartItemsVar();
+    const questions = cartItems.map((id) => {
+      return q_data?.questions.find((q) => q.id === id);
+    });
+    console.log(questions);
+
+    if (questions.length === 0) {
+      return;
+    }
+
+    const doc = <PDFDocument questionsData={{ questions }} />;
+    const asPdf = pdf(doc);
+    const blob = await asPdf.toBlob();
+
+    const url = URL.createObjectURL(blob);
+    const newTab = window.open(url, "_blank");
+    newTab.focus();
+
+    setDownloadLoading(false);
+  }
 
   if (error || t_error || l_error || p_error || a_error || s_error || q_error) {
     console.log(error, t_error, l_error, p_error, a_error, s_error, q_error);
@@ -265,6 +302,29 @@ export default function Options() {
         <span className="loading loading-spinner loading-lg"></span>
       )}
       {q_data && <div>{q_data.questions.length} results</div>}
+
+      {isAdmin && (
+        <>
+          <div
+            onClick={downloadPDF}
+            className="btn btn-neutral btn-lg w-60 fixed bottom-4 right-4 z-10"
+          >
+            {downloadLoading && (
+              <span className="loading loading-spinner"></span>
+            )}
+            {downloadLoading ? "Loading" : "Download worksheet"}
+          </div>
+
+          <div
+            onClick={() => {
+              cartItemsVar([]);
+            }}
+            className="btn btn-neutral btn-lg fixed bottom-4 right-72 z-10"
+          >
+            Clear questions
+          </div>
+        </>
+      )}
 
       <Questions
         questions={q_data?.questions || []}

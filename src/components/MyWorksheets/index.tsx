@@ -12,7 +12,7 @@ async function useLazyQuestionsQuery(
   client,
   query,
   variables,
-  expectedNumQuestions
+  expectedNumQuestions,
 ) {
   const response = await client.query({
     query,
@@ -71,7 +71,7 @@ export default function MyWorksheets() {
         {
           ids: worksheet.worksheets_to_questions.map((wtq) => wtq.question_id),
         },
-        worksheet.worksheets_to_questions.length
+        worksheet.worksheets_to_questions.length,
       )
         .then((result) => {
           console.log("GOT data!");
@@ -93,7 +93,7 @@ export default function MyWorksheets() {
           setWorksheetLoading((prev) => ({ ...prev, [worksheet.id]: false }));
         });
     },
-    [setWorksheetLoading]
+    [setWorksheetLoading],
   );
 
   const worksheets = w_data?.worksheets || [];
