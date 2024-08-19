@@ -37,30 +37,36 @@ const MultiValue = ({ index, getValue, ...props }) => {
 export default function CustomSelect<
   Option,
   IsMulti extends boolean = false,
-  Group extends GroupBase<Option> = GroupBase<Option>
+  Group extends GroupBase<Option> = GroupBase<Option>,
 >(props: Props<Option, IsMulti, Group>) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <Select
-      {...props}
-      setMenuOpen={setMenuOpen}
-      menuIsOpen={menuOpen}
-      //   menuIsOpen={true}
-      onBlur={() => {
-        setMenuOpen(false);
-      }}
-      onMenuOpen={() => {
-        setMenuOpen(true);
-      }}
-      onMenuClose={() => {
-        setMenuOpen(false);
-      }}
-      components={{
-        Menu,
-        LoadingIndicator: () => null,
-        MultiValue,
-      }}
-    />
+    <div>
+      <Select
+        {...props}
+        setMenuOpen={setMenuOpen}
+        menuIsOpen={menuOpen}
+        //   menuIsOpen={true}
+        onBlur={() => {
+          setMenuOpen(false);
+        }}
+        onMenuOpen={() => {
+          setMenuOpen(true);
+        }}
+        onMenuClose={() => {
+          setMenuOpen(false);
+        }}
+        components={{
+          Menu,
+          LoadingIndicator: () => null,
+          MultiValue,
+        }}
+      />
+      {(!props.value ||
+        (Array.isArray(props.value) && props.value.length === 0)) && (
+        <span class="text-xs text-red-500">Need to select input</span>
+      )}
+    </div>
   );
 }

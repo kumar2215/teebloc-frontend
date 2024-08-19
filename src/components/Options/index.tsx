@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { OnChangeValue } from "react-select";
 import CustomSelect from "../CusomSelect";
+import Instructions from "../Instructions";
 import { useUser } from "@clerk/clerk-react";
 import Questions from "../Questions";
 import {
@@ -150,6 +151,15 @@ export default function Options() {
     },
   });
 
+  // Add variable that checks whether all options have at least one value selected (by checking null or empty array)
+  const allOptionsSelected =
+    selectedSubject &&
+    selectedTopics.length > 0 &&
+    selectedLevels.length > 0 &&
+    selectedPapers.length > 0 &&
+    selectedAssessments.length > 0 &&
+    selectedSchools.length > 0;
+
   const setBatchQuery = useBatchQueryParamState();
 
   const [downloadLoading, setDownloadLoading] = useState(false);
@@ -184,6 +194,7 @@ export default function Options() {
 
   return (
     <div className="mx-8 flex flex-wrap gap-8 flex-col">
+      <Instructions />
       <div className="my-2 flex flex-col justify-start gap-2">
         <CustomSelect
           {...commonSelectSettings}
@@ -253,7 +264,15 @@ export default function Options() {
           options={
             p_data &&
             p_data.papers.map((s) => {
-              return { value: s.paper, label: s.paper };
+              const paperLabels = {
+                1: "MCQ",
+                2: "Open Ended",
+                3: "Open Ended",
+              };
+              return {
+                value: s.paper,
+                label: `${s.paper} (${paperLabels[s.paper]})`,
+              };
             })
           }
         />
@@ -324,6 +343,12 @@ export default function Options() {
             Clear questions
           </div>
         </>
+      )}
+
+      {q_data?.questions.length === 0 && allOptionsSelected && (
+        <div>
+          No results. Try selecting more options to broaden your search!
+        </div>
       )}
 
       <Questions
