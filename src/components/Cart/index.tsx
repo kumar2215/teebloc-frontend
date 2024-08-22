@@ -20,6 +20,12 @@ export default function Cart() {
 
   const questions = q_data?.questions || [];
 
+  const paper1Questions = questions.filter((q) => q.paper.paper === 1);
+
+  const totalPrice =
+    paper1Questions.length * 0.05 +
+    (cartItems.length - paper1Questions.length) * 0.1;
+
   const handleCheckout = async () => {
     try {
       const response = await fetch(
@@ -31,9 +37,10 @@ export default function Cart() {
           },
           body: JSON.stringify({
             question_ids: cartItems,
+            num_paper1_questions: paper1Questions.length,
             user_id: user.id,
           }),
-        }
+        },
       );
 
       if (!response.ok) {

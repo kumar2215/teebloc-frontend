@@ -5,6 +5,7 @@ export default function Instructions() {
       <ul>
         <li>10 cents per open ended question</li>
         <li>5 cents per multiple choice question</li>
+        <li>Minimum 50 cents charged per worksheet</li>
       </ul>
       <h4>Usage</h4>
       <ol>
