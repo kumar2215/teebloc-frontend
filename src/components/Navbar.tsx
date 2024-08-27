@@ -8,12 +8,18 @@ import {
 } from "@clerk/clerk-react";
 import { Link, useLocation } from "wouter";
 import { cartItemsVar } from "./Cart/data.tsx";
+import posthog from "posthog-js";
 
 export default function Navbar() {
   const { signOut } = useClerk();
 
   const cartItems = useReactiveVar(cartItemsVar);
   const [location] = useLocation();
+
+  const onSignOut = () => {
+    posthog.reset();
+    signOut();
+  };
 
   return (
     <div className="p-4 sticky top-0 z-10">
@@ -63,7 +69,7 @@ export default function Navbar() {
                 className="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4"
               >
                 <li>
-                  <a onClick={() => signOut()}>Sign out</a>
+                  <a onClick={onSignOut}>Sign out</a>
                 </li>
               </ul>
             </div>

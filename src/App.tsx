@@ -4,9 +4,19 @@ import Cart from "./components/Cart";
 import MyWorksheets from "./components/MyWorksheets";
 import Navbar from "./components/Navbar";
 import Options from "./components/Options";
+import { useUser } from "@clerk/clerk-react";
+import posthog from "posthog-js";
 
-//
 function App() {
+  const { isSignedIn, user, isLoaded } = useUser();
+
+  if (isLoaded && isSignedIn) {
+    posthog.identify(user.id, {
+      email: user.emailAddresses[0].emailAddress,
+      name: user.fullName,
+    });
+  }
+
   return (
     <div>
       <Navbar />
