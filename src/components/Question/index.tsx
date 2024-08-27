@@ -2,6 +2,7 @@ import { cartItemsVar } from "../Cart/data";
 import { useReactiveVar } from "@apollo/client";
 import { QuestionType } from "../Questions";
 import { memo } from "react";
+import posthog from "posthog-js";
 
 function sortQuestionImages(questionimgs: QuestionType["questionimgs"]) {
   const copiedQuestionImages = JSON.parse(JSON.stringify(questionimgs));
@@ -76,7 +77,13 @@ const Question = memo(function Question({
             </button>
           ) : (
             <button
-              onClick={() => cartItemsVar([...cartItemsVar(), q.id])}
+              onClick={() => {
+                cartItemsVar([...cartItemsVar(), q.id]);
+                posthog.capture("question_added_to_worksheet", {
+                  questionId: q.id,
+                  topicNames: q.question_topics.map((qt) => qt.topic.topicname),
+                });
+              }}
               className="btn btn-primary"
             >
               Add to worksheet

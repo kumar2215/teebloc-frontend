@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { OnChangeValue } from "react-select";
 import CustomSelect from "../CusomSelect";
@@ -18,6 +18,7 @@ import { useBatchQueryParamState, useQueryParamsState } from "./hook";
 import { pdf } from "@react-pdf/renderer";
 import { cartItemsVar } from "../Cart/data";
 import { PDFDocument } from "../MyWorksheets/pdf";
+import posthog from "posthog-js";
 
 interface Option {
   readonly value: string;
@@ -114,7 +115,7 @@ export default function Options() {
   });
   const [selectedAssessments, setSelectedAssessments] = useQueryParamsState(
     "assessments",
-    [],
+    []
   );
 
   // Schools
@@ -129,7 +130,7 @@ export default function Options() {
   });
   const [selectedSchools, setSelectedSchools] = useQueryParamsState(
     "schools",
-    [],
+    []
   );
 
   // Questions
@@ -186,6 +187,20 @@ export default function Options() {
 
     setDownloadLoading(false);
   }
+
+  useEffect(() => {
+    if (q_data && q_data.questions.length > 0) {
+      posthog.capture("questions_shown", {
+        count: q_data.questions.length,
+        subject: selectedSubject?.value,
+        topics: selectedTopics.map((t) => t.value),
+        levels: selectedLevels.map((l) => l.value),
+        papers: selectedPapers.map((p) => p.value),
+        assessments: selectedAssessments.map((a) => a.value),
+        schools: selectedSchools.map((s) => s.value),
+      });
+    }
+  }, [q_data]);
 
   if (error || t_error || l_error || p_error || a_error || s_error || q_error) {
     console.log(error, t_error, l_error, p_error, a_error, s_error, q_error);

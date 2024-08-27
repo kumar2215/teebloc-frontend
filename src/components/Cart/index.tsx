@@ -2,6 +2,7 @@ import { useUser } from "@clerk/clerk-react";
 import Question from "../Question";
 import { useQuery, useReactiveVar } from "@apollo/client";
 import { GET_QUESTIONS_BY_ID, cartItemsVar } from "./data";
+import posthog from "posthog-js";
 
 export default function Cart() {
   const { user } = useUser();
@@ -27,6 +28,8 @@ export default function Cart() {
     (cartItems.length - paper1Questions.length) * 0.1;
 
   const handleCheckout = async () => {
+    posthog.capture("user_clicked_checkout");
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_API}/create-checkout-session`,
@@ -40,7 +43,7 @@ export default function Cart() {
             num_paper1_questions: paper1Questions.length,
             user_id: user.id,
           }),
-        },
+        }
       );
 
       if (!response.ok) {

@@ -53,6 +53,11 @@ export default function Navbar() {
                 className={`btn btn-outline ${
                   location === "/cart" && "btn-active"
                 }`}
+                onClick={() => {
+                  posthog.capture("worksheet_cart_clicked", {
+                    cartItemsCount: cartItems.length,
+                  });
+                }}
               >
                 Worksheet Cart
                 {cartItems.length > 0 && (
