@@ -490,7 +490,7 @@ export type Assessment_Level_Bool_Exp = {
 
 /** unique or primary key constraints on table "assessment_level" */
 export enum Assessment_Level_Constraint {
-  /** unique or primary key constraint on columns "levelid", "assessmentid" */
+  /** unique or primary key constraint on columns "assessmentid", "levelid" */
   AssessmentLevelPkey = 'assessment_level_pkey'
 }
 
@@ -1092,7 +1092,7 @@ export type Completedquestions_Bool_Exp = {
 
 /** unique or primary key constraints on table "completedquestions" */
 export enum Completedquestions_Constraint {
-  /** unique or primary key constraint on columns "questionid", "email" */
+  /** unique or primary key constraint on columns "email", "questionid" */
   CompletedquestionsPkey = 'completedquestions_pkey'
 }
 
@@ -2869,6 +2869,7 @@ export type Mutation_RootUpdate_Upvotes_ManyArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_UsersArgs = {
+  _inc?: InputMaybe<Users_Inc_Input>;
   _set?: InputMaybe<Users_Set_Input>;
   where: Users_Bool_Exp;
 };
@@ -2876,6 +2877,7 @@ export type Mutation_RootUpdate_UsersArgs = {
 
 /** mutation root */
 export type Mutation_RootUpdate_Users_By_PkArgs = {
+  _inc?: InputMaybe<Users_Inc_Input>;
   _set?: InputMaybe<Users_Set_Input>;
   pk_columns: Users_Pk_Columns_Input;
 };
@@ -3458,7 +3460,7 @@ export type Pendingpayments_Bool_Exp = {
 
 /** unique or primary key constraints on table "pendingpayments" */
 export enum Pendingpayments_Constraint {
-  /** unique or primary key constraint on columns "questionid", "email" */
+  /** unique or primary key constraint on columns "email", "questionid" */
   PendingpaymentsPkey = 'pendingpayments_pkey'
 }
 
@@ -4348,7 +4350,7 @@ export type Question_Topic_Bool_Exp = {
 
 /** unique or primary key constraints on table "question_topic" */
 export enum Question_Topic_Constraint {
-  /** unique or primary key constraint on columns "questionid", "topicid" */
+  /** unique or primary key constraint on columns "topicid", "questionid" */
   QuestionTopicPkey = 'question_topic_pkey'
 }
 
@@ -5979,7 +5981,7 @@ export type Savedquestions_Bool_Exp = {
 
 /** unique or primary key constraints on table "savedquestions" */
 export enum Savedquestions_Constraint {
-  /** unique or primary key constraint on columns "questionid", "email" */
+  /** unique or primary key constraint on columns "email", "questionid" */
   SavedquestionsPkey = 'savedquestions_pkey'
 }
 
@@ -6190,7 +6192,7 @@ export type School_Subject_Bool_Exp = {
 
 /** unique or primary key constraints on table "school_subject" */
 export enum School_Subject_Constraint {
-  /** unique or primary key constraint on columns "subjectid", "schoolid" */
+  /** unique or primary key constraint on columns "schoolid", "subjectid" */
   SchoolSubjectPkey = 'school_subject_pkey'
 }
 
@@ -8927,7 +8929,7 @@ export type Upvotes_Bool_Exp = {
 
 /** unique or primary key constraints on table "upvotes" */
 export enum Upvotes_Constraint {
-  /** unique or primary key constraint on columns "questionid", "email" */
+  /** unique or primary key constraint on columns "email", "questionid" */
   UpvotesPkey = 'upvotes_pkey'
 }
 
@@ -9046,6 +9048,7 @@ export type Users = {
   /** An aggregate relationship */
   completedquestions_aggregate: Completedquestions_Aggregate;
   email: Scalars['String']['output'];
+  free_worksheets_count: Scalars['Int']['output'];
   id: Scalars['String']['output'];
   last_seen: Scalars['timestamp']['output'];
   /** An array relationship */
@@ -9200,9 +9203,17 @@ export type Users_Aggregate = {
 /** aggregate fields of "users" */
 export type Users_Aggregate_Fields = {
   __typename?: 'users_aggregate_fields';
+  avg?: Maybe<Users_Avg_Fields>;
   count: Scalars['Int']['output'];
   max?: Maybe<Users_Max_Fields>;
   min?: Maybe<Users_Min_Fields>;
+  stddev?: Maybe<Users_Stddev_Fields>;
+  stddev_pop?: Maybe<Users_Stddev_Pop_Fields>;
+  stddev_samp?: Maybe<Users_Stddev_Samp_Fields>;
+  sum?: Maybe<Users_Sum_Fields>;
+  var_pop?: Maybe<Users_Var_Pop_Fields>;
+  var_samp?: Maybe<Users_Var_Samp_Fields>;
+  variance?: Maybe<Users_Variance_Fields>;
 };
 
 
@@ -9210,6 +9221,12 @@ export type Users_Aggregate_Fields = {
 export type Users_Aggregate_FieldsCountArgs = {
   columns?: InputMaybe<Array<Users_Select_Column>>;
   distinct?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** aggregate avg on columns */
+export type Users_Avg_Fields = {
+  __typename?: 'users_avg_fields';
+  free_worksheets_count?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Boolean expression to filter rows from the table "users". All fields are combined with a logical 'AND'. */
@@ -9220,6 +9237,7 @@ export type Users_Bool_Exp = {
   completedquestions?: InputMaybe<Completedquestions_Bool_Exp>;
   completedquestions_aggregate?: InputMaybe<Completedquestions_Aggregate_Bool_Exp>;
   email?: InputMaybe<String_Comparison_Exp>;
+  free_worksheets_count?: InputMaybe<Int_Comparison_Exp>;
   id?: InputMaybe<String_Comparison_Exp>;
   last_seen?: InputMaybe<Timestamp_Comparison_Exp>;
   pendingpayments?: InputMaybe<Pendingpayments_Bool_Exp>;
@@ -9242,10 +9260,16 @@ export enum Users_Constraint {
   UsersPkey = 'users_pkey'
 }
 
+/** input type for incrementing numeric columns in table "users" */
+export type Users_Inc_Input = {
+  free_worksheets_count?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** input type for inserting data into table "users" */
 export type Users_Insert_Input = {
   completedquestions?: InputMaybe<Completedquestions_Arr_Rel_Insert_Input>;
   email?: InputMaybe<Scalars['String']['input']>;
+  free_worksheets_count?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   last_seen?: InputMaybe<Scalars['timestamp']['input']>;
   pendingpayments?: InputMaybe<Pendingpayments_Arr_Rel_Insert_Input>;
@@ -9259,6 +9283,7 @@ export type Users_Insert_Input = {
 export type Users_Max_Fields = {
   __typename?: 'users_max_fields';
   email?: Maybe<Scalars['String']['output']>;
+  free_worksheets_count?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   last_seen?: Maybe<Scalars['timestamp']['output']>;
 };
@@ -9267,6 +9292,7 @@ export type Users_Max_Fields = {
 export type Users_Min_Fields = {
   __typename?: 'users_min_fields';
   email?: Maybe<Scalars['String']['output']>;
+  free_worksheets_count?: Maybe<Scalars['Int']['output']>;
   id?: Maybe<Scalars['String']['output']>;
   last_seen?: Maybe<Scalars['timestamp']['output']>;
 };
@@ -9298,6 +9324,7 @@ export type Users_On_Conflict = {
 export type Users_Order_By = {
   completedquestions_aggregate?: InputMaybe<Completedquestions_Aggregate_Order_By>;
   email?: InputMaybe<Order_By>;
+  free_worksheets_count?: InputMaybe<Order_By>;
   id?: InputMaybe<Order_By>;
   last_seen?: InputMaybe<Order_By>;
   pendingpayments_aggregate?: InputMaybe<Pendingpayments_Aggregate_Order_By>;
@@ -9317,6 +9344,8 @@ export enum Users_Select_Column {
   /** column name */
   Email = 'email',
   /** column name */
+  FreeWorksheetsCount = 'free_worksheets_count',
+  /** column name */
   Id = 'id',
   /** column name */
   LastSeen = 'last_seen'
@@ -9325,8 +9354,27 @@ export enum Users_Select_Column {
 /** input type for updating data in table "users" */
 export type Users_Set_Input = {
   email?: InputMaybe<Scalars['String']['input']>;
+  free_worksheets_count?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   last_seen?: InputMaybe<Scalars['timestamp']['input']>;
+};
+
+/** aggregate stddev on columns */
+export type Users_Stddev_Fields = {
+  __typename?: 'users_stddev_fields';
+  free_worksheets_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_pop on columns */
+export type Users_Stddev_Pop_Fields = {
+  __typename?: 'users_stddev_pop_fields';
+  free_worksheets_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate stddev_samp on columns */
+export type Users_Stddev_Samp_Fields = {
+  __typename?: 'users_stddev_samp_fields';
+  free_worksheets_count?: Maybe<Scalars['Float']['output']>;
 };
 
 /** Streaming cursor of the table "users" */
@@ -9340,8 +9388,15 @@ export type Users_Stream_Cursor_Input = {
 /** Initial value of the column from where the streaming should start */
 export type Users_Stream_Cursor_Value_Input = {
   email?: InputMaybe<Scalars['String']['input']>;
+  free_worksheets_count?: InputMaybe<Scalars['Int']['input']>;
   id?: InputMaybe<Scalars['String']['input']>;
   last_seen?: InputMaybe<Scalars['timestamp']['input']>;
+};
+
+/** aggregate sum on columns */
+export type Users_Sum_Fields = {
+  __typename?: 'users_sum_fields';
+  free_worksheets_count?: Maybe<Scalars['Int']['output']>;
 };
 
 /** update columns of table "users" */
@@ -9349,16 +9404,38 @@ export enum Users_Update_Column {
   /** column name */
   Email = 'email',
   /** column name */
+  FreeWorksheetsCount = 'free_worksheets_count',
+  /** column name */
   Id = 'id',
   /** column name */
   LastSeen = 'last_seen'
 }
 
 export type Users_Updates = {
+  /** increments the numeric columns with given value of the filtered values */
+  _inc?: InputMaybe<Users_Inc_Input>;
   /** sets the columns of the filtered rows to the given values */
   _set?: InputMaybe<Users_Set_Input>;
   /** filter the rows which have to be updated */
   where: Users_Bool_Exp;
+};
+
+/** aggregate var_pop on columns */
+export type Users_Var_Pop_Fields = {
+  __typename?: 'users_var_pop_fields';
+  free_worksheets_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate var_samp on columns */
+export type Users_Var_Samp_Fields = {
+  __typename?: 'users_var_samp_fields';
+  free_worksheets_count?: Maybe<Scalars['Float']['output']>;
+};
+
+/** aggregate variance on columns */
+export type Users_Variance_Fields = {
+  __typename?: 'users_variance_fields';
+  free_worksheets_count?: Maybe<Scalars['Float']['output']>;
 };
 
 /** columns and relationships of "worksheets" */
@@ -9755,7 +9832,7 @@ export type Worksheets_To_Questions_Bool_Exp = {
 
 /** unique or primary key constraints on table "worksheets_to_questions" */
 export enum Worksheets_To_Questions_Constraint {
-  /** unique or primary key constraint on columns "worksheet_id", "question_id" */
+  /** unique or primary key constraint on columns "question_id", "worksheet_id" */
   WorksheetsToQuestionsWorksheetIdQuestionIdPk = 'worksheets_to_questions_worksheet_id_question_id_pk'
 }
 
@@ -10011,6 +10088,20 @@ export type GetQuestionsByIdQueryVariables = Exact<{
 
 export type GetQuestionsByIdQuery = { __typename?: 'query_root', questions: Array<{ __typename?: 'questions', id: string, answerimgs: Array<{ __typename?: 'answerimgs', answerimgname: string, answerimgid: any }>, questionimgs: Array<{ __typename?: 'questionimgs', questionimgname: string, questionimgid: any }>, assessment: { __typename?: 'assessments', assessmentname: string }, level: { __typename?: 'levels', level: string }, paper: { __typename?: 'papers', paper: any }, school: { __typename?: 'schools', schoolname: string }, question_topics: Array<{ __typename?: 'question_topic', topic: { __typename?: 'topics', topicname: string } }> }> };
 
+export type GetFreeWorksheetsLeftQueryVariables = Exact<{
+  userid: Scalars['String']['input'];
+}>;
+
+
+export type GetFreeWorksheetsLeftQuery = { __typename?: 'query_root', users: Array<{ __typename?: 'users', free_worksheets_count: number }> };
+
+export type DecrementFreeWorksheetsMutationVariables = Exact<{
+  userid: Scalars['String']['input'];
+}>;
+
+
+export type DecrementFreeWorksheetsMutation = { __typename?: 'mutation_root', update_users_by_pk?: { __typename?: 'users', id: string, free_worksheets_count: number } | null };
+
 export type GetUserWorksheetsQueryVariables = Exact<{
   userid: Scalars['String']['input'];
 }>;
@@ -10073,6 +10164,8 @@ export type GetQuestionsQuery = { __typename?: 'query_root', questions: Array<{ 
 
 
 export const GetQuestionsByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetQuestionsById"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"questions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_in"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"answerimgs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"answerimgname"}},{"kind":"Field","name":{"kind":"Name","value":"answerimgid"}}]}},{"kind":"Field","name":{"kind":"Name","value":"questionimgs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"questionimgname"}},{"kind":"Field","name":{"kind":"Name","value":"questionimgid"}}]}},{"kind":"Field","name":{"kind":"Name","value":"assessment"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"assessmentname"}}]}},{"kind":"Field","name":{"kind":"Name","value":"level"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"level"}}]}},{"kind":"Field","name":{"kind":"Name","value":"paper"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"paper"}}]}},{"kind":"Field","name":{"kind":"Name","value":"school"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"schoolname"}}]}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"question_topics"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"topic"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"topicname"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetQuestionsByIdQuery, GetQuestionsByIdQueryVariables>;
+export const GetFreeWorksheetsLeftDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFreeWorksheetsLeft"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userid"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"users"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userid"}}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"free_worksheets_count"}}]}}]}}]} as unknown as DocumentNode<GetFreeWorksheetsLeftQuery, GetFreeWorksheetsLeftQueryVariables>;
+export const DecrementFreeWorksheetsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DecrementFreeWorksheets"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userid"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"update_users_by_pk"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"pk_columns"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userid"}}}]}},{"kind":"Argument","name":{"kind":"Name","value":"_inc"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"free_worksheets_count"},"value":{"kind":"IntValue","value":"-1"}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"free_worksheets_count"}}]}}]}}]} as unknown as DocumentNode<DecrementFreeWorksheetsMutation, DecrementFreeWorksheetsMutationVariables>;
 export const GetUserWorksheetsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetUserWorksheets"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userid"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"worksheets"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"creator"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userid"}}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"created"}},{"kind":"Field","name":{"kind":"Name","value":"worksheets_to_questions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"question_id"}}]}}]}}]}}]} as unknown as DocumentNode<GetUserWorksheetsQuery, GetUserWorksheetsQueryVariables>;
 export const GetSubjectsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSubjects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"subjects"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"subject"}},{"kind":"Field","name":{"kind":"Name","value":"subjectid"}}]}}]}}]} as unknown as DocumentNode<GetSubjectsQuery, GetSubjectsQueryVariables>;
 export const GetTopicsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTopics"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"subject"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"topics"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"subject"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"subject"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"_eq"},"value":{"kind":"Variable","name":{"kind":"Name","value":"subject"}}}]}}]}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"topicname"}}]}}]}}]} as unknown as DocumentNode<GetTopicsQuery, GetTopicsQueryVariables>;

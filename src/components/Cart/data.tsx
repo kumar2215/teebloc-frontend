@@ -85,3 +85,23 @@ query GetQuestionsById($ids: [String!]) {
 `);
 
 // isInCart @client
+
+export const GET_FREE_WORKSHEETS_LEFT = gql(`
+  query GetFreeWorksheetsLeft($userid: String!) {
+    users(where: { id: { _eq: $userid } }) {
+      free_worksheets_count
+    }
+  }
+`);
+
+export const DECREMENT_FREE_WORKSHEETS = gql(`
+  mutation DecrementFreeWorksheets($userid: String!) {
+    update_users_by_pk(
+      pk_columns: { id: $userid }
+      _inc: { free_worksheets_count: -1 }
+    ) {
+      id
+      free_worksheets_count
+    }
+  }
+`);

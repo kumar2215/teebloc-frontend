@@ -14,6 +14,8 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 const documents = {
     "\nquery GetQuestionsById($ids: [String!]) {\n  questions(\n    where: {\n        id: {_in: $ids}\n    }\n  ) {\n    answerimgs {\n      answerimgname\n      answerimgid\n    }\n    questionimgs {\n      questionimgname\n      questionimgid\n    }\n    assessment {\n      assessmentname\n    }\n    level {\n      level\n    }\n    paper {\n      paper\n    }\n    school {\n      schoolname\n    }\n    id\n    question_topics {\n      topic {\n        topicname\n      }\n    }\n  }\n}\n": types.GetQuestionsByIdDocument,
+    "\n  query GetFreeWorksheetsLeft($userid: String!) {\n    users(where: { id: { _eq: $userid } }) {\n      free_worksheets_count\n    }\n  }\n": types.GetFreeWorksheetsLeftDocument,
+    "\n  mutation DecrementFreeWorksheets($userid: String!) {\n    update_users_by_pk(\n      pk_columns: { id: $userid }\n      _inc: { free_worksheets_count: -1 }\n    ) {\n      id\n      free_worksheets_count\n    }\n  }\n": types.DecrementFreeWorksheetsDocument,
     "\nquery GetUserWorksheets($userid: String!) {\n  worksheets(where: {creator: {_eq: $userid}}) {\n    name\n    id\n    created\n    worksheets_to_questions {\n      question_id\n    }\n  }\n}\n": types.GetUserWorksheetsDocument,
     "\nquery GetSubjects {\n  subjects {\n    subject\n    subjectid\n  }\n}\n": types.GetSubjectsDocument,
     "\nquery GetTopics($subject: String) {\n  topics(where: {subject: {subject: {_eq: $subject}}}) {\n    topicname\n  }\n}\n": types.GetTopicsDocument,
@@ -42,6 +44,14 @@ export function gql(source: string): unknown;
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\nquery GetQuestionsById($ids: [String!]) {\n  questions(\n    where: {\n        id: {_in: $ids}\n    }\n  ) {\n    answerimgs {\n      answerimgname\n      answerimgid\n    }\n    questionimgs {\n      questionimgname\n      questionimgid\n    }\n    assessment {\n      assessmentname\n    }\n    level {\n      level\n    }\n    paper {\n      paper\n    }\n    school {\n      schoolname\n    }\n    id\n    question_topics {\n      topic {\n        topicname\n      }\n    }\n  }\n}\n"): (typeof documents)["\nquery GetQuestionsById($ids: [String!]) {\n  questions(\n    where: {\n        id: {_in: $ids}\n    }\n  ) {\n    answerimgs {\n      answerimgname\n      answerimgid\n    }\n    questionimgs {\n      questionimgname\n      questionimgid\n    }\n    assessment {\n      assessmentname\n    }\n    level {\n      level\n    }\n    paper {\n      paper\n    }\n    school {\n      schoolname\n    }\n    id\n    question_topics {\n      topic {\n        topicname\n      }\n    }\n  }\n}\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query GetFreeWorksheetsLeft($userid: String!) {\n    users(where: { id: { _eq: $userid } }) {\n      free_worksheets_count\n    }\n  }\n"): (typeof documents)["\n  query GetFreeWorksheetsLeft($userid: String!) {\n    users(where: { id: { _eq: $userid } }) {\n      free_worksheets_count\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  mutation DecrementFreeWorksheets($userid: String!) {\n    update_users_by_pk(\n      pk_columns: { id: $userid }\n      _inc: { free_worksheets_count: -1 }\n    ) {\n      id\n      free_worksheets_count\n    }\n  }\n"): (typeof documents)["\n  mutation DecrementFreeWorksheets($userid: String!) {\n    update_users_by_pk(\n      pk_columns: { id: $userid }\n      _inc: { free_worksheets_count: -1 }\n    ) {\n      id\n      free_worksheets_count\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

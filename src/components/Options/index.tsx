@@ -19,8 +19,9 @@ import { pdf } from "@react-pdf/renderer";
 import { cartItemsVar } from "../Cart/data";
 import { PDFDocument } from "../MyWorksheets/pdf";
 import posthog from "posthog-js";
+import CustomOption from "./CustomOption";
 
-interface Option {
+export interface Option {
   readonly value: string;
   readonly label: string;
 }
@@ -58,6 +59,12 @@ const commonSelectSettings = {
   },
 };
 
+const paperLabels = {
+  1: "MCQ",
+  2: "Open Ended",
+  3: "Open Ended",
+};
+
 function useIsAdmin() {
   const { user } = useUser();
   return user?.publicMetadata?.role === "admin";
@@ -65,6 +72,30 @@ function useIsAdmin() {
 
 export default function Options() {
   const isAdmin = useIsAdmin();
+
+  // State to track scroll position
+  const [showScrollTopButton, setShowScrollTopButton] = useState(false);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 5000) {
+        setShowScrollTopButton(true);
+      } else {
+        setShowScrollTopButton(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Function to scroll to top
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Subjects
   const { loading, error, data } = useQuery(GET_SUBJECTS);
@@ -202,15 +233,59 @@ export default function Options() {
     }
   }, [q_data]);
 
+  // Modify the useEffect to handle auto-selection
+  useEffect(() => {
+    if (
+      selectedSubject &&
+      selectedTopics.length > 0 &&
+      !l_loading &&
+      !p_loading &&
+      !a_loading &&
+      !s_loading &&
+      l_data &&
+      p_data &&
+      a_data &&
+      s_data
+    ) {
+      // Auto-select all schools
+      const allSchools = s_data.schools.map((s) => ({
+        value: s.schoolname,
+        label: s.schoolname,
+      }));
+      setSelectedSchools(allSchools);
+    }
+  }, [
+    selectedSubject,
+    selectedTopics,
+    l_loading,
+    p_loading,
+    a_loading,
+    s_loading,
+    l_data,
+    p_data,
+    a_data,
+    s_data,
+  ]);
+
   if (error || t_error || l_error || p_error || a_error || s_error || q_error) {
     console.log(error, t_error, l_error, p_error, a_error, s_error, q_error);
     return `Error! ${error}`;
   }
 
   return (
-    <div className="mx-8 flex flex-wrap gap-8 flex-col">
+    <div className="mx-8 mb-8 flex flex-wrap gap-8 flex-col">
       <Instructions />
       <div className="my-2 flex flex-col justify-start gap-2">
+        {/* <CustomOption
+          options={data?.subjects.map((s) => ({
+            value: s.subject,
+            label: s.subject,
+          }))}
+          selectedOptions={selectedSubject}
+          setSelectedOptions={setSelectedSubject}
+          placeholder="Subject"
+        /> */}
+
         <CustomSelect
           {...commonSelectSettings}
           isClearable={false}
@@ -279,11 +354,6 @@ export default function Options() {
           options={
             p_data &&
             p_data.papers.map((s) => {
-              const paperLabels = {
-                1: "MCQ",
-                2: "Open Ended",
-                3: "Open Ended",
-              };
               return {
                 value: s.paper,
                 label: `${s.paper} (${paperLabels[s.paper]})`,
@@ -377,6 +447,16 @@ export default function Options() {
           });
         }}
       />
+
+      {/* Go to top button */}
+      {showScrollTopButton && (
+        <button
+          onClick={scrollToTop}
+          className="fixed top-24 left-1/2 transform -translate-x-1/2 z-10 p-2 bg-gray-500 text-white rounded-full"
+        >
+          ↑ Top
+        </button>
+      )}
     </div>
   );
 }

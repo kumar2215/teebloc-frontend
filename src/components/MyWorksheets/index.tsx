@@ -7,12 +7,13 @@ import { useSearch } from "wouter";
 import { GET_QUESTIONS_BY_ID, cartItemsVar } from "../Cart/data";
 import { GET_USER_WORKSHEETS } from "./data";
 import { PDFDocument } from "./pdf";
+import posthog from "posthog-js";
 
 async function useLazyQuestionsQuery(
   client,
   query,
   variables,
-  expectedNumQuestions,
+  expectedNumQuestions
 ) {
   const response = await client.query({
     query,
@@ -38,7 +39,7 @@ export default function MyWorksheets() {
   const { user } = useUser();
   const searchParams = useSearch();
 
-  // CLear cart after successful checkout
+  // Clear cart after successful checkout
   useEffect(() => {
     const existingQueries = qs.parse(searchParams, {
       ignoreQueryPrefix: true,
@@ -71,7 +72,7 @@ export default function MyWorksheets() {
         {
           ids: worksheet.worksheets_to_questions.map((wtq) => wtq.question_id),
         },
-        worksheet.worksheets_to_questions.length,
+        worksheet.worksheets_to_questions.length
       )
         .then((result) => {
           console.log("GOT data!");
@@ -93,7 +94,7 @@ export default function MyWorksheets() {
           setWorksheetLoading((prev) => ({ ...prev, [worksheet.id]: false }));
         });
     },
-    [setWorksheetLoading],
+    [setWorksheetLoading]
   );
 
   const worksheets = w_data?.worksheets || [];

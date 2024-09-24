@@ -1,8 +1,17 @@
 import { useUser } from "@clerk/clerk-react";
 import Question from "../Question";
-import { useQuery, useReactiveVar } from "@apollo/client";
-import { GET_QUESTIONS_BY_ID, cartItemsVar } from "./data";
+import { twMerge } from "tailwind-merge";
+import { useQuery, useReactiveVar, useMutation } from "@apollo/client";
+import {
+  GET_QUESTIONS_BY_ID,
+  cartItemsVar,
+  GET_FREE_WORKSHEETS_LEFT,
+  DECREMENT_FREE_WORKSHEETS,
+} from "./data";
 import posthog from "posthog-js";
+import { useState } from "react";
+import { PDFDocument } from "../MyWorksheets/pdf";
+import { pdf } from "@react-pdf/renderer";
 
 export default function Cart() {
   const { user } = useUser();
@@ -19,13 +28,26 @@ export default function Cart() {
     },
   });
 
+  // Query for number of free worksheets left
+  const { data: freeWorksheetsData } = useQuery(GET_FREE_WORKSHEETS_LEFT, {
+    variables: { userid: user?.id || "" },
+    skip: !user?.id,
+  });
+
+  // Mutation for decrementing free worksheets
+  const [decrementFreeWorksheets] = useMutation(DECREMENT_FREE_WORKSHEETS, {
+    refetchQueries: [GET_FREE_WORKSHEETS_LEFT],
+    variables: { userid: user?.id || "" },
+  });
+
   const questions = q_data?.questions || [];
-
   const paper1Questions = questions.filter((q) => q.paper.paper === 1);
-
   const totalPrice =
     paper1Questions.length * 0.05 +
     (cartItems.length - paper1Questions.length) * 0.1;
+
+  const freeWorksheetsLeft =
+    freeWorksheetsData?.users[0]?.free_worksheets_count || 0;
 
   const handleCheckout = async () => {
     posthog.capture("user_clicked_checkout");
@@ -41,7 +63,7 @@ export default function Cart() {
           body: JSON.stringify({
             question_ids: cartItems,
             num_paper1_questions: paper1Questions.length,
-            user_id: user.id,
+            user_id: user?.id,
           }),
         }
       );
@@ -51,10 +73,47 @@ export default function Cart() {
       }
 
       const session = await response.json();
-      // Redirect to the URL provided by the response
       window.location.href = session.url;
     } catch (error) {
       console.error("There was a problem with the checkout:", error);
+    }
+  };
+
+  const [downloadLoading, setDownloadLoading] = useState(false);
+
+  async function downloadPDF() {
+    const cartItems = cartItemsVar();
+    const questions = cartItems.map((id) => {
+      return q_data?.questions.find((q) => q.id === id);
+    });
+    console.log(questions);
+
+    if (questions.length === 0) {
+      return;
+    }
+
+    const doc = <PDFDocument questionsData={{ questions }} />;
+    const asPdf = pdf(doc);
+    const blob = await asPdf.toBlob();
+
+    const url = URL.createObjectURL(blob);
+    const newTab = window.open(url, "_blank");
+    newTab.focus();
+  }
+
+  const handleDownload = async () => {
+    if (!user?.id || freeWorksheetsLeft <= 0) return;
+
+    try {
+      setDownloadLoading(true);
+      await downloadPDF();
+      await decrementFreeWorksheets({ variables: { userid: user.id } });
+
+      // Double check the below
+      posthog.capture("user_downloaded_free_worksheet");
+      setDownloadLoading(false);
+    } catch (error) {
+      console.error("There was a problem with the download:", error);
     }
   };
 
@@ -70,11 +129,37 @@ export default function Cart() {
         <span className="loading loading-spinner loading-lg"></span>
       )}
 
-      <div
-        onClick={handleCheckout}
-        className="btn btn-neutral btn-lg w-56 fixed bottom-4 right-4 z-10"
-      >
-        Checkout
+      <div className="flex flex-row items-end gap-4 fixed bottom-4 right-4 z-10">
+        <div
+          onClick={() => {
+            cartItemsVar([]);
+          }}
+          className="btn btn-neutral btn-lg"
+        >
+          Clear questions
+        </div>
+        {freeWorksheetsLeft > 0 ? (
+          <div className="flex flex-col">
+            <div>({freeWorksheetsLeft} free downloads left)</div>
+            <div
+              onClick={handleDownload}
+              className={twMerge(
+                "btn btn-primary btn-lg w-56",
+                cartItems.length === 0 && "btn-disabled"
+              )}
+            >
+              {downloadLoading ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                "Download"
+              )}
+            </div>
+          </div>
+        ) : (
+          <div onClick={handleCheckout} className="btn btn-neutral btn-lg w-56">
+            Checkout
+          </div>
+        )}
       </div>
     </div>
   );

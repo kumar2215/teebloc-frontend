@@ -24,7 +24,7 @@ export default function Questions({
       </div>
       {questions.length > 0 && (
         <button
-          className="btn btn-primary mb-8"
+          className="btn btn-primary mb-16"
           onClick={onLoadMore}
           type="button"
           disabled={loading}
