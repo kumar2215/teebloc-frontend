@@ -29,7 +29,6 @@ export interface Option {
 const commonSelectSettings = {
   hideSelectedOptions: false,
   isClearable: true,
-  isSearchable: true,
   closeMenuOnSelect: false,
   styles: {
     container: (baseStyles) => ({
@@ -291,6 +290,7 @@ export default function Options() {
           isClearable={false}
           isLoading={loading}
           placeholder="Subject"
+          isSearchable={false}
           value={selectedSubject}
           onChange={(selectedOption) => {
             setBatchQuery({
@@ -310,6 +310,7 @@ export default function Options() {
           haveSelectAll
           isLoading={t_loading}
           placeholder="Topics"
+          isSearchable
           isMulti
           value={selectedTopics}
           onChange={(selectedOptions: OnChangeValue<Option, true>) => {
@@ -328,6 +329,7 @@ export default function Options() {
           haveSelectAll
           isLoading={l_loading}
           placeholder="Levels"
+          isSearchable={false}
           isMulti
           value={selectedLevels}
           onChange={(selectedOptions: OnChangeValue<Option, true>) => {
@@ -346,6 +348,7 @@ export default function Options() {
           haveSelectAll
           isLoading={p_loading}
           placeholder="Papers"
+          isSearchable={false}
           isMulti
           value={selectedPapers}
           onChange={(selectedOptions: OnChangeValue<Option, true>) => {
@@ -366,6 +369,7 @@ export default function Options() {
           setValues={setSelectedAssessments}
           haveSelectAll
           isLoading={a_loading}
+          isSearchable={false}
           placeholder="Assessments"
           isMulti
           value={selectedAssessments}
@@ -384,6 +388,7 @@ export default function Options() {
           setValues={setSelectedSchools}
           haveSelectAll
           isLoading={s_loading}
+          isSearchable={false}
           placeholder="Schools"
           isMulti
           value={selectedSchools}
