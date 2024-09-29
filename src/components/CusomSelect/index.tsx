@@ -13,6 +13,11 @@ const Menu = (props) => {
             props.selectProps.setValues(props.selectProps.options);
             props.selectProps.setMenuOpen(false);
           }}
+          onTouchEnd={() => {
+            // Select all options
+            props.selectProps.setValues(props.selectProps.options);
+            props.selectProps.setMenuOpen(false);
+          }}
         >
           Select all
         </button>
@@ -37,7 +42,7 @@ const MultiValue = ({ index, getValue, ...props }) => {
 export default function CustomSelect<
   Option,
   IsMulti extends boolean = false,
-  Group extends GroupBase<Option> = GroupBase<Option>,
+  Group extends GroupBase<Option> = GroupBase<Option>
 >(props: Props<Option, IsMulti, Group>) {
   const [menuOpen, setMenuOpen] = useState(false);
 
