@@ -272,7 +272,7 @@ export default function Options() {
   }
 
   return (
-    <div className="mx-8 mb-8 flex flex-wrap gap-8 flex-col">
+    <div className="mx-8 mb-8 flex gap-8 flex-col">
       <Instructions />
       <div className="my-2 flex flex-col justify-start gap-2">
         {/* <CustomOption
