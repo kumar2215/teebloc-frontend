@@ -9,6 +9,7 @@ interface CompositionProps {
   activeComment: string | null;
   activeParagraph: number | null;
   onParagraphClick: (paragraphId: number) => void;
+  activeTab?: "language" | "content";
 }
 
 export const Composition: React.FC<CompositionProps> = ({
@@ -18,11 +19,17 @@ export const Composition: React.FC<CompositionProps> = ({
   activeComment,
   activeParagraph,
   onParagraphClick,
+  activeTab = "language",
 }) => {
   // Split the composition into paragraphs
   const paragraphs = compo.split("\n\n");
 
   const renderParagraphContent = (text: string) => {
+    // If we're in the content tab, just return the text without highlights
+    if (activeTab === "content") {
+      return text.replace(/\[\[(.*?)\|(\d+)\]\]/g, "$1");
+    }
+
     const parts = [];
     let lastIndex = 0;
     const highlightRegex = /\[\[(.*?)\|(\d+)\]\]/g;

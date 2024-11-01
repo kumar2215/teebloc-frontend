@@ -3,13 +3,14 @@ import { Composition } from "./Composition";
 import { CommentPanel } from "./CommentPanel";
 
 export default function Feedback({ id }: { id: string }) {
-  // Load the comments from the JSON file with the given id
   const [data, setData] = useState<any>(null);
   const [activeComment, setActiveComment] = useState<string | null>(null);
   const [activeParagraph, setActiveParagraph] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"language" | "content">(
+    "language"
+  );
 
   useEffect(() => {
-    // Dynamic import
     import(`./data/${id}.json`)
       .then((module) => {
         setData(module.default);
@@ -25,17 +26,21 @@ export default function Feedback({ id }: { id: string }) {
         <>
           <Composition
             compo={data.compo}
-            comments={data.comments}
+            comments={[...data.languageComments, ...data.contentComments]}
             onHighlightClick={setActiveComment}
             activeComment={activeComment}
             activeParagraph={activeParagraph}
             onParagraphClick={setActiveParagraph}
+            activeTab={activeTab}
           />
           <CommentPanel
-            comments={data.comments}
+            languageComments={data.languageComments}
+            contentComments={data.contentComments}
             activeComment={activeComment}
             activeParagraph={activeParagraph}
             onCommentClick={setActiveComment}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
           />
         </>
       )}

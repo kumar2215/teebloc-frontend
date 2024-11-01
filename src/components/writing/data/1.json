@@ -1,6 +1,6 @@
 {
     "compo": "Tom sat by his bedroom window flipping through his calendar, reminding himself of upcoming important events. About to doze off with boredom, [[Tom|1]] suddenly noticed a big red circle on the calendar. Having caught [[Tom's|1]] eye, [[Tom|1]] sat up, looking at the important date. The twenty-first day of July… What date was that? Tom wondered. Then it came to him. \"Mum's birthday! How could I forget such an important date?\" Tom muttered to himself. It was [[right smack in the middle of April|2]]. He had two months left to save and decide what to buy for Mum.\n\nTom's eyes widened and gleamed with delight as he remembered the beautiful embroidered scarf he had seen in a shop window the previous week, but his heart dropped when he [[remembered|3]] the price: three hundred dollars. How was he going to afford it? As Tom thought [[on and on|4]], he decided to [[form a goal|5]]. He was going to save up as much pocket money as he possibly could. With determination running through his veins, Tom [[decided to fulfil his goal|5]].\n\nThe next morning, [[went|7]] straight to his piggy bank and counted his savings. Twenty dollars - it wasn't much, but it was a start. [[He began doing extra chores around the house, offering to wash the neighbors' cars on weekends, and even started a small business selling handmade bookmarks to his classmates during lunch breaks, all while maintaining his regular studies and trying to keep his special project a secret from his mother who was becoming increasingly curious about his sudden burst of entrepreneurial spirit|6]]. Each day, he would carefully count his earnings and add them to his growing collection, watching with pride as the amount slowly increased.\n\n[[The weeks flew by|8]]. Tom's determination never wavered, even when his friends invited him to the arcade or when the ice cream truck's tempting jingle echoed through the neighborhood. [[The scarf was kept safely behind the shop window|9]], almost as if it was waiting just for him. By the first week of July, Tom had managed to save two hundred and ninety-five dollars. He was so close to his goal that he could hardly contain his excitement. The shop owner, who had noticed Tom's frequent visits to admire the scarf, had been touched by his dedication and offered him a small discount, making his dream finally achievable.",
-    "comments": [
+    "languageComments": [
         {
             "id": "1",
             "title": "Overuse of \"Tom\"",
@@ -71,6 +71,48 @@
             "content": "Rewrite this sentence in active voice to make it more engaging.",
             "colorClass": "bg-[#e1bee7]",
             "darkColorClass": "bg-[#ba68c8]",
+            "paragraphId": 4
+        }
+    ],
+    "contentComments": [
+        {
+            "id": "c1",
+            "title": "Setting Development",
+            "content": "The shop window serves as a good focal point. Consider adding more environmental details to enrich the scene.",
+            "colorClass": "bg-[#fff9c4]",
+            "darkColorClass": "bg-[#fff176]",
+            "paragraphId": 1
+        },
+        {
+            "id": "c2",
+            "title": "Plot Structure",
+            "content": "Good narrative arc with clear goal setting. Adding minor setbacks could increase tension.",
+            "colorClass": "bg-[#dcedc8]",
+            "darkColorClass": "bg-[#aed581]",
+            "paragraphId": 2
+        },
+        {
+            "id": "c3",
+            "title": "Character Development",
+            "content": "Strong portrayal of Tom's determination and resourcefulness. His entrepreneurial spirit shows excellent character growth.",
+            "colorClass": "bg-[#b3e5fc]",
+            "darkColorClass": "bg-[#4fc3f7]",
+            "paragraphId": 3
+        },
+        {
+            "id": "c4",
+            "title": "Emotional Depth",
+            "content": "The anticipation and excitement are well portrayed. Could explore Tom's fears and doubts more deeply.",
+            "colorClass": "bg-[#ffccbc]",
+            "darkColorClass": "bg-[#ff8a65]",
+            "paragraphId": 3
+        },
+        {
+            "id": "c5",
+            "title": "Theme Development",
+            "content": "The themes of filial piety and perseverance are well-developed. Consider exploring the mother-son relationship more deeply.",
+            "colorClass": "bg-[#c5cae9]",
+            "darkColorClass": "bg-[#7986cb]",
             "paragraphId": 4
         }
     ]
