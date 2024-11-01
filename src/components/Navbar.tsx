@@ -6,7 +6,8 @@ import {
   SignedOut,
   useClerk,
 } from "@clerk/clerk-react";
-import { Link, useLocation } from "wouter";
+import { twMerge } from "tailwind-merge";
+import { Link, useLocation, useRoute } from "wouter";
 import { cartItemsVar } from "./Cart/data.tsx";
 import posthog from "posthog-js";
 import { useState, useEffect, useRef } from "react";
@@ -14,7 +15,7 @@ import { useState, useEffect, useRef } from "react";
 export default function Navbar() {
   const { signOut } = useClerk();
   const cartItems = useReactiveVar(cartItemsVar);
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -44,10 +45,49 @@ export default function Navbar() {
   return (
     <div className="p-4 sticky top-0 z-10">
       <div className="navbar bg-primary rounded-box">
-        <div className="navbar-start">
-          <Link href="/">
-            <div className="text-xl">Teebloc</div>
+        <div className="navbar-start flex items-center">
+          <Link href="/practice">
+            <div className="text-xl mr-2">Teebloc</div>
           </Link>
+          <div className="dropdown">
+            <label tabIndex={0} className="btn btn-ghost m-1">
+              {location.startsWith("/practice") ? "Practice" : "Writing"}
+              <svg
+                className="fill-current h-4 w-4 ml-1"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              </svg>
+            </label>
+            <ul
+              tabIndex={0}
+              className="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+            >
+              <li>
+                <a
+                  className={twMerge(
+                    "hover:bg-base-300",
+                    location.startsWith("/practice") ? "bg-base-300" : ""
+                  )}
+                  onClick={() => setLocation("/practice")}
+                >
+                  Practice
+                </a>
+              </li>
+              <li>
+                <a
+                  className={twMerge(
+                    "hover:bg-base-300",
+                    location.startsWith("/writing") ? "bg-base-300" : ""
+                  )}
+                  onClick={() => setLocation("/writing")}
+                >
+                  Writing
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div className="flex sm:hidden ml-auto relative" ref={menuRef}>
@@ -102,6 +142,9 @@ function NavItems({
   cartItems: any[]; // Replace 'any' with the correct type if known
   onSignOut: () => void;
 }) {
+  const [writingMatch] = useRoute("/writing");
+  const [practiceMatch, practiceParams] = useRoute("/practice");
+
   return (
     <>
       <SignedOut>
@@ -113,39 +156,44 @@ function NavItems({
         </SignUpButton>
       </SignedOut>
       <SignedIn>
-        <Link href="/worksheets">
-          <div
-            className={`btn btn-outline ${
-              location === "/worksheets" && "btn-active"
-            }`}
-          >
-            My Worksheets
-          </div>
-        </Link>
-        <Link href="/cart">
-          <div
-            className={`btn btn-outline ${
-              location === "/cart" && "btn-active"
-            }`}
-            onClick={() => {
-              posthog.capture("worksheet_cart_clicked", {
-                cartItemsCount: cartItems.length,
-              });
-            }}
-          >
-            Worksheet Cart
-            {cartItems.length > 0 && (
-              <div className="badge">{cartItems.length}</div>
-            )}
-          </div>
-        </Link>
+        {practiceMatch && (
+          <>
+            <Link href="/worksheets">
+              <div
+                className={`btn btn-outline ${
+                  location === "/worksheets" && "btn-active"
+                }`}
+              >
+                My Worksheets
+              </div>
+            </Link>
+            <Link href="/cart">
+              <div
+                className={`btn btn-outline ${
+                  location === "/cart" && "btn-active"
+                }`}
+                onClick={() => {
+                  posthog.capture("worksheet_cart_clicked", {
+                    cartItemsCount: cartItems.length,
+                  });
+                }}
+              >
+                Worksheet Cart
+                {cartItems.length > 0 && (
+                  <div className="badge">{cartItems.length}</div>
+                )}
+              </div>
+            </Link>
+          </>
+        )}
+
         <div className="dropdown dropdown-end">
-          <div tabIndex={0} role="button" className="btn btn-outline">
+          <div tabIndex={0} role="button" className="btn btn-outline m-1">
             Profile
           </div>
           <ul
             tabIndex={0}
-            className="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4"
+            className="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
             <li>
               <a onClick={onSignOut}>Sign out</a>

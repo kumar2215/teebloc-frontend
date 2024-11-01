@@ -19,7 +19,6 @@ import { pdf } from "@react-pdf/renderer";
 import { cartItemsVar } from "../Cart/data";
 import { PDFDocument } from "../MyWorksheets/pdf";
 import posthog from "posthog-js";
-import CustomOption from "./CustomOption";
 
 export interface Option {
   readonly value: string;

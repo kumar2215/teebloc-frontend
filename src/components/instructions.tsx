@@ -1,6 +1,6 @@
 export default function Instructions() {
   return (
-    <article class="prose">
+    <article className="prose">
       <h4>Pricing</h4>
       <ul>
         <li>10 cents per open ended question</li>

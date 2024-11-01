@@ -13,6 +13,7 @@ const Menu = (props) => {
             props.selectProps.setValues(props.selectProps.options);
             props.selectProps.setMenuOpen(false);
           }}
+          // For some reason onClick doesn't work on mobile
           onTouchEnd={() => {
             // Select all options
             props.selectProps.setValues(props.selectProps.options);
