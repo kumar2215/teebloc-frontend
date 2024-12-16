@@ -357,12 +357,15 @@ export default function Options() {
             p_data &&
             p_data.papers.map((s) => {
               return {
-                value: s.paper,
-                label: `${s.paper} (${paperLabels[s.paper]})`,
+                value: s.paper.toString(),
+                label: s.paper.toString(),
               };
             })
           }
         />
+        <span className="text-xs text-gray-500">
+          Paper 1 is MCQ, Paper 2 and Paper 3 are Open Ended
+        </span>
         <CustomSelect
           {...commonSelectSettings}
           setValues={setSelectedAssessments}
