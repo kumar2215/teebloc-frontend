@@ -1,0 +1,151 @@
+{
+    "compo": "Tom sat by his bedroom window flipping through his calendar, reminding himself of upcoming important events. [[About to dose off with boredom|1]], Tom suddenly noticed a big red circle on the calendar. Having caught Tom's eye, Tom sat up, looking at the important date. The twenty-first day of July... [[What date was that?|2]] Tom wondered. Then it came to him. \"Mum's birthday! How could I forget such an important date?\" Tom muttered to himself. [[It was, right smack in the middle|3]] of April. He had two months left to save and decide what to buy for Mum.\n\nTom's eyes widened and gleamed with delight as he remembered the beautiful embroidered scarf he had seen in a shop window the previous week, but his heart dropped when he remembered the price: three hundred dollars. [[How was he going to afford it?|4]] As Tom thought on and on, he decided to form a goal. He was going to save up as much pocket money as he possibly could. With determination running through his veins, Tom decided to fulfill his goal.\n\nFor the next month, Tom saved [[up his pocket money|5]]. Though tempted by the trending things all his friends were buying for themselves, [[ Tom knew he had to push through and persevere|6]]. He was not going to give up on his goal just yet. Every day, Tom slotted his saved money into the shiny-glass piggy bank on his bedside table. Day by day, week by week, the money in the piggy bank started to pile up. By mid-July, the piggy bank was already full. Tom was on the right track. He opened the piggy bank to count the money. \"Thirty, forty, fifty, sixty, seventy, eighty, ninety, ninety-five...\" When Tom finished counting, [[he realised he saved only a hundred dollars|7]]. [[Then it dawned on Tom: he was never going to save enough money|8]]. He only had a month left to save, how was he going to do it? It was like a dead end, he would never be able to afford the scarf.\n\nThe next day, when Tom was walking through the school hall towards his classroom, he noticed another student playing with figurines. He was suddenly reminded of his figurines at home. He had so many duplicates. He never considered what to do with them. [[Suddenly, as if an electrician had implanted a light bulb into his head|9]], Tom came up with a brilliant idea: he would sell all his duplicate figurines to earn enough money to buy a scarf. They were collectible after all, and were not very cheap. As soon as Tom got home, he rummaged through his pile of figurines. \"Aha!\" he exclaimed as he dug out some of his duplicate and valuable figurines. He messed about through his backpack to get his phone and opened his usual online shopping app. He then posted pictures of the figurines and waited for interested buyers.\n\nSoon, Tom's phone was bustling with notifications, buyers wanting to buy the figurines. Tom was not expecting it. [[One by one, he sold his figurines|10]]. Each time he did, Tom gained money. Once he had sold all of them, he had already surpassed his goal of three hundred dollars. Elated, he headed to the store to buy the stunning embroidered scarf. Once purchased, Tom excitedly skipped back home, the scarf in his hands.\n\nSoon came the day of Mum's birthday. [[Tom wrapped the scarf neatly and presented to Mum|11]]. Mum thanked Tom profusely and engulfed him in a big suffocating hug. Seeing his Mum's great display of appreciation, Tom remembered how he had achieved this goal of his. [[Tom was reminded of how it all started. From this incident onwards|12]], Tom believed that the sky is the limit. Whatever goal we set, if we can work hard to fulfill it, it will always be achieved.",
+    "languageComments": [
+        {
+            "id": "1",
+            "title": "Awkward Phrase",
+            "content": "Sentence structure of 'About to dose off with boredom, Tom...' is awkward. Replace with: 'Tom was about to doze off with boredom when he suddenly noticed a big red circle on the calendar.'",
+            "colorClass": "bg-[#FFBE98]",
+            "darkColorClass": "bg-[#FF794D]",
+            "paragraphId": 1
+        },
+        {
+            "id": "2",
+            "title": "Ellipsis",
+            "content": "The ellipsis in 'The twenty-first day of July... What date was that?' is unnecessary. Replace with: 'The twenty-first day of July. What date was that?'",
+            "colorClass": "bg-[#F05A7E]",
+            "darkColorClass": "bg-[#D04766]",
+            "paragraphId": 1
+        },
+        {
+            "id": "3",
+            "title": "Awkward Expression",
+            "content": "The phrase 'right smack in the middle' is informal. Suggestion: 'It was right in the middle of April.'",
+            "colorClass": "bg-[#125B9A]",
+            "darkColorClass": "bg-[#0B8494]",
+            "paragraphId": 1
+        },
+        {
+            "id": "4",
+            "title": "Missing Punctuation",
+            "content": "Add a question mark to 'How was he going to afford it?' to form a complete interrogative sentence.",
+            "colorClass": "bg-[#0B8494]",
+            "darkColorClass": "bg-[#094E63]",
+            "paragraphId": 2
+        },
+        {
+            "id": "5",
+            "title": "Expression Simplification",
+            "content": "Simplify 'saved up his pocket money' to 'saved his pocket money' for clearer expression.",
+            "colorClass": "bg-[#FFBE98]",
+            "darkColorClass": "bg-[#FF794D]",
+            "paragraphId": 3
+        },
+        {
+            "id": "6",
+            "title": "Redundancy",
+            "content": "'Push through and persevere' is slightly redundant. Consider using just 'persevere.'",
+            "colorClass": "bg-[#F05A7E]",
+            "darkColorClass": "bg-[#D04766]",
+            "paragraphId": 3
+        },
+        {
+            "id": "7",
+            "title": "Grammar",
+            "content": "Change 'he realised he saved only a hundred dollars' to 'he realized he had saved only a hundred dollars' for correct verb tense.",
+            "colorClass": "bg-[#125B9A]",
+            "darkColorClass": "bg-[#0B8494]",
+            "paragraphId": 3
+        },
+        {
+            "id": "8",
+            "title": "Phrasing",
+            "content": "Consider rephrasing 'Then it dawned on Tom: he was never going to save enough money.' to 'It dawned on Tom that he was never going to save enough money.'",
+            "colorClass": "bg-[#FFBE98]",
+            "darkColorClass": "bg-[#FF794D]",
+            "paragraphId": 3
+        },
+        {
+            "id": "9",
+            "title": "Metaphor Confusion",
+            "content": "The phrase 'as if an electrician had implanted a light bulb into his head' is confusing. Consider replacing with 'as if a light bulb had gone off in his head.'",
+            "colorClass": "bg-[#F05A7E]",
+            "darkColorClass": "bg-[#D04766]",
+            "paragraphId": 4
+        },
+        {
+            "id": "10",
+            "title": "Repetition",
+            "content": "Consider varying the phrase 'One by one, he sold his figurines' to avoid repetition. Suggested revision: 'He gradually sold each of his figurines.'",
+            "colorClass": "bg-[#125B9A]",
+            "darkColorClass": "bg-[#0B8494]",
+            "paragraphId": 5
+        },
+        {
+            "id": "11",
+            "title": "Missing Word",
+            "content": "Insert 'it' in 'Tom wrapped the scarf neatly and presented it to Mum.'",
+            "colorClass": "bg-[#0B8494]",
+            "darkColorClass": "bg-[#094E63]",
+            "paragraphId": 6
+        },
+        {
+            "id": "12",
+            "title": "Coherence",
+            "content": "Rephrase 'From this incident onwards' to 'From that incident onwards' for better coherence.",
+            "colorClass": "bg-[#FFBE98]",
+            "darkColorClass": "bg-[#FF794D]",
+            "paragraphId": 6
+        }
+    ],
+    "contentComments": [
+        {
+            "id": "1",
+            "title": "Plot Introduction",
+            "content": "The first paragraph sets up the importance of the date and the goal effectively. However, adding more description of Tom's feelings upon realizing the date might enhance emotional depth.",
+            "colorClass": "bg-[#FFBE98]",
+            "darkColorClass": "bg-[#FF794D]",
+            "paragraphId": 1
+        },
+        {
+            "id": "2",
+            "title": "Character Determination",
+            "content": "Tom's determination is well-highlighted as he decides on his goal. More details on his feelings about the scarf could enhance understanding of his motivation.",
+            "colorClass": "bg-[#F05A7E]",
+            "darkColorClass": "bg-[#D04766]",
+            "paragraphId": 2
+        },
+        {
+            "id": "3",
+            "title": "Building Tension",
+            "content": "The tension builds effectively as Tom saves money and sees the gap between his expectations and reality. This paragraph develops a strong sense of realism regarding goal-setting.",
+            "colorClass": "bg-[#125B9A]",
+            "darkColorClass": "bg-[#0B8494]",
+            "paragraphId": 3
+        },
+        {
+            "id": "4",
+            "title": "Resourcefulness",
+            "content": "This paragraph highlights Tom's resourcefulness and problem-solving skills when faced with obstacles. The narrative effectively conveys how challenges can lead to creative solutions.",
+            "colorClass": "bg-[#0B8494]",
+            "darkColorClass": "bg-[#094E63]",
+            "paragraphId": 4
+        },
+        {
+            "id": "5",
+            "title": "Resolution",
+            "content": "The resolution is satisfactory as Tom achieves his goal. The composition could benefit from exploring his emotional journey post-achievement, such as reflections on hard work or the value of gifts.",
+            "colorClass": "bg-[#FFBE98]",
+            "darkColorClass": "bg-[#FF794D]",
+            "paragraphId": 5
+        },
+        {
+            "id": "6",
+            "title": "Theme Reflection",
+            "content": "The final paragraph wraps up the narrative with a positive message about perseverance and goal attainment. Expanding on how this experience might impact Tom's future actions could reinforce the theme.",
+            "colorClass": "bg-[#F05A7E]",
+            "darkColorClass": "bg-[#D04766]",
+            "paragraphId": 6
+        }
+    ]
+}

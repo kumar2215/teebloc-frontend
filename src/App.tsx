@@ -51,8 +51,8 @@ function App() {
               <Writing />
             </Route>
           </Route>
-          <Route>404, Not Found!</Route>
         </SignedIn>
+        <Route>404, Not Found!</Route>
       </Switch>
     </div>
   );

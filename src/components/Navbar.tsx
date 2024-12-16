@@ -143,7 +143,7 @@ function NavItems({
   onSignOut: () => void;
 }) {
   const [writingMatch] = useRoute("/writing");
-  const [practiceMatch, practiceParams] = useRoute("/practice");
+  const [practiceMatch, practiceParams] = useRoute("/practice/*");
 
   return (
     <>
@@ -158,19 +158,19 @@ function NavItems({
       <SignedIn>
         {practiceMatch && (
           <>
-            <Link href="/worksheets">
+            <Link href="/practice/worksheets">
               <div
                 className={`btn btn-outline ${
-                  location === "/worksheets" && "btn-active"
+                  location === "/practice/worksheets" && "btn-active"
                 }`}
               >
                 My Worksheets
               </div>
             </Link>
-            <Link href="/cart">
+            <Link href="/practice/cart">
               <div
                 className={`btn btn-outline ${
-                  location === "/cart" && "btn-active"
+                  location === "/practice/cart" && "btn-active"
                 }`}
                 onClick={() => {
                   posthog.capture("worksheet_cart_clicked", {

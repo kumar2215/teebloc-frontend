@@ -17,7 +17,7 @@ export const Highlight: React.FC<HighlightProps> = ({
 }) => (
   <span
     className={`cursor-pointer rounded px-0.5 transition-all duration-200 
-      ${colorClass} 
+      ${colorClass}
       ${isActive ? "ring-2 ring-offset-1 ring-blue-500 shadow-sm" : ""}
       hover:opacity-80`}
     onClick={() => onClick(commentId)}

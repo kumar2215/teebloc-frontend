@@ -96,6 +96,17 @@ export const Composition: React.FC<CompositionProps> = ({
     }, 305); // Slightly longer than the transition duration to ensure completion
   };
 
+  const getParagraphBackgroundColor = (paragraphIndex: number) => {
+    if (activeTab !== "content") return "";
+
+    // Find the first content comment for this paragraph to use its color consistently
+    const contentComment = comments.find(
+      (c) => c.paragraphId === paragraphIndex + 1
+    );
+
+    return contentComment?.colorClass || "";
+  };
+
   return (
     <div className="flex-1 overflow-y-auto bg-white p-8">
       <h2 className="mb-6 text-2xl font-bold text-blue-900">
@@ -103,19 +114,24 @@ export const Composition: React.FC<CompositionProps> = ({
       </h2>
 
       <div className="space-y-4">
-        {paragraphs.map((paragraph, index) => (
-          <p
-            key={index}
-            onClick={() => handleParagraphClick(index + 1)}
-            className={`text-gray-700 p-4 rounded-lg cursor-pointer transition-colors duration-200 ${
-              activeParagraph === index + 1
-                ? "bg-blue-50 ring-2 ring-blue-200"
-                : "hover:bg-gray-50"
-            }`}
-          >
-            {renderParagraphContent(paragraph)}
-          </p>
-        ))}
+        {paragraphs.map((paragraph, index) => {
+          const bgColor = getParagraphBackgroundColor(index);
+          return (
+            <p
+              key={index}
+              onClick={() => handleParagraphClick(index + 1)}
+              className={`text-gray-700 p-4 rounded-lg cursor-pointer transition-colors duration-200 ${
+                activeParagraph === index + 1
+                  ? `ring-2 ring-blue-200 ${bgColor}`
+                  : activeTab === "content"
+                  ? bgColor
+                  : "hover:bg-gray-50"
+              }`}
+            >
+              {renderParagraphContent(paragraph)}
+            </p>
+          );
+        })}
 
         <div className="mt-8 rounded-lg bg-gray-50 p-6">
           <h3 className="mb-4 text-xl font-semibold text-blue-900">

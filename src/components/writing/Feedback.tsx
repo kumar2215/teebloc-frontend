@@ -13,6 +13,7 @@ export default function Feedback({ id }: { id: string }) {
   useEffect(() => {
     import(`./data/${id}.json`)
       .then((module) => {
+        console.log(module.default);
         setData(module.default);
       })
       .catch((error) => {
