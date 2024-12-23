@@ -17,9 +17,11 @@ const documents = {
     "\n  query GetFreeWorksheetsLeft($userid: String!) {\n    users(where: { id: { _eq: $userid } }) {\n      free_worksheets_count\n    }\n  }\n": types.GetFreeWorksheetsLeftDocument,
     "\n  mutation DecrementFreeWorksheets($userid: String!) {\n    update_users_by_pk(\n      pk_columns: { id: $userid }\n      _inc: { free_worksheets_count: -1 }\n    ) {\n      id\n      free_worksheets_count\n    }\n  }\n": types.DecrementFreeWorksheetsDocument,
     "\nquery GetUserWorksheets($userid: String!) {\n  worksheets(where: {creator: {_eq: $userid}}) {\n    name\n    id\n    created\n    worksheets_to_questions {\n      question_id\n    }\n  }\n}\n": types.GetUserWorksheetsDocument,
-    "\nquery GetSubjects {\n  subjects {\n    subject\n    subjectid\n  }\n}\n": types.GetSubjectsDocument,
+    "\n  mutation UpdateWorksheetName($id: Int!, $newName: String!) {\n    update_worksheets_by_pk(pk_columns: { id: $id }, _set: { name: $newName }) {\n      id\n      name\n    }\n  }\n": types.UpdateWorksheetNameDocument,
+    "\nquery GetAllOptions {\n  # Get all levels\n  levels {\n    level\n    levelid\n  }\n  # Get all subjects and their associated levels\n  subjects {\n    subject\n    subjectid\n    subject_levels {\n      level {\n        level\n      }\n    }\n  }\n  # Get all topics and their associated subjects\n  topics {\n    topicname\n    subject {\n      subject\n    }\n  }\n  # Get all papers and their associated subjects\n  papers {\n    paper\n    subject_papers {\n      subject {\n        subject\n      }\n    }\n  }\n  # Get all assessments and their associated levels\n  assessments {\n    assessmentname\n    assessment_levels {\n      level {\n        level\n      }\n    }\n  }\n  # Get all schools and their associated subjects\n  schools {\n    schoolname\n    school_subjects {\n      subject {\n        subject\n      }\n    }\n  }\n}\n": types.GetAllOptionsDocument,
+    "\nquery GetLevels {\n  levels {\n    level\n    levelid\n  }\n}\n": types.GetLevelsDocument,
+    "\nquery GetSubjects($levels: [String!]) {\n  subjects(where: {subject_levels: {level: {level: {_in: $levels}}}}) {\n    subject\n    subjectid\n  }\n}\n": types.GetSubjectsDocument,
     "\nquery GetTopics($subject: String) {\n  topics(where: {subject: {subject: {_eq: $subject}}}) {\n    topicname\n  }\n}\n": types.GetTopicsDocument,
-    "\nquery GetLevels($subject: String) {\n  levels(where: {subject_levels: {subject: {subject: {_eq: $subject}}}}) {\n    level\n  }\n}\n": types.GetLevelsDocument,
     "\nquery GetPapers($subject: String) {\n  papers(where: {subject_papers: {subject: {subject: {_eq: $subject}}}}) {\n    paper\n  }\n}\n": types.GetPapersDocument,
     "\nquery GetAssessments($levels: [String!]) {\n  assessments(where: {assessment_levels: {level: {level: {_in: $levels}}}}) {\n    assessmentname\n  }\n}\n": types.GetAssessmentsDocument,
     "\nquery GetSchools($subject: String) {\n  schools(where: {school_subjects: {subject: {subject: {_eq: $subject}}}}) {\n    schoolname\n  }\n}\n": types.GetSchoolsDocument,
@@ -59,15 +61,23 @@ export function gql(source: "\nquery GetUserWorksheets($userid: String!) {\n  wo
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\nquery GetSubjects {\n  subjects {\n    subject\n    subjectid\n  }\n}\n"): (typeof documents)["\nquery GetSubjects {\n  subjects {\n    subject\n    subjectid\n  }\n}\n"];
+export function gql(source: "\n  mutation UpdateWorksheetName($id: Int!, $newName: String!) {\n    update_worksheets_by_pk(pk_columns: { id: $id }, _set: { name: $newName }) {\n      id\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateWorksheetName($id: Int!, $newName: String!) {\n    update_worksheets_by_pk(pk_columns: { id: $id }, _set: { name: $newName }) {\n      id\n      name\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\nquery GetAllOptions {\n  # Get all levels\n  levels {\n    level\n    levelid\n  }\n  # Get all subjects and their associated levels\n  subjects {\n    subject\n    subjectid\n    subject_levels {\n      level {\n        level\n      }\n    }\n  }\n  # Get all topics and their associated subjects\n  topics {\n    topicname\n    subject {\n      subject\n    }\n  }\n  # Get all papers and their associated subjects\n  papers {\n    paper\n    subject_papers {\n      subject {\n        subject\n      }\n    }\n  }\n  # Get all assessments and their associated levels\n  assessments {\n    assessmentname\n    assessment_levels {\n      level {\n        level\n      }\n    }\n  }\n  # Get all schools and their associated subjects\n  schools {\n    schoolname\n    school_subjects {\n      subject {\n        subject\n      }\n    }\n  }\n}\n"): (typeof documents)["\nquery GetAllOptions {\n  # Get all levels\n  levels {\n    level\n    levelid\n  }\n  # Get all subjects and their associated levels\n  subjects {\n    subject\n    subjectid\n    subject_levels {\n      level {\n        level\n      }\n    }\n  }\n  # Get all topics and their associated subjects\n  topics {\n    topicname\n    subject {\n      subject\n    }\n  }\n  # Get all papers and their associated subjects\n  papers {\n    paper\n    subject_papers {\n      subject {\n        subject\n      }\n    }\n  }\n  # Get all assessments and their associated levels\n  assessments {\n    assessmentname\n    assessment_levels {\n      level {\n        level\n      }\n    }\n  }\n  # Get all schools and their associated subjects\n  schools {\n    schoolname\n    school_subjects {\n      subject {\n        subject\n      }\n    }\n  }\n}\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\nquery GetLevels {\n  levels {\n    level\n    levelid\n  }\n}\n"): (typeof documents)["\nquery GetLevels {\n  levels {\n    level\n    levelid\n  }\n}\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\nquery GetSubjects($levels: [String!]) {\n  subjects(where: {subject_levels: {level: {level: {_in: $levels}}}}) {\n    subject\n    subjectid\n  }\n}\n"): (typeof documents)["\nquery GetSubjects($levels: [String!]) {\n  subjects(where: {subject_levels: {level: {level: {_in: $levels}}}}) {\n    subject\n    subjectid\n  }\n}\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\nquery GetTopics($subject: String) {\n  topics(where: {subject: {subject: {_eq: $subject}}}) {\n    topicname\n  }\n}\n"): (typeof documents)["\nquery GetTopics($subject: String) {\n  topics(where: {subject: {subject: {_eq: $subject}}}) {\n    topicname\n  }\n}\n"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(source: "\nquery GetLevels($subject: String) {\n  levels(where: {subject_levels: {subject: {subject: {_eq: $subject}}}}) {\n    level\n  }\n}\n"): (typeof documents)["\nquery GetLevels($subject: String) {\n  levels(where: {subject_levels: {subject: {subject: {_eq: $subject}}}}) {\n    level\n  }\n}\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

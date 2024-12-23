@@ -1,11 +1,11 @@
-import { useApolloClient, useQuery } from "@apollo/client";
+import { useApolloClient, useQuery, useMutation } from "@apollo/client";
 import { useUser } from "@clerk/clerk-react";
 import { pdf } from "@react-pdf/renderer";
 import qs from "qs";
 import { useCallback, useEffect, useState } from "react";
 import { useSearch } from "wouter";
 import { GET_QUESTIONS_BY_ID, cartItemsVar } from "../Cart/data";
-import { GET_USER_WORKSHEETS } from "./data";
+import { GET_USER_WORKSHEETS, UPDATE_WORKSHEET_NAME } from "./data";
 import { PDFDocument } from "./pdf";
 import posthog from "posthog-js";
 
@@ -50,6 +50,35 @@ export default function MyWorksheets() {
   }, [searchParams]);
 
   const [worksheetLoading, setWorksheetLoading] = useState({});
+  const [editingWorksheetId, setEditingWorksheetId] = useState(null);
+  const [newWorksheetName, setNewWorksheetName] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const [updateWorksheetName] = useMutation(UPDATE_WORKSHEET_NAME);
+
+  const handleEditName = (worksheetId, currentName) => {
+    setEditingWorksheetId(worksheetId);
+    setNewWorksheetName(currentName);
+  };
+
+  const handleSaveName = (worksheetId) => {
+    setSaving(true);
+    updateWorksheetName({
+      variables: {
+        id: worksheetId,
+        newName: newWorksheetName,
+      },
+    })
+      .then(() => {
+        setEditingWorksheetId(null);
+      })
+      .catch((error) => {
+        console.error("Error updating worksheet name:", error);
+      })
+      .finally(() => {
+        setSaving(false);
+      });
+  };
 
   const {
     loading: w_loading,
@@ -112,9 +141,38 @@ export default function MyWorksheets() {
         {sortedWorksheets.map((w) => (
           <div className="card bg-base-100 shadow-xl border-dashed border-2 border-sky-500 bg-sky-100">
             <div className="card-body">
-              <h2 className="card-title">{w.name}</h2>
+              {editingWorksheetId === w.id ? (
+                <input
+                  type="text"
+                  value={newWorksheetName}
+                  onChange={(e) => setNewWorksheetName(e.target.value)}
+                  className="input"
+                />
+              ) : (
+                <h2 className="card-title">{w.name}</h2>
+              )}
               <p>{w.worksheets_to_questions.length} questions</p>
               <div className="card-actions justify-end">
+                {editingWorksheetId === w.id ? (
+                  <button
+                    className="btn btn-success"
+                    onClick={() => handleSaveName(w.id)}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <span className="loading loading-spinner"></span>
+                    ) : (
+                      "Save"
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => handleEditName(w.id, w.name)}
+                  >
+                    Edit name
+                  </button>
+                )}
                 <button
                   className="btn btn-primary"
                   disabled={worksheetLoading[w.id]}

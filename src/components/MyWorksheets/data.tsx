@@ -12,3 +12,12 @@ query GetUserWorksheets($userid: String!) {
   }
 }
 `);
+
+export const UPDATE_WORKSHEET_NAME = gql(`
+  mutation UpdateWorksheetName($id: Int!, $newName: String!) {
+    update_worksheets_by_pk(pk_columns: { id: $id }, _set: { name: $newName }) {
+      id
+      name
+    }
+  }
+`);
