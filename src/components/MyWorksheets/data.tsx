@@ -8,6 +8,22 @@ query GetUserWorksheets($userid: String!) {
     created
     worksheets_to_questions {
       question_id
+      question {
+        question_topics {
+          topic {
+            topicname
+          }
+        }
+        paper {
+          paper
+        }
+        level {
+          level
+        }
+        assessment {
+          assessmentname
+        }
+      }
     }
   }
 }

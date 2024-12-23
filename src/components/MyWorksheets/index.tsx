@@ -138,58 +138,102 @@ export default function MyWorksheets() {
           <span className="loading loading-spinner loading-lg"></span>
         )}
         {/* Sort worksheets by created date */}
-        {sortedWorksheets.map((w) => (
-          <div className="card bg-base-100 shadow-xl border-dashed border-2 border-sky-500 bg-sky-100">
-            <div className="card-body">
-              {editingWorksheetId === w.id ? (
-                <input
-                  type="text"
-                  value={newWorksheetName}
-                  onChange={(e) => setNewWorksheetName(e.target.value)}
-                  className="input"
-                />
-              ) : (
-                <h2 className="card-title">{w.name}</h2>
-              )}
-              <p>{w.worksheets_to_questions.length} questions</p>
-              <div className="card-actions justify-end">
+        {sortedWorksheets.map((w) => {
+          const levels = new Set();
+          const assessments = new Set();
+          const topics = new Set();
+
+          w.worksheets_to_questions.forEach((wtq) => {
+            wtq.question.question_topics.forEach((qt) =>
+              topics.add(qt.topic.topicname)
+            );
+            levels.add(wtq.question.level.level);
+            assessments.add(wtq.question.assessment.assessmentname);
+          });
+
+          return (
+            <div className="card bg-base-100 shadow-xl border-dashed border-2 border-sky-500 bg-sky-100">
+              <div className="card-body">
                 {editingWorksheetId === w.id ? (
-                  <button
-                    className="btn btn-success"
-                    onClick={() => handleSaveName(w.id)}
-                    disabled={saving}
-                  >
-                    {saving ? (
-                      <span className="loading loading-spinner"></span>
-                    ) : (
-                      "Save"
-                    )}
-                  </button>
+                  <input
+                    type="text"
+                    value={newWorksheetName}
+                    onChange={(e) => setNewWorksheetName(e.target.value)}
+                    className="input"
+                  />
                 ) : (
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => handleEditName(w.id, w.name)}
-                  >
-                    Edit name
-                  </button>
+                  <h2 className="card-title">{w.name}</h2>
                 )}
-                <button
-                  className="btn btn-primary"
-                  disabled={worksheetLoading[w.id]}
-                  onClick={() => {
-                    console.log("Worksheet clicked", w);
-                    handleGetPDF(w);
-                  }}
-                >
-                  {worksheetLoading[w.id] && (
-                    <span className="loading loading-spinner"></span>
+                <p className="text-sm text-gray-500">
+                  Created on: {new Date(w.created).toLocaleDateString()}
+                </p>
+
+                <p>{w.worksheets_to_questions.length} questions</p>
+                <div className="flex flex-wrap gap-2">
+                  {[...levels].map((level) => (
+                    <span
+                      key={level}
+                      className="badge bg-blue-200 text-blue-800"
+                    >
+                      {level}
+                    </span>
+                  ))}
+                  {[...assessments].map((assessment) => (
+                    <span
+                      key={assessment}
+                      className="badge bg-green-200 text-green-800"
+                    >
+                      {assessment}
+                    </span>
+                  ))}
+                  {[...topics].map((topic) => (
+                    <span
+                      key={topic}
+                      className="badge bg-yellow-200 text-yellow-800"
+                    >
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+                <div className="card-actions justify-end">
+                  {editingWorksheetId === w.id ? (
+                    <button
+                      className="btn btn-success"
+                      onClick={() => handleSaveName(w.id)}
+                      disabled={saving}
+                    >
+                      {saving ? (
+                        <span className="loading loading-spinner"></span>
+                      ) : (
+                        "Save"
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => handleEditName(w.id, w.name)}
+                    >
+                      Edit name
+                    </button>
                   )}
-                  {worksheetLoading[w.id] ? "Loading" : "Get PDF"}
-                </button>
+                  <button
+                    className="btn btn-primary"
+                    disabled={worksheetLoading[w.id]}
+                    onClick={() => {
+                      console.log("Worksheet clicked", w);
+                      handleGetPDF(w);
+                    }}
+                  >
+                    {worksheetLoading[w.id] && (
+                      <span className="loading loading-spinner"></span>
+                    )}
+                    {worksheetLoading[w.id] ? "Loading" : "Get PDF"}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </>
   );
