@@ -143,7 +143,7 @@ function NavItems({
   onSignOut: () => void;
 }) {
   const [writingMatch] = useRoute("/writing");
-  const [practiceMatch, practiceParams] = useRoute("/practice/*");
+  const practiceMatch = location.startsWith("/practice");
 
   return (
     <>
