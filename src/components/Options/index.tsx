@@ -1,21 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { OnChangeValue } from "react-select";
 import CustomSelect from "../CusomSelect";
 import Instructions from "../instructions";
 import { useUser } from "@clerk/clerk-react";
 import Questions from "../Questions";
+import { GET_ALL_OPTIONS, GET_QUESTIONS } from "./data";
+import { useQueryParamsState, useQueryUpdater } from "./hook";
 import {
-  GET_ASSESSMENTS,
-  GET_LEVELS,
-  GET_PAPERS,
-  GET_QUESTIONS,
-  GET_SCHOOLS,
-  GET_SUBJECTS,
-  GET_TOPICS,
-} from "./data";
-import { useBatchQueryParamState, useQueryParamsState } from "./hook";
-import { pdf } from "@react-pdf/renderer";
+  Page,
+  View,
+  Text,
+  Document,
+  pdf,
+  PDFViewer,
+} from "@react-pdf/renderer";
 import { cartItemsVar } from "../Cart/data";
 import { PDFDocument } from "../MyWorksheets/pdf";
 import posthog from "posthog-js";
@@ -57,112 +56,198 @@ const commonSelectSettings = {
   },
 };
 
-const paperLabels = {
-  1: "MCQ",
-  2: "Open Ended",
-  3: "Open Ended",
-};
-
 function useIsAdmin() {
   const { user } = useUser();
   return user?.publicMetadata?.role === "admin";
 }
 
+// First, define the dependency tree structure
+const OPTION_DEPENDENCIES = {
+  levels: ["subject", "assessments"], // when levels change, clear subject and assessments
+  subject: ["topics", "papers", "schools"], // when subject changes, clear topics, papers, and schools
+  topics: [], // topics has no children
+  papers: [], // papers has no children
+  assessments: [], // assessments has no children
+  schools: [], // schools has no children
+} as const;
+
+// Helper function to get all descendants of a node
+function getAllDescendants(node: keyof typeof OPTION_DEPENDENCIES): string[] {
+  const children = OPTION_DEPENDENCIES[node];
+  const descendants = [...children];
+
+  children.forEach((child) => {
+    descendants.push(
+      ...getAllDescendants(child as keyof typeof OPTION_DEPENDENCIES)
+    );
+  });
+
+  return descendants;
+}
+
+type OptionType =
+  | "levels"
+  | "subject"
+  | "topics"
+  | "papers"
+  | "assessments"
+  | "schools";
+
 export default function Options() {
   const isAdmin = useIsAdmin();
 
-  // State to track scroll position
-  const [showScrollTopButton, setShowScrollTopButton] = useState(false);
+  // Fetch all options in one query
+  const { data: allData, loading: allLoading } = useQuery(GET_ALL_OPTIONS);
 
-  // Add scroll event listener
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 5000) {
-        setShowScrollTopButton(true);
-      } else {
-        setShowScrollTopButton(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  // Function to scroll to top
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // Subjects
-  const { loading, error, data } = useQuery(GET_SUBJECTS);
-  // const [selectedSubject, setSelectedSubject] = useState<Option>();
-  let [selectedSubject, setSelectedSubject] = useQueryParamsState("subject");
-
-  // Topics
-  const {
-    loading: t_loading,
-    error: t_error,
-    data: t_data,
-  } = useQuery(GET_TOPICS, {
-    variables: { subject: selectedSubject?.value || "" },
-  });
-  const [selectedTopics, setSelectedTopics] = useQueryParamsState("topics", []);
-
-  // Levels
-  const {
-    loading: l_loading,
-    error: l_error,
-    data: l_data,
-  } = useQuery(GET_LEVELS, {
-    variables: { subject: selectedSubject?.value || "" },
-  });
+  // State management
   const [selectedLevels, setSelectedLevels] = useQueryParamsState("levels", []);
-
-  // Papers
-  const {
-    loading: p_loading,
-    error: p_error,
-    data: p_data,
-  } = useQuery(GET_PAPERS, {
-    variables: {
-      subject: selectedSubject?.value || "",
-    },
-  });
+  const [selectedSubject, setSelectedSubject] = useQueryParamsState(
+    "subject",
+    null
+  );
+  const [selectedTopics, setSelectedTopics] = useQueryParamsState("topics", []);
   const [selectedPapers, setSelectedPapers] = useQueryParamsState("papers", []);
-
-  // Assessments
-  const {
-    loading: a_loading,
-    error: a_error,
-    data: a_data,
-  } = useQuery(GET_ASSESSMENTS, {
-    variables: {
-      levels: selectedLevels?.map((l) => l.value) || [],
-    },
-  });
   const [selectedAssessments, setSelectedAssessments] = useQueryParamsState(
     "assessments",
     []
   );
-
-  // Schools
-  const {
-    loading: s_loading,
-    error: s_error,
-    data: s_data,
-  } = useQuery(GET_SCHOOLS, {
-    variables: {
-      subject: selectedSubject?.value || "",
-    },
-  });
   const [selectedSchools, setSelectedSchools] = useQueryParamsState(
     "schools",
     []
   );
 
-  // Questions
+  const { setQueries } = useQueryUpdater();
+
+  const updateSelection = useCallback(
+    (option: OptionType, value: Option) => {
+      // We want to do a batch update
+      const dependentsToReset = getAllDescendants(option);
+      let batchUpdate = {
+        [option]: value,
+      };
+
+      dependentsToReset.forEach((dependent) => {
+        if (dependent === "subject") {
+          batchUpdate[dependent] = null;
+        } else if (dependent === "schools") {
+          // All schools are selected by default
+          const schools = allData?.schools
+            .filter((school) =>
+              school.school_subjects.some(
+                // We use value.value because we know the current option is subject (only possible parent of schools is subject)
+                (ss) => ss.subject.subject === value?.value
+              )
+            )
+            .map((s) => ({
+              value: s.schoolname,
+              label: s.schoolname,
+            }));
+          batchUpdate[dependent] = schools;
+        } else {
+          batchUpdate[dependent] = [];
+        }
+      });
+      console.log("batchUpdate", batchUpdate);
+
+      setQueries(batchUpdate);
+    },
+    [setQueries, allData]
+  );
+
+  const [showScrollTopButton, setShowScrollTopButton] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
+
+  // Filtered options based on selections
+  const levelOptions = useMemo(
+    () =>
+      allData?.levels.map((l) => ({
+        value: l.level,
+        label: l.level,
+      })) || [],
+    [allData]
+  );
+
+  const subjectOptions = useMemo(() => {
+    if (!allData?.subjects || selectedLevels.length === 0) return [];
+    return allData.subjects
+      .filter((subject) =>
+        subject.subject_levels.some((sl) =>
+          selectedLevels.map((l) => l.value).includes(sl.level.level)
+        )
+      )
+      .map((s) => ({
+        value: s.subject,
+        label: s.subject,
+      }));
+  }, [allData, selectedLevels]);
+
+  const topicOptions = useMemo(() => {
+    if (!allData?.topics || !selectedSubject) return [];
+    return allData.topics
+      .filter((topic) => topic.subject.subject === selectedSubject.value)
+      .map((t) => ({
+        value: t.topicname,
+        label: t.topicname,
+      }));
+  }, [allData, selectedSubject]);
+
+  const paperOptions = useMemo(() => {
+    if (!allData?.papers || !selectedSubject) return [];
+    return allData.papers
+      .filter((paper) =>
+        paper.subject_papers.some(
+          (sp) => sp.subject.subject === selectedSubject.value
+        )
+      )
+      .map((p) => ({
+        value: p.paper.toString(),
+        label: p.paper.toString(),
+      }));
+  }, [allData, selectedSubject]);
+
+  const assessmentOptions = useMemo(() => {
+    if (!allData?.assessments || selectedLevels.length === 0) return [];
+    return allData.assessments
+      .filter((assessment) =>
+        assessment.assessment_levels.some((al) =>
+          selectedLevels.map((l) => l.value).includes(al.level.level)
+        )
+      )
+      .map((a) => ({
+        value: a.assessmentname,
+        label: a.assessmentname,
+      }));
+  }, [allData, selectedLevels]);
+
+  const schoolOptions = useMemo(() => {
+    if (!allData?.schools || !selectedSubject) return [];
+    return allData.schools
+      .filter((school) =>
+        school.school_subjects.some(
+          (ss) => ss.subject.subject === selectedSubject.value
+        )
+      )
+      .map((s) => ({
+        value: s.schoolname,
+        label: s.schoolname,
+      }));
+  }, [allData, selectedSubject]);
+
+  // Scroll button logic
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTopButton(window.scrollY > 5000);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Questions query
   const {
     loading: q_loading,
     error: q_error,
@@ -181,44 +266,31 @@ export default function Options() {
     },
   });
 
-  // Add variable that checks whether all options have at least one value selected (by checking null or empty array)
-  const allOptionsSelected =
-    selectedSubject &&
-    selectedTopics.length > 0 &&
-    selectedLevels.length > 0 &&
-    selectedPapers.length > 0 &&
-    selectedAssessments.length > 0 &&
-    selectedSchools.length > 0;
-
-  const setBatchQuery = useBatchQueryParamState();
-
-  const [downloadLoading, setDownloadLoading] = useState(false);
-
+  // PDF download logic
   async function downloadPDF() {
     setDownloadLoading(true);
     const cartItems = cartItemsVar();
     const questions = cartItems.map((id) => {
       return q_data?.questions.find((q) => q.id === id);
     });
-    console.log(questions);
 
     if (questions.length === 0) {
+      setDownloadLoading(false);
       return;
     }
 
     const doc = <PDFDocument questionsData={{ questions }} />;
     const asPdf = pdf(doc);
     const blob = await asPdf.toBlob();
-
     const url = URL.createObjectURL(blob);
     const newTab = window.open(url, "_blank");
     newTab.focus();
-
     setDownloadLoading(false);
   }
 
+  // Analytics
   useEffect(() => {
-    if (q_data && q_data.questions.length > 0) {
+    if (q_data?.questions.length > 0) {
       posthog.capture("questions_shown", {
         count: q_data.questions.length,
         subject: selectedSubject?.value,
@@ -231,189 +303,135 @@ export default function Options() {
     }
   }, [q_data]);
 
-  // Modify the useEffect to handle auto-selection
-  useEffect(() => {
-    if (
-      selectedSubject &&
-      selectedTopics.length > 0 &&
-      !l_loading &&
-      !p_loading &&
-      !a_loading &&
-      !s_loading &&
-      l_data &&
-      p_data &&
-      a_data &&
-      s_data
-    ) {
-      // Auto-select all schools
-      const allSchools = s_data.schools.map((s) => ({
-        value: s.schoolname,
-        label: s.schoolname,
-      }));
-      setSelectedSchools(allSchools);
-    }
-  }, [
-    selectedSubject,
-    selectedTopics,
-    l_loading,
-    p_loading,
-    a_loading,
-    s_loading,
-    l_data,
-    p_data,
-    a_data,
-    s_data,
-  ]);
-
-  if (error || t_error || l_error || p_error || a_error || s_error || q_error) {
-    console.log(error, t_error, l_error, p_error, a_error, s_error, q_error);
-    return `Error! ${error}`;
+  if (q_error) {
+    console.error(q_error);
+    return `Error! ${q_error.message}`;
   }
+
+  const allOptionsSelected =
+    selectedLevels.length > 0 &&
+    selectedSubject &&
+    selectedTopics.length > 0 &&
+    selectedPapers.length > 0 &&
+    selectedAssessments.length > 0 &&
+    selectedSchools.length > 0;
+
+  // Use when debugging PDF layout:
+  // const pdfQuestions =
+  //   cartItemsVar().length > 0 && q_data?.questions.length > 0
+  //     ? cartItemsVar().map((id) => {
+  //         return q_data?.questions.find((q) => q.id === id);
+  //       })
+  //     : [];
 
   return (
     <div className="mx-8 mb-8 flex gap-8 flex-col">
       <Instructions />
+      {/* 
+      Use when debugging PDF layout:
+      {pdfQuestions.length > 0 && (
+        <PDFViewer width="100%" height="1200px">
+          <PDFDocument questionsData={{ questions: pdfQuestions }} />
+        </PDFViewer>
+      )} */}
       <div className="my-2 flex flex-col justify-start gap-2">
-        {/* <CustomOption
-          options={data?.subjects.map((s) => ({
-            value: s.subject,
-            label: s.subject,
-          }))}
-          selectedOptions={selectedSubject}
-          setSelectedOptions={setSelectedSubject}
-          placeholder="Subject"
-        /> */}
-
-        <CustomSelect
-          {...commonSelectSettings}
-          isClearable={false}
-          isLoading={loading}
-          placeholder="Subject"
-          isSearchable={false}
-          value={selectedSubject}
-          onChange={(selectedOption) => {
-            setBatchQuery({
-              subject: selectedOption.value,
-            });
-          }}
-          options={
-            data &&
-            data.subjects.map((s) => {
-              return { value: s.subject, label: s.subject };
-            })
-          }
-        />
-        <CustomSelect
-          {...commonSelectSettings}
-          setValues={setSelectedTopics}
-          haveSelectAll
-          isLoading={t_loading}
-          placeholder="Topics"
-          isSearchable
-          isMulti
-          value={selectedTopics}
-          onChange={(selectedOptions: OnChangeValue<Option, true>) => {
-            selectedOptions && setSelectedTopics(selectedOptions);
-          }}
-          options={
-            t_data &&
-            t_data.topics.map((s) => {
-              return { value: s.topicname, label: s.topicname };
-            })
-          }
-        />
         <CustomSelect
           {...commonSelectSettings}
           setValues={setSelectedLevels}
           haveSelectAll
-          isLoading={l_loading}
+          isLoading={allLoading}
           placeholder="Levels"
           isSearchable={false}
           isMulti
           value={selectedLevels}
           onChange={(selectedOptions: OnChangeValue<Option, true>) => {
-            selectedOptions && setSelectedLevels(selectedOptions);
+            updateSelection("levels", selectedOptions || []);
           }}
-          options={
-            l_data &&
-            l_data.levels.map((s) => {
-              return { value: s.level, label: s.level };
-            })
-          }
+          options={levelOptions}
         />
+
+        <CustomSelect
+          {...commonSelectSettings}
+          isLoading={allLoading}
+          placeholder="Subject"
+          isSearchable={false}
+          value={selectedSubject}
+          onChange={(selectedOption: OnChangeValue<Option, false>) => {
+            updateSelection("subject", selectedOption);
+          }}
+          options={subjectOptions}
+        />
+
+        <CustomSelect
+          {...commonSelectSettings}
+          setValues={setSelectedTopics}
+          haveSelectAll
+          isLoading={allLoading}
+          placeholder="Topics"
+          isSearchable
+          isMulti
+          value={selectedTopics}
+          onChange={(selectedOptions: OnChangeValue<Option, true>) => {
+            updateSelection("topics", selectedOptions || []);
+          }}
+          options={topicOptions}
+        />
+
         <CustomSelect
           {...commonSelectSettings}
           setValues={setSelectedPapers}
           haveSelectAll
-          isLoading={p_loading}
+          isLoading={allLoading}
           placeholder="Papers"
           isSearchable={false}
           isMulti
           value={selectedPapers}
           onChange={(selectedOptions: OnChangeValue<Option, true>) => {
-            selectedOptions && setSelectedPapers(selectedOptions);
+            updateSelection("papers", selectedOptions || []);
           }}
-          options={
-            p_data &&
-            p_data.papers.map((s) => {
-              return {
-                value: s.paper.toString(),
-                label: s.paper.toString(),
-              };
-            })
-          }
+          options={paperOptions}
         />
         <span className="text-xs text-gray-500">
           Paper 1 is MCQ, Paper 2 and Paper 3 are Open Ended
         </span>
+
         <CustomSelect
           {...commonSelectSettings}
           setValues={setSelectedAssessments}
           haveSelectAll
-          isLoading={a_loading}
-          isSearchable={false}
+          isLoading={allLoading}
           placeholder="Assessments"
+          isSearchable={false}
           isMulti
           value={selectedAssessments}
           onChange={(selectedOptions: OnChangeValue<Option, true>) => {
-            selectedOptions && setSelectedAssessments(selectedOptions);
+            updateSelection("assessments", selectedOptions || []);
           }}
-          options={
-            a_data &&
-            a_data.assessments.map((s) => {
-              return { value: s.assessmentname, label: s.assessmentname };
-            })
-          }
+          options={assessmentOptions}
         />
+
         <CustomSelect
           {...commonSelectSettings}
           setValues={setSelectedSchools}
           haveSelectAll
-          isLoading={s_loading}
-          isSearchable={false}
+          isLoading={allLoading}
           placeholder="Schools"
+          isSearchable={false}
           isMulti
           value={selectedSchools}
           onChange={(selectedOptions: OnChangeValue<Option, true>) => {
-            selectedOptions && setSelectedSchools(selectedOptions);
+            updateSelection("schools", selectedOptions || []);
           }}
-          options={
-            s_data &&
-            s_data.schools.map((s) => {
-              return { value: s.schoolname, label: s.schoolname };
-            })
-          }
+          options={schoolOptions}
         />
+        <span className="text-xs text-gray-500">
+          All schools are selected by default
+        </span>
       </div>
-
-      {/* We only want to show the top loading spinner when no questions have been
-      loaded yet. Once some questions have been loaded, the bottom "load more"
-      button will be the one doing the loading. */}
-      {q_loading && (q_data?.questions || []).length === 0 && (
+      {q_loading && (!q_data?.questions || q_data.questions.length === 0) && (
         <span className="loading loading-spinner loading-lg"></span>
       )}
       {q_data && <div>{q_data.questions.length} results</div>}
-
       {isAdmin && (
         <>
           <div
@@ -427,22 +445,18 @@ export default function Options() {
           </div>
 
           <div
-            onClick={() => {
-              cartItemsVar([]);
-            }}
+            onClick={() => cartItemsVar([])}
             className="btn btn-neutral btn-lg fixed bottom-4 right-72 z-10"
           >
             Clear questions
           </div>
         </>
       )}
-
       {q_data?.questions.length === 0 && allOptionsSelected && (
         <div>
           No results. Try selecting more options to broaden your search!
         </div>
       )}
-
       <Questions
         questions={q_data?.questions || []}
         loading={q_loading}
@@ -454,8 +468,6 @@ export default function Options() {
           });
         }}
       />
-
-      {/* Go to top button */}
       {showScrollTopButton && (
         <button
           onClick={scrollToTop}
