@@ -1,6 +1,5 @@
 import { SignedIn } from "@clerk/clerk-react";
 import { Redirect, Route, Switch, useRoute } from "wouter";
-import Cart from "./components/Cart";
 import MyWorksheets from "./components/MyWorksheets";
 import Navbar from "./components/Navbar";
 import Options from "./components/Options";
@@ -8,6 +7,8 @@ import { useUser } from "@clerk/clerk-react";
 import posthog from "posthog-js";
 import Writing from "./components/writing/Writing";
 import Feedback from "./components/writing/Feedback";
+import Subscribe from "./components/Subscribe";
+import CreateWorksheet from "./components/CreateWorksheet";
 
 function App() {
   const { isSignedIn, user, isLoaded } = useUser();
@@ -43,7 +44,10 @@ function App() {
               <MyWorksheets />
             </Route>
             <Route path="/cart">
-              <Cart />
+              <CreateWorksheet />
+            </Route>
+            <Route path="/subscribe">
+              <Subscribe />
             </Route>
           </Route>
           <Route path="/writing" nest>

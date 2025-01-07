@@ -4,7 +4,7 @@ import { pdf } from "@react-pdf/renderer";
 import qs from "qs";
 import { useCallback, useEffect, useState } from "react";
 import { useSearch } from "wouter";
-import { GET_QUESTIONS_BY_ID, cartItemsVar } from "../Cart/data";
+import { GET_QUESTIONS_BY_ID } from "../Cart/data";
 import { GET_USER_WORKSHEETS, UPDATE_WORKSHEET_NAME } from "./data";
 import { PDFDocument } from "./pdf";
 import posthog from "posthog-js";
@@ -37,17 +37,6 @@ async function useLazyQuestionsQuery(
 export default function MyWorksheets() {
   const client = useApolloClient();
   const { user } = useUser();
-  const searchParams = useSearch();
-
-  // Clear cart after successful checkout
-  useEffect(() => {
-    const existingQueries = qs.parse(searchParams, {
-      ignoreQueryPrefix: true,
-    });
-    if (existingQueries && existingQueries.success === "true") {
-      cartItemsVar([]);
-    }
-  }, [searchParams]);
 
   const [worksheetLoading, setWorksheetLoading] = useState({});
   const [editingWorksheetId, setEditingWorksheetId] = useState(null);
@@ -90,7 +79,7 @@ export default function MyWorksheets() {
     },
   });
 
-  // Might not beed to use useCallback here
+  // Might not need to use useCallback here
   const handleGetPDF = useCallback(
     (worksheet) => {
       setWorksheetLoading((prev) => ({ ...prev, [worksheet.id]: true }));

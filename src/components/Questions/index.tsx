@@ -1,6 +1,6 @@
 import { GetQuestionsQuery } from "../../generated/graphql";
 import Question from "../Question";
-import { cartItemsVar } from "../Cart/data";
+import { cartItemsVar } from "../CreateWorksheet/data";
 import { useReactiveVar } from "@apollo/client";
 
 export type QuestionType = GetQuestionsQuery["questions"][0];

@@ -15,7 +15,7 @@ import {
   pdf,
   PDFViewer,
 } from "@react-pdf/renderer";
-import { cartItemsVar } from "../Cart/data";
+import { cartItemsVar } from "../CreateWorksheet/data";
 import { PDFDocument } from "../MyWorksheets/pdf";
 import posthog from "posthog-js";
 

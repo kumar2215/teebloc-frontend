@@ -8,9 +8,10 @@ import {
 } from "@clerk/clerk-react";
 import { twMerge } from "tailwind-merge";
 import { Link, useLocation, useRoute } from "wouter";
-import { cartItemsVar } from "./Cart/data.tsx";
+import { cartItemsVar } from "../CreateWorksheet/data.tsx";
 import posthog from "posthog-js";
 import { useState, useEffect, useRef } from "react";
+import { useSubscription } from "./hook";
 
 export default function Navbar() {
   const { signOut } = useClerk();
@@ -144,6 +145,7 @@ function NavItems({
 }) {
   const [writingMatch] = useRoute("/writing");
   const practiceMatch = location.startsWith("/practice");
+  const { hasActiveSubscription, loading } = useSubscription();
 
   return (
     <>
@@ -167,6 +169,7 @@ function NavItems({
                 My Worksheets
               </div>
             </Link>
+
             <Link href="/practice/cart">
               <div
                 className={`btn btn-outline ${
@@ -184,6 +187,18 @@ function NavItems({
                 )}
               </div>
             </Link>
+
+            {!hasActiveSubscription && !loading && (
+              <Link href="/practice/subscribe">
+                <div
+                  className={`btn btn-outline ${
+                    location === "/practice/subscribe" && "btn-active"
+                  }`}
+                >
+                  Subscribe
+                </div>
+              </Link>
+            )}
           </>
         )}
 
@@ -195,6 +210,18 @@ function NavItems({
             tabIndex={0}
             className="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
+            <li>
+              <form
+                method="POST"
+                action={`${
+                  import.meta.env.VITE_BACKEND_API
+                }/create-portal-session`}
+              >
+                <button type="submit" className="w-full text-left">
+                  Manage subscription
+                </button>
+              </form>
+            </li>
             <li>
               <a onClick={onSignOut}>Sign out</a>
             </li>
