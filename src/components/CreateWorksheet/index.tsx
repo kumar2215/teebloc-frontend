@@ -106,6 +106,12 @@ export default function CreateWorksheet() {
               question_id: questionId,
             })),
           },
+          refetchQueries: [
+            {
+              query: GET_USER_WORKSHEETS,
+              variables: { userid: user.id },
+            },
+          ],
         });
       }
 
