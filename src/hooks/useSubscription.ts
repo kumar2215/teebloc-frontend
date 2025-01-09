@@ -11,6 +11,9 @@ export function useSubscription() {
   const { data, loading, refetch } = useQuery(GET_USER_SUBSCRIPTION, {
     variables: { userId: user?.id },
     skip: !user?.id,
+    onError: (error) => {
+      console.error("Subscription query error:", error);
+    },
   });
 
   // Set up effect to refetch when user becomes available
