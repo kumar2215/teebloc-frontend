@@ -203,7 +203,7 @@ function NavItems({
         )}
 
         <div className="dropdown dropdown-end">
-          <div tabIndex={0} role="button" className="btn btn-outline m-1">
+          <div tabIndex={0} role="button" className="btn btn-outline">
             Profile
           </div>
           <ul
