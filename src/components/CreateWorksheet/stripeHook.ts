@@ -12,6 +12,7 @@ export function useStripeReturn() {
   useEffect(() => {
     const params = qs.parse(searchParams, { ignoreQueryPrefix: true });
     if (params["subscription-success"] === "true") {
+      console.log("subscription-success is true");
       setShowSuccessModal(true);
       // Refetch subscription status when success is true
       refetch();

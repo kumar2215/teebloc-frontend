@@ -16,7 +16,7 @@ import { PDFDocument } from "../MyWorksheets/pdf";
 import { pdf } from "@react-pdf/renderer";
 import { useSubscription } from "../../hooks/useSubscription";
 import { Link, useLocation } from "wouter";
-import { useStripeReturn } from "../Options/stripeHook";
+import { useStripeReturn } from "./stripeHook";
 import { GET_USER_WORKSHEETS } from "../MyWorksheets/data";
 
 export default function CreateWorksheet() {

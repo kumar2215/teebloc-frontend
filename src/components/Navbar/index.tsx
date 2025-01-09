@@ -11,7 +11,7 @@ import { Link, useLocation, useRoute } from "wouter";
 import { cartItemsVar } from "../CreateWorksheet/data.tsx";
 import posthog from "posthog-js";
 import { useState, useEffect, useRef } from "react";
-import { useSubscription } from "./hook";
+import { useSubscription } from "../../hooks/useSubscription.ts";
 
 export default function Navbar() {
   const { signOut } = useClerk();
