@@ -17,8 +17,10 @@ export function useStripeReturn() {
       setShowSuccessModal(true);
 
       // Wait for user to be loaded before refetching
+      console.log("User is loaded?: ", isLoaded);
       if (!isLoaded) {
         const checkAndRefetch = setInterval(() => {
+          console.log("Refetching...");
           if (user?.id) {
             client.refetchQueries({
               include: [GET_USER_SUBSCRIPTION],
