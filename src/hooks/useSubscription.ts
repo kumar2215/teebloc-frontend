@@ -4,6 +4,7 @@ import { GET_USER_SUBSCRIPTION } from "./data";
 
 export function useSubscription() {
   const { user } = useUser();
+  console.log("User: ", user);
 
   const { data, loading } = useQuery(GET_USER_SUBSCRIPTION, {
     variables: { userId: user?.id },
