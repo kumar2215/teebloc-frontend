@@ -11,6 +11,8 @@ export function useSubscription() {
   });
 
   const hasActiveSubscription = data?.subscriptions?.[0]?.status === "active";
+  console.log("Use subscription data: ", data);
+  console.log("hasActiveSubscription", hasActiveSubscription);
 
   return {
     hasActiveSubscription,
