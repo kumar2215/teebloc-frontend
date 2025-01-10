@@ -47,6 +47,8 @@ const makeVarPersisted = (initialValue: any, storageName: string) => {
 
 export const cartItemsVar = makeVarPersisted([], "cartItems");
 
+export const isReorderModeVar = makeVar(false);
+
 export const GET_QUESTIONS_BY_ID = gql(`
 query GetQuestionsById($ids: [String!]) {
   questions(
