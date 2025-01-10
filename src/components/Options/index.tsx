@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { OnChangeValue } from "react-select";
 import CustomSelect from "../CusomSelect";
-import Instructions from "../Instructions";
+import Instructions from "../instructions";
 import { useUser } from "@clerk/clerk-react";
 import Questions from "../Questions";
 import { GET_ALL_OPTIONS, GET_QUESTIONS } from "./data";
