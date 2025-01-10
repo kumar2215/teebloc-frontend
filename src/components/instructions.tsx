@@ -1,23 +1,18 @@
 export default function Instructions() {
   return (
     <article className="prose">
-      <h4>Pricing</h4>
-      <ul>
-        <li>10 cents per open ended question</li>
-        <li>5 cents per multiple choice question</li>
-        <li>Minimum 50 cents charged per worksheet</li>
-      </ul>
       <h4>Usage</h4>
       <ol>
+        <li>Filter questions using the options below.</li>
         <li>
-          Add questions to your worksheet using the "Add to Worksheet" button.
+          Add questions to your worksheet using the "Add to Worksheet" button on
+          each question.
         </li>
-        <li>Check out and make payment.</li>
         <li>
-          Answers to the questions will be attached to the end of the worksheet.
-          You will now be able to download the PDF of the full worksheet +
-          answers.
+          Finalize and download your worksheet in the "Create Worksheet" page.
+          Each worksheet contains answers to all questions.
         </li>
+        <li>Find all your downloaded worksheets in the "My Worksheets" tab.</li>
       </ol>
     </article>
   );

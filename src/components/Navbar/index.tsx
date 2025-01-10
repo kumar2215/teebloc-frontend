@@ -181,7 +181,7 @@ function NavItems({
                   });
                 }}
               >
-                Worksheet Cart
+                Create Worksheet
                 {cartItems.length > 0 && (
                   <div className="badge">{cartItems.length}</div>
                 )}
