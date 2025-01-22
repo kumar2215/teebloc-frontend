@@ -143,7 +143,7 @@ export function PDFDocument({ questionsData }) {
                     style={[
                       styles.answerImage,
                       {
-                        width: question.paper.paper === 1 ? "10%" : "70%",
+                        width: question.paper.paper === 1 ? "40%" : "70%",
                       },
                     ]}
                   />
