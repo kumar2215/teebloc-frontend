@@ -210,18 +210,20 @@ function NavItems({
             tabIndex={0}
             className="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
-            <li>
-              <form
-                method="POST"
-                action={`${
-                  import.meta.env.VITE_BACKEND_API
-                }/create-portal-session`}
-              >
-                <button type="submit" className="w-full text-left">
-                  Manage subscription
-                </button>
-              </form>
-            </li>
+            {hasActiveSubscription && (
+              <li>
+                <form
+                  method="POST"
+                  action={`${
+                    import.meta.env.VITE_BACKEND_API
+                  }/create-portal-session`}
+                >
+                  <button type="submit" className="w-full text-left">
+                    Manage subscription
+                  </button>
+                </form>
+              </li>
+            )}
             <li>
               <a onClick={onSignOut}>Sign out</a>
             </li>
