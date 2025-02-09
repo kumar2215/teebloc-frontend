@@ -148,6 +148,7 @@ function NavItems({
   const [writingMatch] = useRoute("/writing");
   const practiceMatch = location.startsWith("/practice");
   const { hasActiveSubscription, loading } = useSubscription();
+  const [isPortalLoading, setIsPortalLoading] = useState(false);
 
   // Modified from https://clerk.com/docs/backend-requests/making/cross-origin
   const authenticatedFetch = async (url: string, options?: RequestInit) => {
@@ -233,21 +234,33 @@ function NavItems({
               <li>
                 <a
                   onClick={async () => {
-                    const response = await authenticatedFetch(
-                      `${
-                        import.meta.env.VITE_BACKEND_API
-                      }/create-portal-session`,
-                      {
-                        method: "POST",
+                    if (isPortalLoading) return;
+                    setIsPortalLoading(true);
+                    try {
+                      const response = await authenticatedFetch(
+                        `${
+                          import.meta.env.VITE_BACKEND_API
+                        }/create-portal-session`,
+                        {
+                          method: "POST",
+                        }
+                      );
+                      if (response.url) {
+                        window.location.href = response.url;
                       }
-                    );
-                    if (response.url) {
-                      window.location.href = response.url;
+                    } finally {
+                      setIsPortalLoading(false);
                     }
                   }}
-                  className="w-full text-left"
                 >
-                  Manage subscription
+                  {isPortalLoading ? (
+                    <>
+                      <span className="loading loading-spinner loading-xs"></span>
+                      Loading...
+                    </>
+                  ) : (
+                    "Manage subscription"
+                  )}
                 </a>
               </li>
             )}
