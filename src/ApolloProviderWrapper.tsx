@@ -49,11 +49,13 @@ export const ApolloProviderWrapper = ({ children }) => {
   const { getToken } = useAuth();
   const apolloClient = useMemo(() => {
     const authMiddleware = setContext(async (req, { headers }) => {
-      const token = await getToken({ template: "hasura" });
+      // const token = await getToken({ template: "hasura" });
       return {
         headers: {
           ...headers,
-          authorization: `Bearer ${token}`,
+          "x-hasura-admin-secret":
+            "JYe23B2n2UdEMWcDx2J4oNRfhE46LCC8jNJGug5YAj2Q8DxrEH86QeM9heJzLKja",
+          // authorization: `Bearer ${token}`,
         },
       };
     });

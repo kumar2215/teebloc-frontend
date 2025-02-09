@@ -4,6 +4,7 @@ import {
   SignUpButton,
   SignedIn,
   SignedOut,
+  useAuth,
   useClerk,
 } from "@clerk/clerk-react";
 import { twMerge } from "tailwind-merge";
@@ -143,9 +144,27 @@ function NavItems({
   cartItems: any[]; // Replace 'any' with the correct type if known
   onSignOut: () => void;
 }) {
+  const { getToken } = useAuth();
   const [writingMatch] = useRoute("/writing");
   const practiceMatch = location.startsWith("/practice");
   const { hasActiveSubscription, loading } = useSubscription();
+
+  // Modified from https://clerk.com/docs/backend-requests/making/cross-origin
+  const authenticatedFetch = async (url: string, options?: RequestInit) => {
+    const token = await getToken();
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...options?.headers,
+        Authorization: `Bearer ${token}`,
+      },
+    }).then(async (res) => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      return res.json();
+    });
+  };
 
   return (
     <>
@@ -212,16 +231,24 @@ function NavItems({
           >
             {hasActiveSubscription && (
               <li>
-                <form
-                  method="POST"
-                  action={`${
-                    import.meta.env.VITE_BACKEND_API
-                  }/create-portal-session`}
+                <a
+                  onClick={async () => {
+                    const response = await authenticatedFetch(
+                      `${
+                        import.meta.env.VITE_BACKEND_API
+                      }/create-portal-session`,
+                      {
+                        method: "POST",
+                      }
+                    );
+                    if (response.url) {
+                      window.location.href = response.url;
+                    }
+                  }}
+                  className="w-full text-left"
                 >
-                  <button type="submit" className="w-full text-left">
-                    Manage subscription
-                  </button>
-                </form>
+                  Manage subscription
+                </a>
               </li>
             )}
             <li>
