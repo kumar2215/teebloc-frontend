@@ -29,7 +29,7 @@ const Question = memo(function Question({
   isInCart: boolean;
 }) {
   // const cartItems = useReactiveVar(cartItemsVar);
-  // console.log("cartItems", cartItems);
+  console.log(q);
   return (
     <div
       key={q.id}
@@ -50,12 +50,18 @@ const Question = memo(function Question({
       })}
 
       <div className="card-body">
-        {/* <div className="badge badge-outline">
-                {q.assessment.assessmentname}
-              </div> */}
-        {/* <div className="badge badge-outline">{q.level.level}</div>
-              <div className="badge badge-outline">{q.paper.paper}</div>
-              <div className="badge badge-outline">{q.school.schoolname}</div> */}
+        <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-0.5">
+          <div className="text-gray-600">Level:</div>
+          <div>{q.level.level}</div>
+          <div className="text-gray-600">Paper:</div>
+          <div>{q.paper.paper}</div>
+          <div className="text-gray-600">Assessment:</div>
+          <div>{q.assessment.assessmentname}</div>
+          <div className="text-gray-600">School:</div>
+          <div>{q.school.schoolname}</div>
+        </div>
+
+        <div className="text-gray-600 mt-2">Topics:</div>
         {q.question_topics.map((qt) => {
           return (
             <div className="badge badge-outline inline">
