@@ -203,7 +203,7 @@ export default function CreateWorksheet() {
 
       {isReorderMode ? (
         <div className="flex gap-4">
-          <div className="w-1/2 border border-dashed border-gray-400 p-4">
+          <div className="w-1/2 border border-dashed border-gray-400 p-4 max-h-[calc(100vh-200px)] overflow-y-auto">
             <h3 className="font-bold mb-2">
               Re-order questions (drag and drop)
             </h3>
@@ -288,11 +288,11 @@ export default function CreateWorksheet() {
             </DragDropContext>
           </div>
 
-          <div className="w-1/2 border border-dashed border-gray-400 p-4">
+          <div className="w-1/2 border border-dashed border-gray-400 p-4 sticky top-4 max-h-[calc(100vh-200px)]">
             <h3 className="font-bold mb-2">Question Preview</h3>
 
             {hoveredQuestion ? (
-              <div className="border border-gray-300 bg-white shadow-sm p-2 rounded flex flex-col items-center">
+              <div className="border border-gray-300 bg-white shadow-sm p-2 rounded flex flex-col items-center overflow-y-auto max-h-[calc(100vh-300px)]">
                 {sortQuestionImages(hoveredQuestion.questionimgs).map(
                   (img: any) => (
                     <img
