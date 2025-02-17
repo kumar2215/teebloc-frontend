@@ -58,8 +58,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   answerImage: {
-    marginLeft: 40,
-    width: "70%",
+    marginLeft: 50,
+    width: 400,
     marginBottom: 20,
   },
 });
