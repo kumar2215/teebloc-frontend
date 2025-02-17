@@ -13,6 +13,7 @@ import {
 import { PDFDocument } from "./pdf";
 import posthog from "posthog-js";
 import { useIsAdmin } from "../../hooks/useIsAdmin";
+import Worker from "../../workers/pdf.worker?worker";
 
 /**
  * Helper function to fetch questions data for a worksheet.
@@ -55,10 +56,9 @@ export function PDFDownloadButton({
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    workerRef.current = new Worker(
-      new URL("../../workers/pdf.worker.ts", import.meta.url),
-      { type: "module" }
-    );
+    workerRef.current = new Worker();
+    // new URL("../../workers/pdf.worker.ts", import.meta.url),
+    // { type: "module" }
     return () => {
       if (workerRef.current) {
         workerRef.current.terminate();
