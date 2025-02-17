@@ -19,10 +19,17 @@ if (
   }
 }
 
-import RefreshRuntime from "/@react-refresh";
 if (import.meta.env.DEV) {
-  RefreshRuntime.injectIntoGlobalHook(window);
-  window.$RefreshReg$ = () => {};
-  window.$RefreshSig$ = () => (type) => type;
-  window.__vite_plugin_react_preamble_installed__ = true;
+  // Dynamically import react-refresh only in development
+  import("/@react-refresh")
+    .then((module) => {
+      const RefreshRuntime = module.default;
+      RefreshRuntime.injectIntoGlobalHook(window);
+      window.$RefreshReg$ = () => {};
+      window.$RefreshSig$ = () => (type) => type;
+      window.__vite_plugin_react_preamble_installed__ = true;
+    })
+    .catch((error) => {
+      console.error("Failed to load react-refresh:", error);
+    });
 }
