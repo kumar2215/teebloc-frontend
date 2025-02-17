@@ -32,7 +32,9 @@ const styles = StyleSheet.create({
     left: -30,
   },
   questionImage: {
-    width: "70%",
+    // Using width: "70%" sometimes causes the PDF rendering to take infinitely long.
+    // width: "70%",
+    width: 400,
   },
   answersPage: {
     flexDirection: "column",
@@ -69,6 +71,15 @@ export function PDFDocument({ questionsData }) {
   const sortedQuestions = questions.sort((a, b) => {
     return parseInt(a.paper.paper) - parseInt(b.paper.paper);
   });
+  // Add metadata to the sortedQuestions: for the images, add image_url in the form of
+  // https://equally-clean-dogfish.ngrok-free.app/images/question/{questionimgid}
+  // sortedQuestions.forEach((question) => {
+  //   question.questionimgs.forEach((questionImage) => {
+  //     questionImage.image_url = `${
+  //       import.meta.env.VITE_BACKEND_API
+  //     }/images/question/${questionImage.questionimgid}`;
+  //   });
+  // });
 
   return (
     <Document>

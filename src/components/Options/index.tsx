@@ -18,6 +18,7 @@ import {
 import { cartItemsVar } from "../CreateWorksheet/data";
 import { PDFDocument } from "../MyWorksheets/pdf";
 import posthog from "posthog-js";
+import { useIsAdmin } from "../../hooks/useIsAdmin";
 
 export interface Option {
   readonly value: string;
@@ -55,11 +56,6 @@ const commonSelectSettings = {
     }),
   },
 };
-
-function useIsAdmin() {
-  const { user } = useUser();
-  return user?.publicMetadata?.role === "admin";
-}
 
 // First, define the dependency tree structure
 const OPTION_DEPENDENCIES = {
