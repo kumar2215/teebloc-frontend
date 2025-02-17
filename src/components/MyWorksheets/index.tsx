@@ -53,22 +53,11 @@ export function PDFDownloadButton({
   client: any;
 }) {
   const [loading, setLoading] = useState(false);
-  const workerRef = useRef<Worker | null>(null);
-
-  useEffect(() => {
-    workerRef.current = new Worker();
-    return () => {
-      if (workerRef.current) {
-        workerRef.current.terminate();
-        workerRef.current = null;
-      }
-    };
-  }, []);
 
   const handleDownload = async () => {
     setLoading(true);
+    let worker: Worker | null = null;
     try {
-      // Fetch questions data for the worksheet.
       const result = await useLazyQuestionsQuery(
         client,
         GET_QUESTIONS_BY_ID,
@@ -80,13 +69,26 @@ export function PDFDownloadButton({
         worksheet.worksheets_to_questions.length
       );
       if (result.data) {
-        if (workerRef.current) {
-          const pdfWorker = wrap(workerRef.current);
-          // Dispatch the PDF generation job to the worker.
-          const url = await pdfWorker.renderPDF(result.data);
-          window.open(url, "_blank")?.focus();
+        // Instantiate a new worker for this download
+        worker = new Worker();
+        const pdfWorker = wrap(worker);
+        const url: string = await pdfWorker.renderPDF(result.data);
+        // After generating the PDF blob and obtaining `url`
+        const pdfWindow = window.open(url, "_blank");
+        pdfWindow?.focus();
+        if (pdfWindow) {
+          const interval = setInterval(() => {
+            if (pdfWindow.closed) {
+              // Terminate the worker once the new tab (PDF preview) is closed.
+              worker?.terminate();
+              clearInterval(interval);
+              console.log("Worker terminated as PDF tab has been closed.");
+            }
+          }, 1000); // Check every second; adjust as necessary.
         } else {
-          console.error("PDF worker is not available");
+          console.error("Failed to open the PDF tab.");
+          // Terminate the worker if you can't show the PDF.
+          worker.terminate();
         }
       }
     } catch (error) {
