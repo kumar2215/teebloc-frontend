@@ -105,15 +105,36 @@ query GetSchools($subject: String) {
 `);
 
 export const GET_QUESTIONS = gql(`
-query GetQuestions($offset: Int, $limit: Int, $topics: [String!], $levels: [String!], $papers: [bigint!], $assessments: [String!], $schools: [String!]) {
+query GetQuestions(
+  $offset: Int, 
+  $limit: Int, 
+  $topics: [String!], 
+  $levels: [String!], 
+  $papers: [bigint!], 
+  $assessments: [String!], 
+  $schools: [String!]
+) {
+  questions_aggregate(
+    where: {
+      question_topics: { topic: { topicname: { _in: $topics } } },
+      level: { level: { _in: $levels } },
+      paper: { paper: { _in: $papers } },
+      assessment: { assessmentname: { _in: $assessments } },
+      school: { schoolname: { _in: $schools } }
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
   questions(
     where: {
-      question_topics: {topic: {topicname: {_in: $topics}}}, 
-      level: {level: {_in: $levels}}, 
-      paper: {paper: {_in: $papers}}, 
-      assessment: {assessmentname: {_in: $assessments}}, 
-      school: {schoolname: {_in: $schools}}, 
-    }
+      question_topics: { topic: { topicname: { _in: $topics } } },
+      level: { level: { _in: $levels } },
+      paper: { paper: { _in: $papers } },
+      assessment: { assessmentname: { _in: $assessments } },
+      school: { schoolname: { _in: $schools } }
+    },
     offset: $offset,
     limit: $limit
   ) {

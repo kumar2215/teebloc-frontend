@@ -427,7 +427,9 @@ export default function Options() {
       {q_loading && (!q_data?.questions || q_data.questions.length === 0) && (
         <span className="loading loading-spinner loading-lg"></span>
       )}
-      {q_data && <div>{q_data.questions.length} results</div>}
+      {q_data && (
+        <div>{q_data.questions_aggregate.aggregate.count} results</div>
+      )}
       {isAdmin && (
         <>
           <div
