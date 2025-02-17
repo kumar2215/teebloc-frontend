@@ -57,8 +57,6 @@ export function PDFDownloadButton({
 
   useEffect(() => {
     workerRef.current = new Worker();
-    // new URL("../../workers/pdf.worker.ts", import.meta.url),
-    // { type: "module" }
     return () => {
       if (workerRef.current) {
         workerRef.current.terminate();
