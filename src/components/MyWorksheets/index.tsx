@@ -14,6 +14,7 @@ import { PDFDocument } from "./pdf";
 import posthog from "posthog-js";
 import { useIsAdmin } from "../../hooks/useIsAdmin";
 import Worker from "../../workers/pdf.worker?worker";
+import { useSearchParams } from "wouter-search";
 
 /**
  * Helper function to fetch questions data for a worksheet.
@@ -173,8 +174,30 @@ export default function MyWorksheets() {
 
   const worksheets = w_data?.worksheets || [];
   const sortedWorksheets = [...worksheets].sort((a, b) => {
-    return new Date(b.created) - new Date(a.created);
+    return new Date(b.created).getTime() - new Date(a.created).getTime();
   });
+
+  // Highlight logic using wouter's useSearch
+  const [searchParams] = useSearchParams();
+  const highlightWorksheetId = searchParams.get("highlight")
+    ? parseInt(searchParams.get("highlight")!, 10)
+    : null;
+  const [highlightActive, setHighlightActive] = useState(true);
+
+  useEffect(() => {
+    if (highlightWorksheetId) {
+      const element = document.getElementById(
+        `worksheet-${highlightWorksheetId}`
+      );
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Remove the highlight after 3 seconds.
+        setTimeout(() => {
+          setHighlightActive(false);
+        }, 3000);
+      }
+    }
+  }, [highlightWorksheetId]);
 
   return (
     <>
@@ -203,6 +226,9 @@ export default function MyWorksheets() {
         )}
         {w_error && <p>Error loading worksheets: {w_error.message}</p>}
         {sortedWorksheets.map((w: any) => {
+          // Determine if this worksheet should be highlighted.
+          const isHighlighted =
+            highlightActive && highlightWorksheetId === w.id;
           const levels = new Set<string>();
           const assessments = new Set<string>();
           const topics = new Set<string>();
@@ -218,7 +244,12 @@ export default function MyWorksheets() {
           return (
             <div
               key={w.id}
-              className="card bg-base-100 shadow-xl border-dashed border-2 border-sky-500 bg-sky-100"
+              id={`worksheet-${w.id}`}
+              className={`card bg-base-100 shadow-xl border-dashed ${
+                isHighlighted
+                  ? "border-2 border-red-500 animate-[pulse_0.5s_ease-in-out_infinite]"
+                  : "border-2 border-sky-500"
+              } bg-sky-100`}
             >
               <div className="card-body">
                 {editingWorksheetId === w.id ? (
@@ -282,7 +313,6 @@ export default function MyWorksheets() {
                       Edit name
                     </button>
                   )}
-                  {/* Render the PDFDownloadButton component which now manages its own worker */}
                   <PDFDownloadButton worksheet={w} client={client} />
                   {isAdmin && (
                     <button

@@ -3,6 +3,7 @@ import { useReactiveVar } from "@apollo/client";
 import { QuestionType } from "../Questions";
 import { memo } from "react";
 import posthog from "posthog-js";
+import { Link } from "wouter";
 
 function sortQuestionImages(questionimgs: QuestionType["questionimgs"]) {
   const copiedQuestionImages = JSON.parse(JSON.stringify(questionimgs));
@@ -24,12 +25,12 @@ function sortQuestionImages(questionimgs: QuestionType["questionimgs"]) {
 const Question = memo(function Question({
   q,
   isInCart,
+  worksheets = [],
 }: {
   q: QuestionType;
   isInCart: boolean;
+  worksheets?: { id: number; name: string }[];
 }) {
-  // const cartItems = useReactiveVar(cartItemsVar);
-  console.log(q);
   return (
     <div
       key={q.id}
@@ -37,7 +38,7 @@ const Question = memo(function Question({
     >
       {sortQuestionImages(q.questionimgs).map((qi) => {
         return (
-          <figure>
+          <figure key={qi.questionimgid}>
             <img
               src={`${import.meta.env.VITE_BACKEND_API}/images/question/${
                 qi.questionimgid
@@ -64,11 +65,32 @@ const Question = memo(function Question({
         <div className="text-gray-600 mt-2">Topics:</div>
         {q.question_topics.map((qt) => {
           return (
-            <div className="badge badge-outline inline">
+            <div
+              key={qt.topic.topicname}
+              className="badge badge-outline inline"
+            >
               {qt.topic.topicname}
             </div>
           );
         })}
+
+        {worksheets.length > 0 && (
+          <div className="mt-2 text-sm text-gray-700">
+            This question was used in:{" "}
+            {worksheets.map((ws, index) => (
+              <span key={ws.id}>
+                <Link
+                  href={`/worksheets?highlight=${ws.id}`}
+                  className="text-blue-500 underline"
+                >
+                  {ws.name}
+                </Link>
+                {index < worksheets.length - 1 && ", "}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="card-actions justify-end">
           {isInCart ? (
             // {cartItems.includes(q.id) ? (

@@ -5,7 +5,7 @@ import CustomSelect from "../CusomSelect";
 import Instructions from "../instructions";
 import { useUser } from "@clerk/clerk-react";
 import Questions from "../Questions";
-import { GET_ALL_OPTIONS, GET_QUESTIONS } from "./data";
+import { GET_ALL_OPTIONS, GET_QUESTIONS, GET_USER_WORKSHEETS } from "./data";
 import { useQueryParamsState, useQueryUpdater } from "./hook";
 import {
   Page,
@@ -262,6 +262,28 @@ export default function Options() {
     },
   });
 
+  // New query to fetch the worksheets for the current user
+  const { user } = useUser();
+  const { data: worksheetsData } = useQuery(GET_USER_WORKSHEETS, {
+    variables: { userid: user?.id },
+    skip: !user?.id,
+  });
+
+  const worksheetsMapping = useMemo(() => {
+    const mapping: { [key: string]: { id: number; name: string }[] } = {};
+    if (worksheetsData?.worksheets) {
+      worksheetsData.worksheets.forEach((ws: any) => {
+        ws.worksheets_to_questions.forEach((qt: any) => {
+          if (!mapping[qt.question_id]) {
+            mapping[qt.question_id] = [];
+          }
+          mapping[qt.question_id].push({ id: ws.id, name: ws.name });
+        });
+      });
+    }
+    return mapping;
+  }, [worksheetsData]);
+
   // PDF download logic
   async function downloadPDF() {
     setDownloadLoading(true);
@@ -319,6 +341,9 @@ export default function Options() {
   //         return q_data?.questions.find((q) => q.id === id);
   //       })
   //     : [];
+
+  // Add new state for the toggle
+  const [excludeUsedQuestions, setExcludeUsedQuestions] = useState(false);
 
   return (
     <div className="mx-8 mb-8 flex gap-8 flex-col">
@@ -423,6 +448,21 @@ export default function Options() {
         <span className="text-xs text-gray-500">
           All schools are selected by default
         </span>
+
+        {/* Add the toggle switch right after Instructions */}
+        <div className="form-control w-fit">
+          <label className="label cursor-pointer gap-4">
+            <span className="label-text">
+              Exclude questions included in my worksheets
+            </span>
+            <input
+              type="checkbox"
+              className="checkbox"
+              checked={excludeUsedQuestions}
+              onChange={(e) => setExcludeUsedQuestions(e.target.checked)}
+            />
+          </label>
+        </div>
       </div>
       {q_loading && (!q_data?.questions || q_data.questions.length === 0) && (
         <span className="loading loading-spinner loading-lg"></span>
@@ -456,7 +496,17 @@ export default function Options() {
         </div>
       )}
       <Questions
-        questions={q_data?.questions || []}
+        questions={
+          excludeUsedQuestions
+            ? (q_data?.questions || []).filter(
+                (q) =>
+                  !(
+                    worksheetsMapping[q.id] &&
+                    worksheetsMapping[q.id].length > 0
+                  )
+              )
+            : q_data?.questions || []
+        }
         loading={q_loading}
         onLoadMore={() => {
           fetchMore({
@@ -465,6 +515,7 @@ export default function Options() {
             },
           });
         }}
+        worksheetsMapping={worksheetsMapping}
       />
       {showScrollTopButton && (
         <button

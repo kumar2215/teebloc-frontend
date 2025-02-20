@@ -9,17 +9,24 @@ export default function Questions({
   questions,
   loading,
   onLoadMore,
+  worksheetsMapping = {},
 }: {
   questions: QuestionType[];
   loading: boolean;
   onLoadMore: () => void;
+  worksheetsMapping?: { [key: string]: { id: number; name: string }[] };
 }) {
   const cartItems = useReactiveVar(cartItemsVar);
   return (
     <>
       <div className="flex flex-col gap-8">
         {questions.map((q) => (
-          <Question key={q.id} q={q} isInCart={cartItems.includes(q.id)} />
+          <Question
+            key={q.id}
+            q={q}
+            isInCart={cartItems.includes(q.id)}
+            worksheets={worksheetsMapping[q.id] || []}
+          />
         ))}
       </div>
       {questions.length > 0 && (

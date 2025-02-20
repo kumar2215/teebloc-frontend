@@ -168,4 +168,16 @@ query GetQuestions(
 }
 `);
 
+export const GET_USER_WORKSHEETS = gql(`
+query GetUserWorksheetsForOptions($userid: String!) {
+  worksheets(where: { creator: { _eq: $userid } }) {
+    id
+    name
+    worksheets_to_questions {
+      question_id
+    }
+  }
+}
+`);
+
 // isInCart @client
