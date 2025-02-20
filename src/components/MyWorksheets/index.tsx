@@ -182,22 +182,31 @@ export default function MyWorksheets() {
   const highlightWorksheetId = searchParams.get("highlight")
     ? parseInt(searchParams.get("highlight")!, 10)
     : null;
-  const [highlightActive, setHighlightActive] = useState(true);
+  const [highlightActive, setHighlightActive] = useState(false);
 
+  // Only trigger the highlight effect after data has loaded
   useEffect(() => {
-    if (highlightWorksheetId) {
-      const element = document.getElementById(
-        `worksheet-${highlightWorksheetId}`
+    if (!w_loading && w_data && highlightWorksheetId) {
+      // Check if the worksheet exists in the loaded data
+      const worksheetExists = w_data.worksheets.some(
+        (w: any) => w.id === highlightWorksheetId
       );
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-        // Remove the highlight after 3 seconds.
-        setTimeout(() => {
-          setHighlightActive(false);
-        }, 3000);
+
+      if (worksheetExists) {
+        setHighlightActive(true);
+        const element = document.getElementById(
+          `worksheet-${highlightWorksheetId}`
+        );
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+          // Remove the highlight after 3 seconds
+          setTimeout(() => {
+            setHighlightActive(false);
+          }, 3000);
+        }
       }
     }
-  }, [highlightWorksheetId]);
+  }, [w_loading, w_data, highlightWorksheetId]);
 
   return (
     <>
