@@ -168,6 +168,45 @@ query GetQuestions(
 }
 `);
 
+export const GET_QUESTION_AGGREGATES = gql(`
+  query GetQuestionCounts(
+    $topics: [String!],
+    $levels: [String!],
+    $papers: [bigint!],
+    $assessments: [String!],
+    $schools: [String!],
+    $excludedIds: [String!]
+  ) {
+    all: questions_aggregate(
+      where: {
+        question_topics: { topic: { topicname: { _in: $topics } } },
+        level: { level: { _in: $levels } },
+        paper: { paper: { _in: $papers } },
+        assessment: { assessmentname: { _in: $assessments } },
+        school: { schoolname: { _in: $schools } }
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+    excluding: questions_aggregate(
+      where: {
+        question_topics: { topic: { topicname: { _in: $topics } } },
+        level: { level: { _in: $levels } },
+        paper: { paper: { _in: $papers } },
+        assessment: { assessmentname: { _in: $assessments } },
+        school: { schoolname: { _in: $schools } },
+        id: { _nin: $excludedIds }
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+  }
+`);
+
 export const GET_USER_WORKSHEETS = gql(`
 query GetUserWorksheetsForOptions($userid: String!) {
   worksheets(where: { creator: { _eq: $userid } }) {

@@ -5,7 +5,12 @@ import CustomSelect from "../CusomSelect";
 import Instructions from "../instructions";
 import { useUser } from "@clerk/clerk-react";
 import Questions from "../Questions";
-import { GET_ALL_OPTIONS, GET_QUESTIONS, GET_USER_WORKSHEETS } from "./data";
+import {
+  GET_ALL_OPTIONS,
+  GET_QUESTION_AGGREGATES,
+  GET_QUESTIONS,
+  GET_USER_WORKSHEETS,
+} from "./data";
 import { useQueryParamsState, useQueryUpdater } from "./hook";
 import {
   Page,
@@ -143,7 +148,6 @@ export default function Options() {
           batchUpdate[dependent] = [];
         }
       });
-      console.log("batchUpdate", batchUpdate);
 
       setQueries(batchUpdate);
     },
@@ -261,15 +265,16 @@ export default function Options() {
       schools: selectedSchools?.map((s) => s.value) || [],
     },
   });
-
-  // New query to fetch the worksheets for the current user
   const { user } = useUser();
   const { data: worksheetsData } = useQuery(GET_USER_WORKSHEETS, {
     variables: { userid: user?.id },
     skip: !user?.id,
   });
 
+  // Exclude questions logic
+  const [excludeUsedQuestions, setExcludeUsedQuestions] = useState(false);
   const worksheetsMapping = useMemo(() => {
+    // Map question ids to worksheets
     const mapping: { [key: string]: { id: number; name: string }[] } = {};
     if (worksheetsData?.worksheets) {
       worksheetsData.worksheets.forEach((ws: any) => {
@@ -283,6 +288,34 @@ export default function Options() {
     }
     return mapping;
   }, [worksheetsData]);
+
+  const usedIDs = useMemo(() => {
+    if (!worksheetsMapping) return [];
+    return Object.keys(worksheetsMapping);
+  }, [worksheetsMapping]);
+
+  // NEW aggregator query: returns two counts (all + excluding)
+  const { data: aggregatesData, loading: aggregatesLoading } = useQuery(
+    GET_QUESTION_AGGREGATES,
+    {
+      variables: {
+        topics: selectedTopics?.map((t) => t.value) || [],
+        levels: selectedLevels?.map((l) => l.value) || [],
+        papers: selectedPapers?.map((p) => p.value) || [],
+        assessments: selectedAssessments?.map((a) => a.value) || [],
+        schools: selectedSchools?.map((s) => s.value) || [],
+        excludedIds: usedIDs,
+      },
+    }
+  );
+
+  const totalQuestions = aggregatesData?.all?.aggregate?.count || 0;
+  const totalExcludingUsed = aggregatesData?.excluding?.aggregate?.count || 0;
+
+  // Once you have totalExcludingUsed, you can filter your displayedQuestions
+  const displayedQuestions = excludeUsedQuestions
+    ? (q_data?.questions || []).filter((q) => !usedIDs.includes(q.id))
+    : q_data?.questions || [];
 
   // PDF download logic
   async function downloadPDF() {
@@ -341,9 +374,6 @@ export default function Options() {
   //         return q_data?.questions.find((q) => q.id === id);
   //       })
   //     : [];
-
-  // Add new state for the toggle
-  const [excludeUsedQuestions, setExcludeUsedQuestions] = useState(false);
 
   return (
     <div className="mx-8 mb-8 flex gap-8 flex-col">
@@ -468,7 +498,9 @@ export default function Options() {
         <span className="loading loading-spinner loading-lg"></span>
       )}
       {q_data && (
-        <div>{q_data.questions_aggregate.aggregate.count} results</div>
+        <div>
+          {excludeUsedQuestions ? totalExcludingUsed : totalQuestions} results
+        </div>
       )}
       {isAdmin && (
         <>
@@ -496,17 +528,7 @@ export default function Options() {
         </div>
       )}
       <Questions
-        questions={
-          excludeUsedQuestions
-            ? (q_data?.questions || []).filter(
-                (q) =>
-                  !(
-                    worksheetsMapping[q.id] &&
-                    worksheetsMapping[q.id].length > 0
-                  )
-              )
-            : q_data?.questions || []
-        }
+        questions={displayedQuestions}
         loading={q_loading}
         onLoadMore={() => {
           fetchMore({
