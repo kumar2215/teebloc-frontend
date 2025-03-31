@@ -54,9 +54,15 @@ export function PDFDownloadButton({
   client: any;
 }) {
   const [loading, setLoading] = useState(false);
+  const [questionsOnlyLoading, setQuestionsOnlyLoading] = useState(false);
 
-  const handleDownload = async () => {
-    setLoading(true);
+  const handleDownload = async (questionsOnly = false) => {
+    if (questionsOnly) {
+      setQuestionsOnlyLoading(true);
+    } else {
+      setLoading(true);
+    }
+
     let worker: Worker | null = null;
     try {
       const result = await useLazyQuestionsQuery(
@@ -73,8 +79,12 @@ export function PDFDownloadButton({
         // Instantiate a new worker for this download
         worker = new Worker();
         const pdfWorker = wrap(worker);
-        const url: string = await pdfWorker.renderPDF(result.data);
-        // After generating the PDF blob and obtaining `url`
+        // Pass questionsOnly parameter to the worker
+        const url: string = await pdfWorker.renderPDF(
+          result.data,
+          questionsOnly
+        );
+
         const pdfWindow = window.open(url, "_blank");
         pdfWindow?.focus();
         if (pdfWindow) {
@@ -95,24 +105,43 @@ export function PDFDownloadButton({
     } catch (error) {
       console.error("Error generating PDF:", error);
     } finally {
-      setLoading(false);
+      if (questionsOnly) {
+        setQuestionsOnlyLoading(false);
+      } else {
+        setLoading(false);
+      }
     }
   };
 
   return (
-    <button
-      className="btn btn-primary"
-      onClick={handleDownload}
-      disabled={loading}
-    >
-      {loading ? (
-        <>
-          <span className="loading loading-spinner"></span> Loading
-        </>
-      ) : (
-        "Get PDF"
-      )}
-    </button>
+    <div className="flex space-x-2">
+      <button
+        className="btn btn-primary"
+        onClick={() => handleDownload(false)}
+        disabled={loading || questionsOnlyLoading}
+      >
+        {loading ? (
+          <>
+            <span className="loading loading-spinner"></span> Loading
+          </>
+        ) : (
+          "Get PDF"
+        )}
+      </button>
+      <button
+        className="btn btn-primary"
+        onClick={() => handleDownload(true)}
+        disabled={loading || questionsOnlyLoading}
+      >
+        {questionsOnlyLoading ? (
+          <>
+            <span className="loading loading-spinner"></span> Loading
+          </>
+        ) : (
+          "Get PDF without answer sheet"
+        )}
+      </button>
+    </div>
   );
 }
 

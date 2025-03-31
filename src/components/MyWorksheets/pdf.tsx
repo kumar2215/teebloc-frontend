@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export function PDFDocument({ questionsData }) {
+export function PDFDocument({ questionsData, questionsOnly = false }) {
   if (!questionsData) return null;
 
   let questions = JSON.parse(JSON.stringify(questionsData.questions));
@@ -122,47 +122,50 @@ export function PDFDocument({ questionsData }) {
         )}
       </Page>
 
-      <Page size="A4" style={styles.answersPage}>
-        <Text style={styles.answersTitle}>Answers</Text>
+      {/* Only render answers page if questionsOnly is false */}
+      {!questionsOnly && (
+        <Page size="A4" style={styles.answersPage}>
+          <Text style={styles.answersTitle}>Answers</Text>
 
-        {sortedQuestions.map((question, questionIndex) => (
-          <View key={question.id} style={styles.answerContainer}>
-            {question.answerimgs
-              .sort((a, b) => {
-                const regex = /Q(\d+)-(\d+)\./;
-                const aMatch = a.answerimgname.match(regex);
-                const bMatch = b.answerimgname.match(regex);
-                if (aMatch && bMatch) {
-                  return aMatch[2] - bMatch[2];
-                } else {
-                  return 0;
-                }
-              })
-              .map((answerImage, index) => (
-                <View
-                  wrap={false}
-                  key={answerImage.answerimgid}
-                  style={styles.answerImageContainer}
-                >
-                  <Text style={styles.answerNumber}>
-                    {index === 0 ? questionIndex + 1 : ""}
-                  </Text>
-                  <Image
-                    src={`${import.meta.env.VITE_BACKEND_API}/images/answer/${
-                      answerImage.answerimgid
-                    }`}
-                    style={[
-                      styles.answerImage,
-                      {
-                        width: question.paper.paper === 1 ? "40%" : "70%",
-                      },
-                    ]}
-                  />
-                </View>
-              ))}
-          </View>
-        ))}
-      </Page>
+          {sortedQuestions.map((question, questionIndex) => (
+            <View key={question.id} style={styles.answerContainer}>
+              {question.answerimgs
+                .sort((a, b) => {
+                  const regex = /Q(\d+)-(\d+)\./;
+                  const aMatch = a.answerimgname.match(regex);
+                  const bMatch = b.answerimgname.match(regex);
+                  if (aMatch && bMatch) {
+                    return aMatch[2] - bMatch[2];
+                  } else {
+                    return 0;
+                  }
+                })
+                .map((answerImage, index) => (
+                  <View
+                    wrap={false}
+                    key={answerImage.answerimgid}
+                    style={styles.answerImageContainer}
+                  >
+                    <Text style={styles.answerNumber}>
+                      {index === 0 ? questionIndex + 1 : ""}
+                    </Text>
+                    <Image
+                      src={`${import.meta.env.VITE_BACKEND_API}/images/answer/${
+                        answerImage.answerimgid
+                      }`}
+                      style={[
+                        styles.answerImage,
+                        {
+                          width: question.paper.paper === 1 ? "40%" : "70%",
+                        },
+                      ]}
+                    />
+                  </View>
+                ))}
+            </View>
+          ))}
+        </Page>
+      )}
     </Document>
   );
 }
