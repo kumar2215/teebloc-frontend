@@ -100,9 +100,10 @@ export function useQueryUpdater() {
 
       console.log("queryString", queryString);
 
+      // This is needed to refresh the options when they are changed
       questionsSearchParams(queryString);
       setLocation(
-        queryString ? `${location.split("?")[0]}?${queryString}` : location,
+        queryString ? `${location.split("?")[0]}?${queryString}` : location, // to remove the '?' in the url
         {
           replace: true,
         }
