@@ -100,9 +100,13 @@ export function useQueryUpdater() {
 
       console.log("queryString", queryString);
 
-      setLocation(`${location.split("?")[0]}?${queryString}`, {
-        replace: true,
-      });
+      questionsSearchParams(queryString);
+      setLocation(
+        queryString ? `${location.split("?")[0]}?${queryString}` : location,
+        {
+          replace: true,
+        }
+      );
     },
     [setLocation, location, searchParams]
   );

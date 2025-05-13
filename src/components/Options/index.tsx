@@ -376,7 +376,7 @@ export default function Options() {
   //     : [];
 
   return (
-    <div className="mx-8 mb-8 flex gap-8 flex-col">
+    <div className="flex flex-col gap-8 mx-8 mb-8">
       <Instructions />
       {/* 
       Use when debugging PDF layout:
@@ -385,7 +385,7 @@ export default function Options() {
           <PDFDocument questionsData={{ questions: pdfQuestions }} />
         </PDFViewer>
       )} */}
-      <div className="my-2 flex flex-col justify-start gap-2">
+      <div className="flex flex-col justify-start gap-2 my-2">
         <CustomSelect
           {...commonSelectSettings}
           setValues={setSelectedLevels}
@@ -481,7 +481,7 @@ export default function Options() {
 
         {/* Add the toggle switch right after Instructions */}
         <div className="form-control w-fit">
-          <label className="label cursor-pointer gap-4">
+          <label className="gap-4 cursor-pointer label">
             <span className="label-text">
               Exclude questions included in my worksheets
             </span>
@@ -506,7 +506,7 @@ export default function Options() {
         <>
           <div
             onClick={downloadPDF}
-            className="btn btn-neutral btn-lg w-60 fixed bottom-4 right-4 z-10"
+            className="fixed z-10 btn btn-neutral btn-lg w-60 bottom-4 right-4"
           >
             {downloadLoading && (
               <span className="loading loading-spinner"></span>
@@ -516,7 +516,7 @@ export default function Options() {
 
           <div
             onClick={() => cartItemsVar([])}
-            className="btn btn-neutral btn-lg fixed bottom-4 right-72 z-10"
+            className="fixed z-10 btn btn-neutral btn-lg bottom-4 right-72"
           >
             Clear questions
           </div>
@@ -542,7 +542,7 @@ export default function Options() {
       {showScrollTopButton && (
         <button
           onClick={scrollToTop}
-          className="fixed top-24 left-1/2 transform -translate-x-1/2 z-10 p-2 bg-gray-500 text-white rounded-full"
+          className="fixed z-10 p-2 text-white transform -translate-x-1/2 bg-gray-500 rounded-full top-24 left-1/2"
         >
           ↑ Top
         </button>
