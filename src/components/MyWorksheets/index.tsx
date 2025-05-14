@@ -1,8 +1,6 @@
 import { useApolloClient, useQuery, useMutation } from "@apollo/client";
 import { useUser } from "@clerk/clerk-react";
-import { pdf } from "@react-pdf/renderer";
-import qs from "qs";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { wrap } from "comlink";
 import { GET_QUESTIONS_BY_ID } from "../Cart/data";
 import {
@@ -10,8 +8,6 @@ import {
   UPDATE_WORKSHEET_NAME,
   DELETE_WORKSHEET_AND_RELATIONS,
 } from "./data";
-import { PDFDocument } from "./pdf";
-import posthog from "posthog-js";
 import { useIsAdmin } from "../../hooks/useIsAdmin";
 import Worker from "../../workers/pdf.worker?worker";
 import { useSearchParams } from "wouter-search";
@@ -239,10 +235,10 @@ export default function MyWorksheets() {
 
   return (
     <>
-      <div className="mx-8 flex flex-col gap-8">
+      <div className="flex flex-col gap-8 mx-8">
         {/* Admin-only UI: Filter worksheets by user id */}
         {isAdmin && (
-          <div className="admin-filter flex gap-2 items-center">
+          <div className="flex items-center gap-2 admin-filter">
             <input
               type="text"
               className="input"
@@ -308,7 +304,7 @@ export default function MyWorksheets() {
                   {[...levels].map((level) => (
                     <span
                       key={level}
-                      className="badge bg-blue-200 text-blue-800"
+                      className="text-blue-800 bg-blue-200 badge"
                     >
                       {level}
                     </span>
@@ -316,7 +312,7 @@ export default function MyWorksheets() {
                   {[...assessments].map((assessment) => (
                     <span
                       key={assessment}
-                      className="badge bg-green-200 text-green-800"
+                      className="text-green-800 bg-green-200 badge"
                     >
                       {assessment}
                     </span>
@@ -324,13 +320,13 @@ export default function MyWorksheets() {
                   {[...topics].map((topic) => (
                     <span
                       key={topic}
-                      className="badge bg-yellow-200 text-yellow-800"
+                      className="text-yellow-800 bg-yellow-200 badge"
                     >
                       {topic}
                     </span>
                   ))}
                 </div>
-                <div className="card-actions justify-end">
+                <div className="justify-end card-actions">
                   {editingWorksheetId === w.id ? (
                     <button
                       className="btn btn-success"

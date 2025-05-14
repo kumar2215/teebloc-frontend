@@ -6,8 +6,6 @@ import {
   Text,
   View,
 } from "@react-pdf/renderer";
-import { getImageDimensions } from "./util";
-import { useState, useEffect } from "react";
 
 // Define styles for the PDF document
 const styles = StyleSheet.create({
