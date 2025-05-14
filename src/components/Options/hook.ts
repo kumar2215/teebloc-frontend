@@ -1,4 +1,4 @@
-import { makeVar } from "@apollo/client";
+import { makeVar, useReactiveVar } from "@apollo/client";
 import qs from "qs";
 import { useCallback, useEffect, useMemo } from "react";
 import { useLocation, useSearch, useNavigate } from "wouter";
@@ -22,20 +22,20 @@ export const useQueryParamsState = (query: string, initialValue: any) => {
   const { setQueries } = useQueryUpdater();
   const [location, setLocation] = useLocation();
   const searchParams = useSearch();
+  const questionsSearchParamsVar = useReactiveVar(questionsSearchParams);
   // What's the difference between searchParams and location?
   // useLocation simply returns the path. For example, /practice
   // useSearch returns the search params. For example, subject=123&topics=456
 
-  // On first load, if searchParams is empty but reactive variable is not, set the searchParams to the reactive variable
-  // We need this so that even if the search param changes when user navigates to another page in the app,
-  // we can recover the state of the user's filters and re-populate the url search params.
+  // The questionsSearchParams reactive var is our main "source of truth". Location will always
+  // reflect the value of questionsSearchParamsVar.
   useEffect(() => {
-    if (!searchParams) {
-      if (questionsSearchParams()) {
-        setLocation(`${location.split("?")[0]}?${questionsSearchParams()}`);
-      }
-    }
-  }, [searchParams, query]);
+    setLocation(
+      `${location.split("?")[0]}${
+        questionsSearchParamsVar ? `?${questionsSearchParamsVar}` : ""
+      }`
+    );
+  }, [questionsSearchParamsVar]);
 
   const setQuery = useCallback(
     (value) => {
@@ -44,12 +44,14 @@ export const useQueryParamsState = (query: string, initialValue: any) => {
     [setQueries]
   );
 
-  // Keep the reactive variable in sync with the URL
+  // Only use searchParams to set questionsSearchParams on first load
+  // We need this so that even if the search param changes when user navigates to another page in the app,
+  // we can recover the state of the user's filters and re-populate the url search params.
   useEffect(() => {
     if (searchParams) {
       questionsSearchParams(searchParams);
     }
-  }, [searchParams]);
+  }, []);
 
   const parsedValue = useMemo(() => {
     // From the qs docs:
@@ -100,9 +102,7 @@ export function useQueryUpdater() {
 
       console.log("queryString", queryString);
 
-      setLocation(`${location.split("?")[0]}?${queryString}`, {
-        replace: true,
-      });
+      questionsSearchParams(queryString);
     },
     [setLocation, location, searchParams]
   );
