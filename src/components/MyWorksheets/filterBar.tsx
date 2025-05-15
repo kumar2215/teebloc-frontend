@@ -1,0 +1,264 @@
+import { useMemo, useEffect, useCallback } from "react";
+import { MultiValue, OnChangeValue } from "react-select";
+import { Option } from "../Options/index";
+import CustomSelect from "../CusomSelect";
+import { useQueryParamsState } from "../Options/hook";
+import { GetUserWorksheetsQuery } from "../../__generated__/graphql";
+
+const commonSelectSettings = {
+  hideSelectedOptions: false,
+  isClearable: true,
+  closeMenuOnSelect: false,
+  styles: {
+    container: (baseStyles) => ({
+      ...baseStyles,
+      display: "flex",
+    }),
+    placeholder: (baseStyles) => ({
+      ...baseStyles,
+      color: "black",
+    }),
+    option: (baseStyles) => ({
+      ...baseStyles,
+      whiteSpace: "nowrap",
+    }),
+    menu: (baseStyles) => ({
+      ...baseStyles,
+      display: "flex",
+      width: "fit-content",
+      flexDirection: "column",
+    }),
+    menuList: (baseStyles) => ({
+      ...baseStyles,
+      display: "flex",
+      width: "100%",
+      flexDirection: "column",
+    }),
+  },
+};
+
+export default function FilterBar({
+  worksheets,
+  setFilteredWorksheets,
+  setIsChanged,
+}: {
+  worksheets: GetUserWorksheetsQuery["worksheets"];
+  setFilteredWorksheets: (
+    worksheets: GetUserWorksheetsQuery["worksheets"]
+  ) => void;
+  setIsChanged: (isChanged: boolean) => void;
+}) {
+  // State management
+  const [filteredLevels, setfilteredLevels] = useQueryParamsState("levels", []);
+  const [filteredTopics, setfilteredTopics] = useQueryParamsState("topics", []);
+  const [filteredPapers, setfilteredPapers] = useQueryParamsState("papers", []);
+  const [filteredAssessments, setfilteredAssessments] = useQueryParamsState(
+    "assessments",
+    []
+  );
+
+  // Helper to extract .value from Option[]
+  const getValues = (arr: Option[]) => arr.map((o) => o.value);
+
+  // Memoize filtered worksheets to avoid unnecessary rerenders
+  const filtered = useMemo(() => {
+    const selectedLevels = getValues(filteredLevels);
+    const selectedTopics = getValues(filteredTopics);
+    const selectedPapers = getValues(filteredPapers);
+    const selectedAssessments = getValues(filteredAssessments);
+
+    // If no filters are selected, return all worksheets
+    const anyFilterSelected =
+      selectedLevels.length > 0 ||
+      selectedTopics.length > 0 ||
+      selectedPapers.length > 0 ||
+      selectedAssessments.length > 0;
+
+    if (!anyFilterSelected) return worksheets;
+
+    return worksheets.filter((worksheet) => {
+      const levels = worksheet.worksheets_to_questions.map(
+        (wtq) => wtq.question.level.level
+      );
+      const topics = worksheet.worksheets_to_questions.flatMap((wtq) =>
+        wtq.question.question_topics.map((qt) => qt.topic.topicname)
+      );
+      const papers = worksheet.worksheets_to_questions.map(
+        (wtq) => wtq.question.paper.paper
+      );
+      const assessments = worksheet.worksheets_to_questions.map(
+        (wtq) => wtq.question.assessment.assessmentname
+      );
+
+      // Disjunctive (OR) logic: include if matches ANY filter type
+      return (
+        (selectedLevels.length > 0 &&
+          levels.some((level) => selectedLevels.includes(level))) ||
+        (selectedTopics.length > 0 &&
+          topics.some((topic) => selectedTopics.includes(topic))) ||
+        (selectedPapers.length > 0 &&
+          papers.some((paper) => selectedPapers.includes(paper))) ||
+        (selectedAssessments.length > 0 &&
+          assessments.some((assessment) =>
+            selectedAssessments.includes(assessment)
+          ))
+      );
+    });
+  }, [
+    filteredLevels,
+    filteredTopics,
+    filteredPapers,
+    filteredAssessments,
+    worksheets,
+  ]);
+
+  // Only update filteredWorksheets when the filtered result changes
+  useEffect(() => {
+    setFilteredWorksheets(filtered);
+    setIsChanged(true);
+  }, [filtered]);
+
+  const updateFilter = (filterType: string, values: MultiValue<Option>) => {
+    switch (filterType) {
+      case "levels":
+        setfilteredLevels(values);
+        break;
+      case "topics":
+        setfilteredTopics(values);
+        break;
+      case "papers":
+        setfilteredPapers(values);
+        break;
+      case "assessments":
+        setfilteredAssessments(values);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Filtered options based on selections
+  const levelOptions = useMemo(() => {
+    const levels = new Set();
+    worksheets.forEach((w) => {
+      w.worksheets_to_questions.forEach((wtq) => {
+        levels.add(wtq.question.level.level);
+      });
+    });
+    return (
+      Array.from(levels).map((level) => ({
+        value: level,
+        label: level,
+      })) || []
+    );
+  }, [worksheets]);
+
+  const topicOptions = useMemo(() => {
+    const topics = new Set();
+    worksheets.forEach((w) => {
+      w.worksheets_to_questions.forEach((wtq) => {
+        wtq.question.question_topics.forEach((qt) =>
+          topics.add(qt.topic.topicname)
+        );
+      });
+    });
+    return Array.from(topics).map((topic) => ({
+      value: topic,
+      label: topic,
+    }));
+  }, [worksheets]);
+
+  const paperOptions = useMemo(() => {
+    const papers = new Set();
+    worksheets.forEach((w) => {
+      w.worksheets_to_questions.forEach((wtq) => {
+        papers.add(wtq.question.paper.paper);
+      });
+    });
+    return Array.from(papers).map((paper) => ({
+      value: paper,
+      label: paper,
+    }));
+  }, [worksheets]);
+
+  const assessmentOptions = useMemo(() => {
+    const assessments = new Set();
+    worksheets.forEach((w) => {
+      w.worksheets_to_questions.forEach((wtq) => {
+        assessments.add(wtq.question.assessment.assessmentname);
+      });
+    });
+    return Array.from(assessments).map((assessment) => ({
+      value: assessment,
+      label: assessment,
+    }));
+  }, [worksheets]);
+
+  return (
+    <div className="flex flex-col gap-4 md:flex-row">
+      <CustomSelect
+        {...commonSelectSettings}
+        setValues={setfilteredLevels}
+        haveSelectAll
+        isLoading={false}
+        placeholder="Levels"
+        isSearchable={false}
+        isMulti
+        value={filteredLevels}
+        onChange={(filteredLevels: OnChangeValue<Option, true>) => {
+          updateFilter("levels", filteredLevels || []);
+        }}
+        options={levelOptions}
+        includeFooter={false}
+      />
+
+      <CustomSelect
+        {...commonSelectSettings}
+        setValues={setfilteredTopics}
+        haveSelectAll
+        isLoading={false}
+        placeholder="Topics"
+        isSearchable
+        isMulti
+        value={filteredTopics}
+        onChange={(filteredTopics: OnChangeValue<Option, true>) => {
+          updateFilter("topics", filteredTopics || []);
+        }}
+        options={topicOptions}
+        includeFooter={false}
+      />
+
+      <CustomSelect
+        {...commonSelectSettings}
+        setValues={setfilteredPapers}
+        haveSelectAll
+        isLoading={false}
+        placeholder="Papers"
+        isSearchable={false}
+        isMulti
+        value={filteredPapers}
+        onChange={(filteredPapers: OnChangeValue<Option, true>) => {
+          updateFilter("papers", filteredPapers || []);
+        }}
+        options={paperOptions}
+        includeFooter={false}
+      />
+
+      <CustomSelect
+        {...commonSelectSettings}
+        setValues={setfilteredAssessments}
+        haveSelectAll
+        isLoading={false}
+        placeholder="Assessments"
+        isSearchable={false}
+        isMulti
+        value={filteredAssessments}
+        onChange={(filteredAssessments: OnChangeValue<Option, true>) => {
+          updateFilter("assessments", filteredAssessments || []);
+        }}
+        options={assessmentOptions}
+        includeFooter={false}
+      />
+    </div>
+  );
+}

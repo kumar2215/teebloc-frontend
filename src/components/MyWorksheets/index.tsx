@@ -1,149 +1,12 @@
 import { useApolloClient, useQuery, useMutation } from "@apollo/client";
 import { useUser } from "@clerk/clerk-react";
-import { pdf } from "@react-pdf/renderer";
-import qs from "qs";
-import { useCallback, useEffect, useState, useRef } from "react";
-import { wrap } from "comlink";
-import { GET_QUESTIONS_BY_ID } from "../Cart/data";
-import {
-  GET_USER_WORKSHEETS,
-  UPDATE_WORKSHEET_NAME,
-  DELETE_WORKSHEET_AND_RELATIONS,
-} from "./data";
-import { PDFDocument } from "./pdf";
-import posthog from "posthog-js";
+import { useEffect, useMemo, useState } from "react";
+import { GET_USER_WORKSHEETS, UPDATE_WORKSHEET_NAME } from "./data";
 import { useIsAdmin } from "../../hooks/useIsAdmin";
-import Worker from "../../workers/pdf.worker?worker";
+import PDFDownloadButton from "./pdfDownloadButton";
+import FilterBar from "./filterBar";
+import { useDeleteWorksheet } from "./helpers";
 import { useSearchParams } from "wouter-search";
-
-/**
- * Helper function to fetch questions data for a worksheet.
- */
-export async function useLazyQuestionsQuery(
-  client: any,
-  query: any,
-  variables: any,
-  expectedNumQuestions: number
-) {
-  const response = await client.query({
-    query,
-    variables,
-  });
-  const { data } = response;
-  const questions = data?.questions;
-  if (questions?.length === expectedNumQuestions) {
-    return response;
-  } else {
-    return client.query({
-      query,
-      variables,
-      fetchPolicy: "network-only",
-    });
-  }
-}
-
-/**
- * A top-level component that handles dispatching the PDF job to the worker.
- * This component manages its own worker instance.
- */
-export function PDFDownloadButton({
-  worksheet,
-  client,
-}: {
-  worksheet: any;
-  client: any;
-}) {
-  const [loading, setLoading] = useState(false);
-  const [questionsOnlyLoading, setQuestionsOnlyLoading] = useState(false);
-
-  const handleDownload = async (questionsOnly = false) => {
-    if (questionsOnly) {
-      setQuestionsOnlyLoading(true);
-    } else {
-      setLoading(true);
-    }
-
-    let worker: Worker | null = null;
-    try {
-      const result = await useLazyQuestionsQuery(
-        client,
-        GET_QUESTIONS_BY_ID,
-        {
-          ids: worksheet.worksheets_to_questions.map(
-            (wtq: any) => wtq.question_id
-          ),
-        },
-        worksheet.worksheets_to_questions.length
-      );
-      if (result.data) {
-        // Instantiate a new worker for this download
-        worker = new Worker();
-        const pdfWorker = wrap(worker);
-        // Pass questionsOnly parameter to the worker
-        const url: string = await pdfWorker.renderPDF(
-          result.data,
-          questionsOnly
-        );
-
-        const pdfWindow = window.open(url, "_blank");
-        pdfWindow?.focus();
-        if (pdfWindow) {
-          const interval = setInterval(() => {
-            if (pdfWindow.closed) {
-              // Terminate the worker once the new tab (PDF preview) is closed.
-              worker?.terminate();
-              clearInterval(interval);
-              console.log("Worker terminated as PDF tab has been closed.");
-            }
-          }, 1000); // Check every second; adjust as necessary.
-        } else {
-          console.error("Failed to open the PDF tab.");
-          // Terminate the worker if you can't show the PDF.
-          worker.terminate();
-        }
-      }
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-    } finally {
-      if (questionsOnly) {
-        setQuestionsOnlyLoading(false);
-      } else {
-        setLoading(false);
-      }
-    }
-  };
-
-  return (
-    <div className="flex space-x-2">
-      <button
-        className="btn btn-primary"
-        onClick={() => handleDownload(false)}
-        disabled={loading || questionsOnlyLoading}
-      >
-        {loading ? (
-          <>
-            <span className="loading loading-spinner"></span> Loading
-          </>
-        ) : (
-          "Get PDF"
-        )}
-      </button>
-      <button
-        className="btn btn-primary"
-        onClick={() => handleDownload(true)}
-        disabled={loading || questionsOnlyLoading}
-      >
-        {questionsOnlyLoading ? (
-          <>
-            <span className="loading loading-spinner"></span> Loading
-          </>
-        ) : (
-          "Get PDF without answer sheet"
-        )}
-      </button>
-    </div>
-  );
-}
 
 export default function MyWorksheets() {
   const client = useApolloClient();
@@ -202,9 +65,37 @@ export default function MyWorksheets() {
   };
 
   const worksheets = w_data?.worksheets || [];
-  const sortedWorksheets = [...worksheets].sort((a, b) => {
-    return new Date(b.created).getTime() - new Date(a.created).getTime();
-  });
+  const [filteredWorksheets, setFilteredWorksheets] = useState([...worksheets]);
+
+  useEffect(() => {
+    setFilteredWorksheets(w_data?.worksheets || []);
+  }, [w_data]);
+
+  const [sortedWorksheets, setSortedWorksheets] = useState([
+    ...filteredWorksheets,
+  ]);
+  const [isChanged, setIsChanged] = useState(false);
+
+  useEffect(() => {
+    if (isChanged) {
+      const sortedWorksheets = [...filteredWorksheets].sort((a, b) => {
+        return new Date(b.created).getTime() - new Date(a.created).getTime();
+      });
+      setSortedWorksheets(sortedWorksheets);
+      setIsChanged(false);
+      console.log("Sorted worksheets:", sortedWorksheets);
+    }
+  }, [filteredWorksheets, isChanged]);
+
+  const filterBar = useMemo(() => {
+    return (
+      <FilterBar
+        worksheets={worksheets}
+        setFilteredWorksheets={setFilteredWorksheets}
+        setIsChanged={setIsChanged}
+      />
+    );
+  }, [worksheets]);
 
   // Highlight logic using wouter's useSearch
   const [searchParams] = useSearchParams();
@@ -239,10 +130,10 @@ export default function MyWorksheets() {
 
   return (
     <>
-      <div className="mx-8 flex flex-col gap-8">
+      <div className="flex flex-col gap-8 mx-8">
         {/* Admin-only UI: Filter worksheets by user id */}
         {isAdmin && (
-          <div className="admin-filter flex gap-2 items-center">
+          <div className="flex items-center gap-2 admin-filter">
             <input
               type="text"
               className="input"
@@ -263,6 +154,7 @@ export default function MyWorksheets() {
           <span className="loading loading-spinner loading-lg"></span>
         )}
         {w_error && <p>Error loading worksheets: {w_error.message}</p>}
+        {worksheets.length > 0 && filterBar}
         {sortedWorksheets.map((w: any) => {
           // Determine if this worksheet should be highlighted.
           const isHighlighted =
@@ -292,6 +184,7 @@ export default function MyWorksheets() {
               <div className="card-body">
                 {editingWorksheetId === w.id ? (
                   <input
+                    placeholder="New worksheet name"
                     type="text"
                     value={newWorksheetName}
                     onChange={(e) => setNewWorksheetName(e.target.value)}
@@ -308,7 +201,7 @@ export default function MyWorksheets() {
                   {[...levels].map((level) => (
                     <span
                       key={level}
-                      className="badge bg-blue-200 text-blue-800"
+                      className="text-blue-800 bg-blue-200 badge"
                     >
                       {level}
                     </span>
@@ -316,7 +209,7 @@ export default function MyWorksheets() {
                   {[...assessments].map((assessment) => (
                     <span
                       key={assessment}
-                      className="badge bg-green-200 text-green-800"
+                      className="text-green-800 bg-green-200 badge"
                     >
                       {assessment}
                     </span>
@@ -324,13 +217,13 @@ export default function MyWorksheets() {
                   {[...topics].map((topic) => (
                     <span
                       key={topic}
-                      className="badge bg-yellow-200 text-yellow-800"
+                      className="text-yellow-800 bg-yellow-200 badge"
                     >
                       {topic}
                     </span>
                   ))}
                 </div>
-                <div className="card-actions justify-end">
+                <div className="justify-end card-actions">
                   {editingWorksheetId === w.id ? (
                     <button
                       className="btn btn-success"
@@ -373,37 +266,4 @@ export default function MyWorksheets() {
       </div>
     </>
   );
-}
-
-/**
- * Custom hook to handle deleting a worksheet along with its related join table entries.
- *
- * @param refetchWorksheets - Function to refetch worksheets after deletion.
- */
-function useDeleteWorksheet(refetchWorksheets: () => void) {
-  const [deleteWorksheetMutation] = useMutation(DELETE_WORKSHEET_AND_RELATIONS);
-  const [deletingWorksheet, setDeletingWorksheet] = useState<
-    Record<number, boolean>
-  >({});
-
-  const deleteWorksheetById = (worksheetId: number) => {
-    if (!window.confirm("Are you sure you want to delete this worksheet?")) {
-      return;
-    }
-    setDeletingWorksheet((prev) => ({ ...prev, [worksheetId]: true }));
-    deleteWorksheetMutation({
-      variables: { id: worksheetId },
-    })
-      .then(() => {
-        refetchWorksheets();
-      })
-      .catch((error) => {
-        console.error("Error deleting worksheet:", error);
-      })
-      .finally(() => {
-        setDeletingWorksheet((prev) => ({ ...prev, [worksheetId]: false }));
-      });
-  };
-
-  return { deleteWorksheetById, deletingWorksheet };
 }
