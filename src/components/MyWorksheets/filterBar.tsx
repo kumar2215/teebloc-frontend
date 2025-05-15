@@ -97,7 +97,7 @@ export default function FilterBar({
         (selectedTopics.length > 0 &&
           topics.some((topic) => selectedTopics.includes(topic))) ||
         (selectedPapers.length > 0 &&
-          papers.some((paper) => selectedPapers.includes(paper))) ||
+          papers.some((paper) => selectedPapers.includes(paper.toString()))) ||
         (selectedAssessments.length > 0 &&
           assessments.some((assessment) =>
             selectedAssessments.includes(assessment)
