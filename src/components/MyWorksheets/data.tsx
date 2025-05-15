@@ -12,6 +12,9 @@ query GetUserWorksheets($userid: String!) {
         question_topics {
           topic {
             topicname
+            subject {
+              subject
+            }
           }
         }
         paper {
