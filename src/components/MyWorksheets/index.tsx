@@ -1,9 +1,10 @@
 import { useApolloClient, useQuery, useMutation } from "@apollo/client";
 import { useUser } from "@clerk/clerk-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GET_USER_WORKSHEETS, UPDATE_WORKSHEET_NAME } from "./data";
 import { useIsAdmin } from "../../hooks/useIsAdmin";
 import PDFDownloadButton from "./pdfDownloadButton";
+import FilterBar from "./filterBar";
 import { useDeleteWorksheet } from "./helpers";
 import { useSearchParams } from "wouter-search";
 
@@ -64,9 +65,37 @@ export default function MyWorksheets() {
   };
 
   const worksheets = w_data?.worksheets || [];
-  const sortedWorksheets = [...worksheets].sort((a, b) => {
-    return new Date(b.created).getTime() - new Date(a.created).getTime();
-  });
+  const [filteredWorksheets, setFilteredWorksheets] = useState([...worksheets]);
+
+  useEffect(() => {
+    setFilteredWorksheets(w_data?.worksheets || []);
+  }, [w_data]);
+
+  const [sortedWorksheets, setSortedWorksheets] = useState([
+    ...filteredWorksheets,
+  ]);
+  const [isChanged, setIsChanged] = useState(false);
+
+  useEffect(() => {
+    if (isChanged) {
+      const sortedWorksheets = [...filteredWorksheets].sort((a, b) => {
+        return new Date(b.created).getTime() - new Date(a.created).getTime();
+      });
+      setSortedWorksheets(sortedWorksheets);
+      setIsChanged(false);
+      console.log("Sorted worksheets:", sortedWorksheets);
+    }
+  }, [filteredWorksheets, isChanged]);
+
+  const filterBar = useMemo(() => {
+    return (
+      <FilterBar
+        worksheets={worksheets}
+        setFilteredWorksheets={setFilteredWorksheets}
+        setIsChanged={setIsChanged}
+      />
+    );
+  }, [worksheets]);
 
   // Highlight logic using wouter's useSearch
   const [searchParams] = useSearchParams();
@@ -125,6 +154,7 @@ export default function MyWorksheets() {
           <span className="loading loading-spinner loading-lg"></span>
         )}
         {w_error && <p>Error loading worksheets: {w_error.message}</p>}
+        {worksheets.length > 0 && filterBar}
         {sortedWorksheets.map((w: any) => {
           // Determine if this worksheet should be highlighted.
           const isHighlighted =
@@ -154,6 +184,7 @@ export default function MyWorksheets() {
               <div className="card-body">
                 {editingWorksheetId === w.id ? (
                   <input
+                    placeholder="New worksheet name"
                     type="text"
                     value={newWorksheetName}
                     onChange={(e) => setNewWorksheetName(e.target.value)}

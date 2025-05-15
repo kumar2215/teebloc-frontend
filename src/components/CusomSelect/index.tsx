@@ -7,7 +7,7 @@ const Menu = (props) => {
       {props.children}
       {props.selectProps.haveSelectAll && (
         <button
-          className="w-full flex justify-center px-2 py-1 cursor-pointer border-t-2 border-gray-200 hover:text-gray-500"
+          className="flex justify-center w-full px-2 py-1 border-t-2 border-gray-200 cursor-pointer hover:text-gray-500"
           onClick={() => {
             // Select all options
             props.selectProps.setValues(props.selectProps.options);
@@ -69,10 +69,11 @@ export default function CustomSelect<
           MultiValue,
         }}
       />
-      {(!props.value ||
-        (Array.isArray(props.value) && props.value.length === 0)) && (
-        <span class="text-xs text-red-500">Need to select input</span>
-      )}
+      {props.includeFooter !== false &&
+        (!props.value ||
+          (Array.isArray(props.value) && props.value.length === 0)) && (
+          <span className="text-xs text-red-500">Need to select input</span>
+        )}
     </div>
   );
 }
