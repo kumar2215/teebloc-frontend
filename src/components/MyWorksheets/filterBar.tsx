@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useCallback } from "react";
+import { useMemo, useEffect } from "react";
 import { MultiValue, OnChangeValue } from "react-select";
 import { Option } from "../Options/index";
 import CustomSelect from "../CusomSelect";
@@ -10,25 +10,25 @@ const commonSelectSettings = {
   isClearable: true,
   closeMenuOnSelect: false,
   styles: {
-    container: (baseStyles) => ({
+    container: (baseStyles: React.CSSProperties) => ({
       ...baseStyles,
       display: "flex",
     }),
-    placeholder: (baseStyles) => ({
+    placeholder: (baseStyles: React.CSSProperties) => ({
       ...baseStyles,
       color: "black",
     }),
-    option: (baseStyles) => ({
+    option: (baseStyles: React.CSSProperties) => ({
       ...baseStyles,
       whiteSpace: "nowrap",
     }),
-    menu: (baseStyles) => ({
+    menu: (baseStyles: React.CSSProperties) => ({
       ...baseStyles,
       display: "flex",
       width: "fit-content",
       flexDirection: "column",
     }),
-    menuList: (baseStyles) => ({
+    menuList: (baseStyles: React.CSSProperties) => ({
       ...baseStyles,
       display: "flex",
       width: "100%",
@@ -56,6 +56,10 @@ export default function FilterBar({
     "assessments",
     []
   );
+  const [filteredSubjects, setfilteredSubjects] = useQueryParamsState(
+    "subjects",
+    []
+  );
 
   // Helper to extract .value from Option[]
   const getValues = (arr: Option[]) => arr.map((o) => o.value);
@@ -66,13 +70,15 @@ export default function FilterBar({
     const selectedTopics = getValues(filteredTopics);
     const selectedPapers = getValues(filteredPapers);
     const selectedAssessments = getValues(filteredAssessments);
+    const selectedSubjects = getValues(filteredSubjects);
 
     // If no filters are selected, return all worksheets
     const anyFilterSelected =
       selectedLevels.length > 0 ||
       selectedTopics.length > 0 ||
       selectedPapers.length > 0 ||
-      selectedAssessments.length > 0;
+      selectedAssessments.length > 0 ||
+      selectedSubjects.length > 0;
 
     if (!anyFilterSelected) return worksheets;
 
@@ -89,6 +95,9 @@ export default function FilterBar({
       const assessments = worksheet.worksheets_to_questions.map(
         (wtq) => wtq.question.assessment.assessmentname
       );
+      const subjects = worksheet.worksheets_to_questions.flatMap((wtq) =>
+        wtq.question.question_topics.map((qt) => qt.topic.subject.subject)
+      );
 
       // Disjunctive (OR) logic: include if matches ANY filter type
       return (
@@ -97,11 +106,13 @@ export default function FilterBar({
         (selectedTopics.length > 0 &&
           topics.some((topic) => selectedTopics.includes(topic))) ||
         (selectedPapers.length > 0 &&
-          papers.some((paper) => selectedPapers.includes(paper))) ||
+          papers.some((paper) => selectedPapers.includes(paper.toString()))) ||
         (selectedAssessments.length > 0 &&
           assessments.some((assessment) =>
             selectedAssessments.includes(assessment)
-          ))
+          )) ||
+        (selectedSubjects.length > 0 &&
+          subjects.some((subject) => selectedSubjects.includes(subject)))
       );
     });
   }, [
@@ -109,6 +120,7 @@ export default function FilterBar({
     filteredTopics,
     filteredPapers,
     filteredAssessments,
+    filteredSubjects,
     worksheets,
   ]);
 
@@ -131,6 +143,9 @@ export default function FilterBar({
         break;
       case "assessments":
         setfilteredAssessments(values);
+        break;
+      case "subjects":
+        setfilteredSubjects(values);
         break;
       default:
         break;
@@ -194,6 +209,21 @@ export default function FilterBar({
     }));
   }, [worksheets]);
 
+  const subjectOptions = useMemo(() => {
+    const subjects = new Set();
+    worksheets.forEach((w) => {
+      w.worksheets_to_questions.forEach((wtq) => {
+        wtq.question.question_topics.forEach((qt) =>
+          subjects.add(qt.topic.subject.subject)
+        );
+      });
+    });
+    return Array.from(subjects).map((subject) => ({
+      value: subject,
+      label: subject,
+    }));
+  }, [worksheets]);
+
   return (
     <div className="flex flex-col gap-4 md:flex-row">
       <CustomSelect
@@ -209,6 +239,22 @@ export default function FilterBar({
           updateFilter("levels", filteredLevels || []);
         }}
         options={levelOptions}
+        includeFooter={false}
+      />
+
+      <CustomSelect
+        {...commonSelectSettings}
+        setValues={setfilteredSubjects}
+        haveSelectAll
+        isLoading={false}
+        placeholder="Subjects"
+        isSearchable={false}
+        isMulti
+        value={filteredSubjects}
+        onChange={(filteredSubjects: OnChangeValue<Option, true>) => {
+          updateFilter("subjects", filteredSubjects || []);
+        }}
+        options={subjectOptions}
         includeFooter={false}
       />
 
