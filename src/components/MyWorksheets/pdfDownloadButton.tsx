@@ -136,7 +136,7 @@ export default function PDFDownloadButton({
               downloadType={DownloadType.ANSWERS_ONLY}
               btnClassName="w-[200px] bg-base-100 border-none"
               btnTextClassName="pt-2"
-              style={{}}
+              style={{ boxShadow: "none" }}
             />
           </li>
           <li>
@@ -145,7 +145,7 @@ export default function PDFDownloadButton({
               downloadType={DownloadType.QUESTIONS_ONLY}
               btnClassName="w-[200px] bg-base-100 border-none"
               btnTextClassName="pt-2"
-              style={{}}
+              style={{ boxShadow: "none" }}
             />
           </li>
         </ul>
