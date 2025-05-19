@@ -6,6 +6,7 @@ query GetUserWorksheets($userid: String!) {
     name
     id
     created
+    questions_order
     worksheets_to_questions {
       question_id
       question {
