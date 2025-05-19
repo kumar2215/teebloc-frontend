@@ -63,13 +63,24 @@ const styles = StyleSheet.create({
   },
 });
 
-export function PDFDocument({ questionsData, downloadType }) {
+export function PDFDocument({
+  questionsData,
+  downloadType,
+  orderChanged = false,
+}: {
+  questionsData: any;
+  downloadType: DownloadType;
+  orderChanged?: boolean;
+}) {
   if (!questionsData) return null;
 
   let questions = JSON.parse(JSON.stringify(questionsData.questions));
-  const sortedQuestions = questions.sort((a, b) => {
-    return parseInt(a.paper.paper) - parseInt(b.paper.paper);
-  });
+
+  if (!orderChanged) {
+    questions = questions.sort((a, b) => {
+      return parseInt(a.paper.paper) - parseInt(b.paper.paper);
+    });
+  }
   // Add metadata to the sortedQuestions: for the images, add image_url in the form of
   // https://equally-clean-dogfish.ngrok-free.app/images/question/{questionimgid}
   // sortedQuestions.forEach((question) => {
@@ -85,7 +96,7 @@ export function PDFDocument({ questionsData, downloadType }) {
       {(downloadType === DownloadType.FULL ||
         downloadType === DownloadType.QUESTIONS_ONLY) && (
         <Page size="A4" style={styles.page}>
-          {sortedQuestions.map((question, questionIndex) =>
+          {questions.map((question, questionIndex) =>
             question.questionimgs
               .sort((a, b) => {
                 const regex = /Q(\d+)-(\d+)\./;
@@ -129,7 +140,7 @@ export function PDFDocument({ questionsData, downloadType }) {
         <Page size="A4" style={styles.answersPage}>
           <Text style={styles.answersTitle}>Answers</Text>
 
-          {sortedQuestions.map((question, questionIndex) => (
+          {questions.map((question, questionIndex) => (
             <View key={question.id} style={styles.answerContainer}>
               {question.answerimgs
                 .sort((a, b) => {

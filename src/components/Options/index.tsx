@@ -15,6 +15,7 @@ import { useQueryParamsState, useQueryUpdater } from "./hook";
 import { pdf } from "@react-pdf/renderer";
 import { cartItemsVar } from "../CreateWorksheet/data";
 import { PDFDocument } from "../MyWorksheets/pdf";
+import { DownloadType } from "../MyWorksheets/pdfDownloadButton";
 import posthog from "posthog-js";
 import { useIsAdmin } from "../../hooks/useIsAdmin";
 
@@ -323,7 +324,12 @@ export default function Options() {
       return;
     }
 
-    const doc = <PDFDocument questionsData={{ questions }} />;
+    const doc = (
+      <PDFDocument
+        questionsData={{ questions }}
+        downloadType={DownloadType.FULL}
+      />
+    );
     const asPdf = pdf(doc);
     const blob = await asPdf.toBlob();
     const url = URL.createObjectURL(blob);

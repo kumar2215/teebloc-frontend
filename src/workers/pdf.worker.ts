@@ -11,7 +11,10 @@ const renderPDF = async (questionsData: any, downloadType: DownloadType) => {
 
   // Create the PDF document element from your PDFDocument component
   const blob = await pdf(
-    createElement(PDFDocument, { questionsData, downloadType })
+    createElement(PDFDocument, {
+      questionsData,
+      downloadType,
+    })
   ).toBlob();
 
   // Create and return a URL for the blob so that it can be downloaded/opened.

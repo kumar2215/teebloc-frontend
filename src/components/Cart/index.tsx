@@ -12,6 +12,7 @@ import posthog from "posthog-js";
 import { useState } from "react";
 import { PDFDocument } from "../MyWorksheets/pdf";
 import { pdf } from "@react-pdf/renderer";
+import { DownloadType } from "../MyWorksheets/pdfDownloadButton";
 
 export default function Cart() {
   const { user } = useUser();
@@ -92,7 +93,12 @@ export default function Cart() {
       return;
     }
 
-    const doc = <PDFDocument questionsData={{ questions }} />;
+    const doc = (
+      <PDFDocument
+        questionsData={{ questions }}
+        downloadType={DownloadType.FULL}
+      />
+    );
     const asPdf = pdf(doc);
     const blob = await asPdf.toBlob();
 
@@ -129,7 +135,7 @@ export default function Cart() {
         <span className="loading loading-spinner loading-lg"></span>
       )}
 
-      <div className="flex flex-row items-end gap-4 fixed bottom-4 right-4 z-10">
+      <div className="fixed z-10 flex flex-row items-end gap-4 bottom-4 right-4">
         <div
           onClick={() => {
             cartItemsVar([]);
@@ -156,7 +162,7 @@ export default function Cart() {
             </div>
           </div>
         ) : (
-          <div onClick={handleCheckout} className="btn btn-neutral btn-lg w-56">
+          <div onClick={handleCheckout} className="w-56 btn btn-neutral btn-lg">
             Checkout
           </div>
         )}
