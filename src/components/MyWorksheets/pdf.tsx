@@ -66,21 +66,14 @@ const styles = StyleSheet.create({
 export function PDFDocument({
   questionsData,
   downloadType,
-  orderChanged = false,
 }: {
   questionsData: any;
   downloadType: DownloadType;
-  orderChanged?: boolean;
 }) {
   if (!questionsData) return null;
 
   let questions = JSON.parse(JSON.stringify(questionsData.questions));
 
-  if (!orderChanged) {
-    questions = questions.sort((a, b) => {
-      return parseInt(a.paper.paper) - parseInt(b.paper.paper);
-    });
-  }
   // Add metadata to the sortedQuestions: for the images, add image_url in the form of
   // https://equally-clean-dogfish.ngrok-free.app/images/question/{questionimgid}
   // sortedQuestions.forEach((question) => {

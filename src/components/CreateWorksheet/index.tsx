@@ -96,26 +96,11 @@ export default function CreateWorksheet() {
 
   const [downloadLoading, setDownloadLoading] = useState(false);
 
-  async function downloadPDF() {
-    const cartItems = cartItemsVar();
-    const questions = cartItems.map((id) => {
-      return q_data?.questions.find((q) => q.id === id);
-    });
-
-    if (questions.length === 0) {
-      return;
-    }
-
-    const orderChanged = !_.isEqual(
-      cartItems,
-      unsortedQuestions.map((q) => q.id)
-    );
-
+  async function downloadPDF(questions: any[]) {
     const doc = (
       <PDFDocument
         questionsData={{ questions }}
         downloadType={DownloadType.FULL}
-        orderChanged={orderChanged}
       />
     );
     const asPdf = pdf(doc);
@@ -132,15 +117,36 @@ export default function CreateWorksheet() {
     try {
       setDownloadLoading(true);
 
+      let cartItems = cartItemsVar();
+      let questions = cartItems.map((id) => {
+        return q_data?.questions.find((q) => q.id === id);
+      });
+
+      if (questions.length === 0) {
+        return;
+      }
+
+      const orderChanged = !_.isEqual(
+        cartItems,
+        unsortedQuestions.map((q) => q.id)
+      );
+
+      if (!orderChanged) {
+        // If the order is not changed by the user, sort by paper
+        questions = questions.sort((a, b) => {
+          return parseInt(a.paper.paper) - parseInt(b.paper.paper);
+        });
+        cartItems = questions.map((q) => q.id);
+      }
+
       // First create the worksheet
       const { data: worksheetData } = await createWorksheet({
         variables: {
           name: `Worksheet ${new Date().toLocaleDateString()}`,
           creator: user.id,
+          questions_order: cartItems,
         },
       });
-
-      const cartItems = cartItemsVar();
 
       // Then create the worksheet-question relationships
       if (worksheetData?.insert_worksheets_one?.id) {
@@ -160,7 +166,7 @@ export default function CreateWorksheet() {
         });
       }
 
-      await downloadPDF();
+      await downloadPDF(questions);
       if (freeWorksheetsLeft > 0) {
         await decrementFreeWorksheets({ variables: { userid: user.id } });
       }
