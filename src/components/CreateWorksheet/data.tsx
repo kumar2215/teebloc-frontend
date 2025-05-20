@@ -109,10 +109,11 @@ export const DECREMENT_FREE_WORKSHEETS = gql(`
 `);
 
 export const CREATE_WORKSHEET = gql(`
-  mutation CreateWorksheet($name: String!, $creator: String!) {
+  mutation CreateWorksheet($name: String!, $creator: String!, $questions_order: [String!]!) {
     insert_worksheets_one(object: {
       name: $name,
       creator: $creator
+      questions_order: $questions_order
     }) {
       id
       name

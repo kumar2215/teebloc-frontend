@@ -4,6 +4,7 @@ import Worker from "../../workers/pdf.worker?worker";
 import { useState } from "react";
 import { useLazyQuestionsQuery } from "./helpers";
 import { ChevronDownIcon } from "@heroicons/react/solid";
+import { Worksheets } from "../../__generated__/graphql";
 
 export enum DownloadType {
   FULL,
@@ -19,7 +20,7 @@ export default function PDFDownloadButton({
   worksheet,
   client,
 }: {
-  worksheet: any;
+  worksheet: Worksheets;
   client: any;
 }) {
   const [loading, setLoading] = useState(false);
@@ -65,9 +66,7 @@ export default function PDFDownloadButton({
         client,
         GET_QUESTIONS_BY_ID,
         {
-          ids: worksheet.worksheets_to_questions.map(
-            (wtq: any) => wtq.question_id
-          ),
+          ids: worksheet.questions_order,
         },
         worksheet.worksheets_to_questions.length
       );
@@ -75,6 +74,13 @@ export default function PDFDownloadButton({
         // Instantiate a new worker for this download
         worker = new Worker();
         const pdfWorker = wrap(worker);
+
+        result.data = {
+          questions: worksheet.questions_order.map((id: string) =>
+            result.data.questions.find((q: any) => q.id === id)
+          ),
+        };
+
         // Pass questionsOnly parameter to the worker
         const url: string = await pdfWorker.renderPDF(
           result.data,

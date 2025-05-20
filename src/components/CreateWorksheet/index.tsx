@@ -20,6 +20,8 @@ import { useStripeReturn } from "./stripeHook";
 import { GET_USER_WORKSHEETS } from "../MyWorksheets/data";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { isReorderModeVar } from "./data";
+import { _ } from "lodash";
+import { DownloadType } from "../MyWorksheets/pdfDownloadButton";
 
 export default function CreateWorksheet() {
   const [location, setLocation] = useLocation();
@@ -67,10 +69,11 @@ export default function CreateWorksheet() {
     refetchQueries: [GET_USER_WORKSHEETS],
   });
 
+  const unsortedQuestions = q_data?.questions ?? [];
+
   const handleDragEnd = useCallback(
     (result: any) => {
       if (!result.destination) return;
-
       const sourceIndex = result.source.index;
       const destinationIndex = result.destination.index;
 
@@ -84,7 +87,6 @@ export default function CreateWorksheet() {
     [cartItems]
   );
 
-  const unsortedQuestions = q_data?.questions ?? [];
   const questions = cartItems
     .map((id) => unsortedQuestions.find((q) => q.id === id))
     .filter(Boolean);
@@ -94,17 +96,13 @@ export default function CreateWorksheet() {
 
   const [downloadLoading, setDownloadLoading] = useState(false);
 
-  async function downloadPDF() {
-    const cartItems = cartItemsVar();
-    const questions = cartItems.map((id) => {
-      return q_data?.questions.find((q) => q.id === id);
-    });
-
-    if (questions.length === 0) {
-      return;
-    }
-
-    const doc = <PDFDocument questionsData={{ questions }} />;
+  async function downloadPDF(questions: any[]) {
+    const doc = (
+      <PDFDocument
+        questionsData={{ questions }}
+        downloadType={DownloadType.FULL}
+      />
+    );
     const asPdf = pdf(doc);
     const blob = await asPdf.toBlob();
 
@@ -119,11 +117,34 @@ export default function CreateWorksheet() {
     try {
       setDownloadLoading(true);
 
+      let cartItems = cartItemsVar();
+      let questions = cartItems.map((id) => {
+        return q_data?.questions.find((q) => q.id === id);
+      });
+
+      if (questions.length === 0) {
+        return;
+      }
+
+      const orderChanged = !_.isEqual(
+        cartItems,
+        unsortedQuestions.map((q) => q.id)
+      );
+
+      if (!orderChanged) {
+        // If the order is not changed by the user, sort by paper
+        questions = questions.sort((a, b) => {
+          return parseInt(a.paper.paper) - parseInt(b.paper.paper);
+        });
+        cartItems = questions.map((q) => q.id);
+      }
+
       // First create the worksheet
       const { data: worksheetData } = await createWorksheet({
         variables: {
           name: `Worksheet ${new Date().toLocaleDateString()}`,
           creator: user.id,
+          questions_order: cartItems,
         },
       });
 
@@ -145,7 +166,7 @@ export default function CreateWorksheet() {
         });
       }
 
-      await downloadPDF();
+      await downloadPDF(questions);
       if (freeWorksheetsLeft > 0) {
         await decrementFreeWorksheets({ variables: { userid: user.id } });
       }
@@ -204,7 +225,7 @@ export default function CreateWorksheet() {
       {isReorderMode ? (
         <div className="flex gap-4">
           <div className="w-1/2 border border-dashed border-gray-400 p-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-            <h3 className="font-bold mb-2">
+            <h3 className="mb-2 font-bold">
               Re-order questions (drag and drop)
             </h3>
 
@@ -239,7 +260,7 @@ export default function CreateWorksheet() {
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className="relative border border-gray-300 bg-white shadow-sm p-2 rounded flex gap-2 items-center hover:bg-gray-50"
+                              className="relative flex items-center gap-2 p-2 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50"
                               onMouseEnter={() => setHoveredQuestionId(q.id)}
                             >
                               <button
@@ -247,7 +268,7 @@ export default function CreateWorksheet() {
                                   e.stopPropagation();
                                   removeFromCart(q.id);
                                 }}
-                                className="absolute top-1 right-1 text-gray-400 hover:text-gray-700"
+                                className="absolute text-gray-400 top-1 right-1 hover:text-gray-700"
                                 aria-label="Remove question"
                               >
                                 ✕
@@ -257,10 +278,10 @@ export default function CreateWorksheet() {
                                 <img
                                   src={thumbnailUrl}
                                   alt="Question Thumbnail"
-                                  className="w-20 h-20 object-contain"
+                                  className="object-contain w-20 h-20"
                                 />
                               ) : (
-                                <div className="w-20 h-20 bg-gray-200 flex items-center justify-center text-gray-500">
+                                <div className="flex items-center justify-center w-20 h-20 text-gray-500 bg-gray-200">
                                   No Img
                                 </div>
                               )}
@@ -289,7 +310,7 @@ export default function CreateWorksheet() {
           </div>
 
           <div className="w-1/2 border border-dashed border-gray-400 p-4 sticky top-4 max-h-[calc(100vh-200px)]">
-            <h3 className="font-bold mb-2">Question Preview</h3>
+            <h3 className="mb-2 font-bold">Question Preview</h3>
 
             {hoveredQuestion ? (
               <div className="border border-gray-300 bg-white shadow-sm p-2 rounded flex flex-col items-center overflow-y-auto max-h-[calc(100vh-300px)]">
@@ -301,7 +322,7 @@ export default function CreateWorksheet() {
                         import.meta.env.VITE_BACKEND_API
                       }/images/question/${img.questionimgid}`}
                       alt={img.questionimgname}
-                      className="w-full h-auto object-contain my-2"
+                      className="object-contain w-full h-auto my-2"
                     />
                   )
                 )}
@@ -325,7 +346,7 @@ export default function CreateWorksheet() {
         </div>
       )}
 
-      <div className="flex flex-row items-end gap-4 fixed bottom-4 right-4 z-10">
+      <div className="fixed z-10 flex flex-row items-end gap-4 bottom-4 right-4">
         <div
           onClick={() => {
             cartItemsVar([]);
@@ -382,8 +403,8 @@ function SubscriptionSuccessModal() {
   const { showSuccessModal, setShowSuccessModal } = useStripeReturn();
   return (
     <div className={`modal ${showSuccessModal ? "modal-open" : ""}`}>
-      <div className="modal-box text-center">
-        <h3 className="text-2xl font-bold mb-4">Subscription Successful!</h3>
+      <div className="text-center modal-box">
+        <h3 className="mb-4 text-2xl font-bold">Subscription Successful!</h3>
         <p className="mb-4">Thank you for subscribing to Teebloc</p>
         <button
           className="btn btn-primary"
