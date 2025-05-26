@@ -1,9 +1,13 @@
-import { GetQuestionsQuery } from "../../generated/graphql";
+import {
+  GetQuestionsQuery,
+  GetQuestionsByIdQuery,
+} from "../../__generated__/graphql";
 import Question from "../Question";
 import { cartItemsVar } from "../CreateWorksheet/data";
 import { useReactiveVar } from "@apollo/client";
 
 export type QuestionType = GetQuestionsQuery["questions"][0];
+export type QuestionByIdType = GetQuestionsByIdQuery["questions"][0];
 
 export default function Questions({
   questions,
@@ -11,7 +15,7 @@ export default function Questions({
   onLoadMore,
   worksheetsMapping = {},
 }: {
-  questions: QuestionType[];
+  questions: QuestionType[] | QuestionByIdType[];
   loading: boolean;
   onLoadMore: () => void;
   worksheetsMapping?: { [key: string]: { id: number; name: string }[] };
@@ -31,7 +35,7 @@ export default function Questions({
       </div>
       {questions.length > 0 && (
         <button
-          className="btn btn-primary mb-16"
+          className="mb-16 btn btn-primary"
           onClick={onLoadMore}
           type="button"
           disabled={loading}

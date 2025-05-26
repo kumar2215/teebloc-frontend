@@ -1,9 +1,13 @@
 import { cartItemsVar } from "../CreateWorksheet/data";
-import { useReactiveVar } from "@apollo/client";
-import { QuestionType } from "../Questions";
+import { QuestionByIdType, QuestionType } from "../Questions";
+import { useLazyQuestionsQuery } from "../MyWorksheets/helpers";
+import { GET_QUESTIONS_BY_ID } from "../CreateWorksheet/data";
+import { useApolloClient } from "@apollo/client"; // <-- add useLazyQuery
+import { useState, useEffect } from "react";
 import { memo } from "react";
 import posthog from "posthog-js";
 import { Link } from "wouter";
+import Overlay from "./overlay";
 
 function sortQuestionImages(questionimgs: QuestionType["questionimgs"]) {
   const copiedQuestionImages = JSON.parse(JSON.stringify(questionimgs));
@@ -26,15 +30,67 @@ const Question = memo(function Question({
   q,
   isInCart,
   worksheets = [],
+  canShowSimilarQuestions = true,
 }: {
-  q: QuestionType;
+  q: QuestionType | QuestionByIdType;
   isInCart: boolean;
   worksheets?: { id: number; name: string }[];
+  canShowSimilarQuestions?: boolean;
 }) {
+  const client = useApolloClient();
+  const [showSimilarQuestions, setShowSimilarQuestions] = useState(false);
+  const [similarQuestionsLoading, setSimilarQuestionsLoading] = useState(false);
+  const [similarQuestions, setSimilarQuestions] = useState<QuestionByIdType[]>(
+    []
+  );
+  const [similarQuestionsData, setSimilarQuestionsData] = useState<{
+    questions: QuestionByIdType[];
+  } | null>(null);
+
+  async function getSimilarQuestions() {
+    setSimilarQuestionsLoading(true);
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_API}/questions/similar/${q.questionimgs
+        .map((img) => img.questionimgid)
+        .join(",")}`,
+      {
+        method: "GET",
+      }
+    );
+
+    if (!response.ok) {
+      alert("Failed to fetch similar questions. Please try again later.");
+      return;
+    }
+    const similarQuestionsIds = await response.json();
+    const similarQuestionsData = await useLazyQuestionsQuery(
+      client,
+      GET_QUESTIONS_BY_ID,
+      {
+        ids: similarQuestionsIds,
+      },
+      similarQuestionsIds.length
+    );
+    setShowSimilarQuestions(true);
+    setSimilarQuestionsData(similarQuestionsData.data);
+    setSimilarQuestionsLoading(false);
+
+    posthog.capture("question_clicked_see_similar", {
+      questionId: q.id,
+      topicNames: q.question_topics.map((qt) => qt.topic.topicname),
+    });
+  }
+
+  useEffect(() => {
+    if (similarQuestionsData?.questions) {
+      setSimilarQuestions(similarQuestionsData.questions);
+    }
+  }, [similarQuestionsData]);
+
   return (
     <div
       key={q.id}
-      className="card bg-base-100 shadow-xl w-3/5 min-w-96 border-dashed border-2 border-sky-500 bg-sky-100"
+      className="w-3/5 border-2 border-dashed shadow-xl card min-w-96 border-sky-500 bg-sky-100"
     >
       {sortQuestionImages(q.questionimgs).map((qi) => {
         return (
@@ -62,12 +118,12 @@ const Question = memo(function Question({
           <div>{q.school.schoolname}</div>
         </div>
 
-        <div className="text-gray-600 mt-2">Topics:</div>
+        <div className="mt-2 text-gray-600">Topics:</div>
         {q.question_topics.map((qt) => {
           return (
             <div
               key={qt.topic.topicname}
-              className="badge badge-outline inline"
+              className="inline badge badge-outline"
             >
               {qt.topic.topicname}
             </div>
@@ -91,7 +147,37 @@ const Question = memo(function Question({
           </div>
         )}
 
-        <div className="card-actions justify-end">
+        {canShowSimilarQuestions && (
+          <Overlay
+            isOpen={showSimilarQuestions}
+            onClose={() => setShowSimilarQuestions(false)}
+          >
+            <div className="flex flex-col gap-4">
+              {similarQuestions.map((sq) => (
+                <Question
+                  key={sq.id}
+                  q={sq}
+                  isInCart={cartItemsVar().includes(sq.id)}
+                  worksheets={[]}
+                  canShowSimilarQuestions={false}
+                />
+              ))}
+            </div>
+          </Overlay>
+        )}
+
+        <div className="justify-end gap-4 card-actions">
+          {canShowSimilarQuestions && (
+            <button onClick={getSimilarQuestions} className="btn btn-primary">
+              {similarQuestionsLoading ? (
+                <>
+                  <span className="loading loading-spinner"></span> Loading
+                </>
+              ) : (
+                <span>See similar questions</span>
+              )}
+            </button>
+          )}
           {isInCart ? (
             // {cartItems.includes(q.id) ? (
             <button
