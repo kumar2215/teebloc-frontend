@@ -60,6 +60,7 @@ const Question = memo(function Question({
 
     if (!response.ok) {
       alert("Failed to fetch similar questions. Please try again later.");
+      setSimilarQuestionsLoading(false);
       return;
     }
     const similarQuestionsIds = await response.json();
