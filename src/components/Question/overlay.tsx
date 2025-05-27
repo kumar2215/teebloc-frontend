@@ -1,5 +1,3 @@
-import "./overlay.css";
-
 function Overlay({
   isOpen,
   onClose,
@@ -12,8 +10,14 @@ function Overlay({
   if (!isOpen) return null;
 
   return (
-    <div className="overlay-background" onClick={onClose}>
-      <div className="overlay-content" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed top-0 left-0 w-[100vw] h-[100vh] bg-black/50 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white p-5 max-w-[90%] max-h-[90%] overflow-y-auto rounded-lg shadow-md"
+        onClick={(e) => e.stopPropagation()}
+      >
         {children}
       </div>
     </div>
