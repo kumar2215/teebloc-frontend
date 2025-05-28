@@ -4,6 +4,7 @@ import {
 } from "../../__generated__/graphql";
 import Question from "../Question";
 import { cartItemsVar } from "../CreateWorksheet/data";
+import { useState } from "react";
 import { useReactiveVar } from "@apollo/client";
 
 export type QuestionType = GetQuestionsQuery["questions"][0];
@@ -21,6 +22,7 @@ export default function Questions({
   worksheetsMapping?: { [key: string]: { id: number; name: string }[] };
 }) {
   const cartItems = useReactiveVar(cartItemsVar);
+  const [similarQuestionsPressed, setSimilarQuestionsPressed] = useState(false);
   return (
     <>
       <div className="flex flex-col gap-8">
@@ -30,6 +32,8 @@ export default function Questions({
             q={q}
             isInCart={cartItems.includes(q.id)}
             worksheets={worksheetsMapping[q.id] || []}
+            similarQuestionsPressed={similarQuestionsPressed}
+            setSimilarQuestionsPressed={setSimilarQuestionsPressed}
           />
         ))}
       </div>

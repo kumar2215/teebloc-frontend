@@ -29,11 +29,15 @@ function sortQuestionImages(questionimgs: QuestionType["questionimgs"]) {
 const Question = memo(function Question({
   q,
   isInCart,
+  similarQuestionsPressed,
+  setSimilarQuestionsPressed,
   worksheets = [],
   canShowSimilarQuestions = true,
 }: {
   q: QuestionType | QuestionByIdType;
   isInCart: boolean;
+  similarQuestionsPressed: boolean;
+  setSimilarQuestionsPressed: (pressed: boolean) => void;
   worksheets?: { id: number; name: string }[];
   canShowSimilarQuestions?: boolean;
 }) {
@@ -48,6 +52,8 @@ const Question = memo(function Question({
   } | null>(null);
 
   async function getSimilarQuestions() {
+    if (similarQuestionsPressed) return;
+    setSimilarQuestionsPressed(true);
     setSimilarQuestionsLoading(true);
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_API}/questions/similar/${q.questionimgs
@@ -75,6 +81,7 @@ const Question = memo(function Question({
     setShowSimilarQuestions(true);
     setSimilarQuestionsData(similarQuestionsData.data);
     setSimilarQuestionsLoading(false);
+    setSimilarQuestionsPressed(false);
 
     posthog.capture("question_clicked_see_similar", {
       questionId: q.id,
@@ -160,6 +167,8 @@ const Question = memo(function Question({
                   q={sq}
                   isInCart={cartItemsVar().includes(sq.id)}
                   worksheets={[]}
+                  similarQuestionsPressed={similarQuestionsPressed}
+                  setSimilarQuestionsPressed={setSimilarQuestionsPressed}
                   canShowSimilarQuestions={false}
                 />
               ))}
@@ -169,7 +178,11 @@ const Question = memo(function Question({
 
         <div className="justify-end gap-4 card-actions">
           {canShowSimilarQuestions && (
-            <button onClick={getSimilarQuestions} className="btn btn-primary">
+            <button
+              onClick={getSimilarQuestions}
+              disabled={similarQuestionsPressed}
+              className="btn btn-primary"
+            >
               {similarQuestionsLoading ? (
                 <>
                   <span className="loading loading-spinner"></span> Loading
