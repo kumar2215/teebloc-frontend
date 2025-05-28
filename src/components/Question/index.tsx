@@ -161,6 +161,25 @@ const Question = memo(function Question({
             onClose={() => setShowSimilarQuestions(false)}
           >
             <div className="flex flex-col gap-4">
+              <button
+                className="sticky top-0 self-end p-1 bg-gray-200 rounded-md hover:bg-gray-300"
+                onClick={() => setShowSimilarQuestions(false)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
               {similarQuestions.map((sq) => (
                 <Question
                   key={sq.id}
