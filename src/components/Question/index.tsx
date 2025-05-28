@@ -31,6 +31,7 @@ const Question = memo(function Question({
   isInCart,
   similarQuestionsPressed,
   setSimilarQuestionsPressed,
+  setCanScrollMain = () => {},
   worksheets = [],
   canShowSimilarQuestions = true,
 }: {
@@ -38,6 +39,7 @@ const Question = memo(function Question({
   isInCart: boolean;
   similarQuestionsPressed: boolean;
   setSimilarQuestionsPressed: (pressed: boolean) => void;
+  setCanScrollMain?: (canScroll: boolean) => void;
   worksheets?: { id: number; name: string }[];
   canShowSimilarQuestions?: boolean;
 }) {
@@ -79,6 +81,7 @@ const Question = memo(function Question({
       similarQuestionsIds.length
     );
     setShowSimilarQuestions(true);
+    setCanScrollMain(false);
     setSimilarQuestionsData(similarQuestionsData.data);
     setSimilarQuestionsLoading(false);
     setSimilarQuestionsPressed(false);
@@ -163,7 +166,10 @@ const Question = memo(function Question({
             <div className="flex flex-col gap-4">
               <button
                 className="sticky top-0 self-end p-1 bg-gray-200 rounded-md hover:bg-gray-300"
-                onClick={() => setShowSimilarQuestions(false)}
+                onClick={() => {
+                  setShowSimilarQuestions(false);
+                  setCanScrollMain(true);
+                }}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
