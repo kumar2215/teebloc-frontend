@@ -14,12 +14,10 @@ export default function Questions({
   questions,
   loading,
   onLoadMore,
-  worksheetsMapping = {},
 }: {
   questions: QuestionType[] | QuestionByIdType[];
   loading: boolean;
   onLoadMore: () => void;
-  worksheetsMapping?: { [key: string]: { id: number; name: string }[] };
 }) {
   const cartItems = useReactiveVar(cartItemsVar);
   const [similarQuestionsPressed, setSimilarQuestionsPressed] = useState(false);
@@ -44,7 +42,9 @@ export default function Questions({
             key={q.id}
             q={q}
             isInCart={cartItems.includes(q.id)}
-            worksheets={worksheetsMapping[q.id] || []}
+            // similarQuestionsPressed and setSimilarQuestionsPressed are required
+            // to disable the similar questions button on all questions
+            // when it is pressed for one question
             similarQuestionsPressed={similarQuestionsPressed}
             setSimilarQuestionsPressed={setSimilarQuestionsPressed}
             setCanScrollMain={setCanScrollMain}

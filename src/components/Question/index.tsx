@@ -8,6 +8,7 @@ import { memo } from "react";
 import posthog from "posthog-js";
 import { Link } from "wouter";
 import Overlay from "./overlay";
+import { useWorksheetsMapping } from "../../context/WorksheetsMappingContext";
 
 function sortQuestionImages(questionimgs: QuestionType["questionimgs"]) {
   const copiedQuestionImages = JSON.parse(JSON.stringify(questionimgs));
@@ -32,7 +33,6 @@ const Question = memo(function Question({
   similarQuestionsPressed,
   setSimilarQuestionsPressed,
   setCanScrollMain = () => {},
-  worksheets = [],
   canShowSimilarQuestions = true,
 }: {
   q: QuestionType | QuestionByIdType;
@@ -40,7 +40,6 @@ const Question = memo(function Question({
   similarQuestionsPressed: boolean;
   setSimilarQuestionsPressed: (pressed: boolean) => void;
   setCanScrollMain?: (canScroll: boolean) => void;
-  worksheets?: { id: number; name: string }[];
   canShowSimilarQuestions?: boolean;
 }) {
   const client = useApolloClient();
@@ -52,6 +51,8 @@ const Question = memo(function Question({
   const [similarQuestionsData, setSimilarQuestionsData] = useState<{
     questions: QuestionByIdType[];
   } | null>(null);
+  const worksheetsMapping = useWorksheetsMapping();
+  const worksheets = worksheetsMapping[q.id] || [];
 
   async function getSimilarQuestions() {
     if (similarQuestionsPressed) return;
@@ -191,7 +192,6 @@ const Question = memo(function Question({
                   key={sq.id}
                   q={sq}
                   isInCart={cartItemsVar().includes(sq.id)}
-                  worksheets={[]}
                   similarQuestionsPressed={similarQuestionsPressed}
                   setSimilarQuestionsPressed={setSimilarQuestionsPressed}
                   canShowSimilarQuestions={false}
