@@ -179,6 +179,7 @@ export default function Options() {
     if (!allData?.topics || !selectedSubject) return [];
     return allData.topics
       .filter((topic) => topic.subject.subject === selectedSubject.value)
+      .sort((a, b) => a.topicname.localeCompare(b.topicname))
       .map((t) => ({
         value: t.topicname,
         label: t.topicname,
