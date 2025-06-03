@@ -170,8 +170,8 @@ export default function Options() {
       limit: 20,
       topics: topicsChosen || [],
       levels: specificLevelsChosen || [],
-      papers: papersWithoutAll || [],
-      assessments: assessmentsWithoutAll || [],
+      papers: papersChosen || [],
+      assessments: assessmentsChosen || [],
       schools: schoolsChosen || [],
     },
   });
@@ -211,8 +211,8 @@ export default function Options() {
       variables: {
         topics: topicsChosen || [],
         levels: specificLevelsChosen || [],
-        papers: papersWithoutAll || [],
-        assessments: assessmentsWithoutAll || [],
+        papers: papersChosen || [],
+        assessments: assessmentsChosen || [],
         schools: schoolsChosen || [],
         excludedIds: usedIDs,
       },
@@ -305,15 +305,16 @@ export default function Options() {
   };
 
   const handleSpecificLevelChange = (specificLevel: string) => {
-    const withoutSpecificLevel = specificLevelsChosen.filter(
-      (level) => level !== specificLevel
-    );
     setSpecificLevelsChosen(
       specificLevelsChosen.includes(specificLevel)
-        ? withoutSpecificLevel
+        ? specificLevelsChosen.filter((level) => level !== specificLevel)
         : [...specificLevelsChosen, specificLevel]
     );
-    if (withoutSpecificLevel.length === 0) {
+    if (
+      specificLevelsChosen.length === 1 &&
+      specificLevelsChosen[0] === specificLevel
+    ) {
+      setSubjectChosen("");
       setResetSubject(true);
       setResetTopics(true);
       setResetPapers(true);
@@ -350,6 +351,15 @@ export default function Options() {
     }
   }, [topicsChosen]);
 
+  useEffect(() => {
+    console.log("Specific levels chosen:", specificLevelsChosen);
+    console.log("Subject chosen:", subjectChosen);
+    console.log("Topics chosen:", topicsChosen);
+    console.log("Papers chosen:", papersChosen);
+    console.log("Assessments chosen:", assessmentsChosen);
+    console.log("Schools chosen:", schoolsChosen);
+  }, [topicsChosen, papersChosen, assessmentsChosen]);
+
   const handlePaperChange = (paper: string) => (selected: boolean) => {
     if (selected) {
       if (paper === "All") {
@@ -362,7 +372,11 @@ export default function Options() {
         setPapersChosen([...papersChosen, paper]);
       }
     } else {
-      setPapersChosen(papersChosen.filter((p) => p !== paper));
+      if (paper === "All") {
+        setPapersChosen([]);
+      } else {
+        setPapersChosen(papersChosen.filter((p) => p !== paper));
+      }
     }
   };
 
@@ -380,7 +394,13 @@ export default function Options() {
           setAssessmentsChosen([...assessmentsChosen, assessment]);
         }
       } else {
-        setAssessmentsChosen(assessmentsChosen.filter((a) => a !== assessment));
+        if (assessment === "All") {
+          setAssessmentsChosen([]);
+        } else {
+          setAssessmentsChosen(
+            assessmentsChosen.filter((a) => a !== assessment)
+          );
+        }
       }
     };
 
