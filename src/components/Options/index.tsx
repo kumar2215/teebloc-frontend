@@ -76,6 +76,7 @@ export default function Options() {
     () =>
       allData?.topics
         .filter((topic) => topic.subject.subject === subjectChosen)
+        .sort((a, b) => a.topicname.localeCompare(b.topicname))
         .map((t) => t.topicname) || [],
     [allData, subjectChosen]
   );
