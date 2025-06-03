@@ -351,14 +351,14 @@ export default function Options() {
     }
   }, [topicsChosen]);
 
-  useEffect(() => {
-    console.log("Specific levels chosen:", specificLevelsChosen);
-    console.log("Subject chosen:", subjectChosen);
-    console.log("Topics chosen:", topicsChosen);
-    console.log("Papers chosen:", papersChosen);
-    console.log("Assessments chosen:", assessmentsChosen);
-    console.log("Schools chosen:", schoolsChosen);
-  }, [topicsChosen, papersChosen, assessmentsChosen]);
+  // useEffect(() => {
+  //   console.log("Specific levels chosen:", specificLevelsChosen);
+  //   console.log("Subject chosen:", subjectChosen);
+  //   console.log("Topics chosen:", topicsChosen);
+  //   console.log("Papers chosen:", papersChosen);
+  //   console.log("Assessments chosen:", assessmentsChosen);
+  //   console.log("Schools chosen:", schoolsChosen);
+  // }, [topicsChosen, papersChosen, assessmentsChosen]);
 
   const handlePaperChange = (paper: string) => (selected: boolean) => {
     if (selected) {
