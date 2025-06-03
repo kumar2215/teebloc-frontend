@@ -48,9 +48,6 @@ const Question = memo(function Question({
   const [similarQuestions, setSimilarQuestions] = useState<QuestionByIdType[]>(
     []
   );
-  const [similarQuestionsData, setSimilarQuestionsData] = useState<{
-    questions: QuestionByIdType[];
-  } | null>(null);
   const worksheetsMapping = useWorksheetsMapping();
   const worksheets = worksheetsMapping[q.id] || [];
 
@@ -83,7 +80,7 @@ const Question = memo(function Question({
     );
     setShowSimilarQuestions(true);
     setCanScrollMain(false);
-    setSimilarQuestionsData(similarQuestionsData.data);
+    setSimilarQuestions(similarQuestionsData.data.questions);
     setSimilarQuestionsLoading(false);
     setSimilarQuestionsPressed(false);
 
@@ -92,12 +89,6 @@ const Question = memo(function Question({
       topicNames: q.question_topics.map((qt) => qt.topic.topicname),
     });
   }
-
-  useEffect(() => {
-    if (similarQuestionsData?.questions) {
-      setSimilarQuestions(similarQuestionsData.questions);
-    }
-  }, [similarQuestionsData]);
 
   return (
     <div
