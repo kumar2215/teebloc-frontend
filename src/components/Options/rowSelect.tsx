@@ -121,7 +121,7 @@ export default function RowSelect({
               haveSelectAll={true}
               isLoading={useCustomSelect.allLoading}
               placeholder={rowLabel}
-              isSearchable={false}
+              isSearchable={true}
               isMulti={multiselect}
               value={useCustomSelect.selectedValues}
               setValues={useCustomSelect.setSelectedValues}

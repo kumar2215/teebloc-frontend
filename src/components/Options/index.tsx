@@ -63,13 +63,11 @@ export default function Options() {
       allData?.subjects
         .filter((subject) =>
           subject.subject_levels.some((sl) =>
-            (levels[levelChosen as keyof typeof levels] || []).includes(
-              sl.level.level
-            )
+            (specificLevelsChosen || []).includes(sl.level.level)
           )
         )
         .map((s) => s.subject) || [],
-    [allData, levelChosen]
+    [allData, specificLevelsChosen]
   );
   const [subjectChosen, setSubjectChosen] = useState<string>("");
   const [resetSubject, setResetSubject] = useState(false);
@@ -172,8 +170,8 @@ export default function Options() {
       limit: 20,
       topics: topicsChosen || [],
       levels: specificLevelsChosen || [],
-      papers: (papersChosen || []).filter((p) => p !== "All"),
-      assessments: (assessmentsChosen || []).filter((a) => a !== "All"),
+      papers: papersWithoutAll || [],
+      assessments: assessmentsWithoutAll || [],
       schools: schoolsChosen || [],
     },
   });
@@ -213,8 +211,8 @@ export default function Options() {
       variables: {
         topics: topicsChosen || [],
         levels: specificLevelsChosen || [],
-        papers: (papersChosen || []).filter((p) => p !== "All"),
-        assessments: (assessmentsChosen || []).filter((a) => a !== "All"),
+        papers: papersWithoutAll || [],
+        assessments: assessmentsWithoutAll || [],
         schools: schoolsChosen || [],
         excludedIds: usedIDs,
       },
