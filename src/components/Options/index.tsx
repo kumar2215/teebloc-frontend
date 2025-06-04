@@ -295,7 +295,7 @@ export default function Options() {
     setSubjectChosen("");
     setPapersChosen(papers.filter((p) => p !== "All"));
     setAssessmentsChosen(assessments.filter((a) => a !== "All"));
-    selected ? setlevelChosen(level) : setlevelChosen("");
+    setlevelChosen(selected ? level : "");
     setResetSpecificLevels(true);
     setResetSubject(true);
     setResetTopics(true);
@@ -304,24 +304,27 @@ export default function Options() {
     setResetSchools(true);
   };
 
-  const handleSpecificLevelChange = (specificLevel: string) => {
-    setSpecificLevelsChosen(
-      specificLevelsChosen.includes(specificLevel)
-        ? specificLevelsChosen.filter((level) => level !== specificLevel)
-        : [...specificLevelsChosen, specificLevel]
-    );
-    if (
-      specificLevelsChosen.length === 1 &&
-      specificLevelsChosen[0] === specificLevel
-    ) {
-      setSubjectChosen("");
-      setResetSubject(true);
-      setResetTopics(true);
-      setResetPapers(true);
-      setResetAssessments(true);
-      setResetSchools(true);
-    }
-  };
+  const handleSpecificLevelChange =
+    (specificLevel: string) => (selected: boolean) => {
+      if (selected) {
+        setSpecificLevelsChosen([...specificLevelsChosen, specificLevel]);
+      } else {
+        setSpecificLevelsChosen(
+          specificLevelsChosen.filter((level) => level !== specificLevel)
+        );
+      }
+      if (
+        specificLevelsChosen.length === 1 &&
+        specificLevelsChosen[0] === specificLevel
+      ) {
+        setSubjectChosen("");
+        setResetSubject(true);
+        setResetTopics(true);
+        setResetPapers(true);
+        setResetAssessments(true);
+        setResetSchools(true);
+      }
+    };
 
   const handleSubjectChange = (subject: string) => (selected: boolean) => {
     setSubjectChosen(selected ? subject : "");
@@ -430,7 +433,7 @@ export default function Options() {
             .split(" ")
             .map((word) => word[0])
             .join(""),
-          onChange: () => handleSpecificLevelChange(level),
+          onChange: handleSpecificLevelChange(level),
         }))}
         multiselect={true}
         reset={resetSpecificLevels}
