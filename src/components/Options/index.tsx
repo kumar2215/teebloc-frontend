@@ -407,7 +407,7 @@ export default function Options() {
 
   return (
     <div className="flex flex-col gap-4 mx-8 mb-8">
-      <Instructions />
+      {/* <Instructions /> */}
       {/* 
       Use when debugging PDF layout:
       {pdfQuestions.length > 0 && (
