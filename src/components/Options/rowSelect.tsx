@@ -110,11 +110,15 @@ export default function RowSelect({
 
   return (
     <div className="flex flex-row">
-      <div className={`self-start w-28 ${useCustomSelect ? "mt-[6px]" : ""}`}>
+      <div
+        className={`self-start flex-shrink-0 w-40 ${
+          useCustomSelect ? "mt-[6px]" : ""
+        }`}
+      >
         <label className="font-medium">{rowLabel}</label>
       </div>
       {showCondition && (
-        <div className="flex flex-row gap-2 ml-10">
+        <div className="flex flex-row flex-wrap gap-2">
           {useCustomSelect ? (
             <CustomSelect
               {...commonSelectSettings}
