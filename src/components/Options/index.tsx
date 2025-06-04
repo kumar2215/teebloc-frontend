@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@apollo/client";
-import Instructions from "../instructions";
 import { useUser } from "@clerk/clerk-react";
 import Questions from "../Questions";
 import {
@@ -22,6 +21,19 @@ export interface Option {
   readonly label: string;
 }
 
+const levels = {
+  Primary: [
+    "Primary 1",
+    "Primary 2",
+    "Primary 3",
+    "Primary 4",
+    "Primary 5",
+    "Primary 6",
+  ],
+  Secondary: ["Secondary 1", "Secondary 2", "Secondary 3", "Secondary 4"],
+  JC: ["Junior College 1", "Junior College 2"],
+};
+
 export default function Options() {
   const isAdmin = useIsAdmin();
 
@@ -30,19 +42,6 @@ export default function Options() {
 
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
-
-  const levels = {
-    Primary: [
-      "Primary 1",
-      "Primary 2",
-      "Primary 3",
-      "Primary 4",
-      "Primary 5",
-      "Primary 6",
-    ],
-    Secondary: ["Secondary 1", "Secondary 2", "Secondary 3", "Secondary 4"],
-    JC: ["Junior College 1", "Junior College 2"],
-  };
 
   const [levelChosen, setlevelChosen] = useState<string>("");
 
