@@ -1,5 +1,5 @@
 import { SignedIn } from "@clerk/clerk-react";
-import { Redirect, Route, Switch, useRoute } from "wouter";
+import { Redirect, Route, Switch, useLocation, useRoute } from "wouter";
 import MyWorksheets from "./components/MyWorksheets";
 import Navbar from "./components/Navbar";
 import Options from "./components/Options";
@@ -21,6 +21,12 @@ function App() {
       email: user.emailAddresses[0].emailAddress,
       name: user.fullName,
     });
+  }
+
+  const [location] = useLocation();
+  const hasRefreshed = localStorage.getItem("hasRefreshed");
+  if (location !== "/practice/" && hasRefreshed !== null) {
+    localStorage.removeItem("hasRefreshed");
   }
 
   return (

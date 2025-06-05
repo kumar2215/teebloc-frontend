@@ -8,6 +8,7 @@ import {
   GET_QUESTIONS,
   GET_USER_WORKSHEETS,
 } from "./data";
+import { useQueryParamsState, useQueryUpdater } from "./hook";
 import { pdf } from "@react-pdf/renderer";
 import { cartItemsVar } from "../CreateWorksheet/data";
 import { PDFDocument } from "../MyWorksheets/pdf";
@@ -43,7 +44,9 @@ export default function Options() {
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
 
-  const [levelChosen, setlevelChosen] = useState<string>("");
+  const [levelChosen, setLevelChosen] = useState<string>(
+    useQueryParamsState("level", "")
+  );
 
   const specificLevels = useMemo(
     () =>
@@ -53,7 +56,7 @@ export default function Options() {
     [levelChosen]
   );
   const [specificLevelsChosen, setSpecificLevelsChosen] = useState<string[]>(
-    []
+    useQueryParamsState("specificLevels", [])
   );
   const [resetSpecificLevels, setResetSpecificLevels] = useState(false);
 
@@ -68,7 +71,9 @@ export default function Options() {
         .map((s) => s.subject) || [],
     [allData, specificLevelsChosen]
   );
-  const [subjectChosen, setSubjectChosen] = useState<string>("");
+  const [subjectChosen, setSubjectChosen] = useState<string>(
+    useQueryParamsState("subject", "")
+  );
   const [resetSubject, setResetSubject] = useState(false);
 
   const topics = useMemo(
@@ -79,7 +84,9 @@ export default function Options() {
         .map((t) => t.topicname) || [],
     [allData, subjectChosen]
   );
-  const [topicsChosen, setTopicsChosen] = useState<string[]>([]);
+  const [topicsChosen, setTopicsChosen] = useState<string[]>(
+    useQueryParamsState("topics", [])
+  );
   const [resetTopics, setResetTopics] = useState(false);
 
   const papers = useMemo(
@@ -98,11 +105,15 @@ export default function Options() {
           if (b.paper === "All") return 1;
           return 0;
         })
-        .map((p) => p.paper) || [],
+        .map((p) =>
+          typeof p.paper === "number" ? p.paper.toString() : p.paper
+        ) || [],
     [allData, subjectChosen]
   );
   const papersWithoutAll = papers.filter((p) => p !== "All");
-  const [papersChosen, setPapersChosen] = useState<string[]>([]);
+  const [papersChosen, setPapersChosen] = useState<string[]>(
+    useQueryParamsState("papers", [])
+  );
   const [resetPapers, setResetPapers] = useState(false);
 
   const assessments = useMemo(
@@ -126,7 +137,9 @@ export default function Options() {
     [allData, specificLevelsChosen]
   );
   const assessmentsWithoutAll = assessments.filter((a) => a !== "All");
-  const [assessmentsChosen, setAssessmentsChosen] = useState<string[]>([]);
+  const [assessmentsChosen, setAssessmentsChosen] = useState<string[]>(
+    useQueryParamsState("assessments", [])
+  );
   const [resetAssessments, setResetAssessments] = useState(false);
 
   const schools = useMemo(() => {
@@ -140,7 +153,9 @@ export default function Options() {
         .map((s) => s.schoolname) || []
     );
   }, [allData, subjectChosen]);
-  const [schoolsChosen, setSchoolsChosen] = useState<string[]>([]);
+  const [schoolsChosen, setSchoolsChosen] = useState<string[]>(
+    useQueryParamsState("schools", [])
+  );
   const [resetSchools, setResetSchools] = useState(false);
 
   // Scroll button logic
@@ -282,6 +297,28 @@ export default function Options() {
     assessmentsChosen.length > 0 &&
     schoolsChosen.length > 0;
 
+  const { setQueries } = useQueryUpdater();
+
+  useEffect(() => {
+    setQueries({
+      level: levelChosen ? levelChosen : null,
+      specificLevels: specificLevelsChosen,
+      subject: subjectChosen ? subjectChosen : null,
+      topics: topicsChosen,
+      papers: papersChosen,
+      assessments: assessmentsChosen,
+      schools: schoolsChosen,
+    });
+  }, [
+    levelChosen,
+    specificLevelsChosen,
+    subjectChosen,
+    topicsChosen,
+    papersChosen,
+    assessmentsChosen,
+    schoolsChosen,
+  ]);
+
   // Use when debugging PDF layout:
   // const pdfQuestions =
   //   cartItemsVar().length > 0 && q_data?.questions.length > 0
@@ -293,9 +330,9 @@ export default function Options() {
   const handleLevelChange = (level: string) => (selected: boolean) => {
     setSpecificLevelsChosen([]);
     setSubjectChosen("");
-    setPapersChosen(papers.filter((p) => p !== "All"));
-    setAssessmentsChosen(assessments.filter((a) => a !== "All"));
-    setlevelChosen(selected ? level : "");
+    setPapersChosen([]);
+    setAssessmentsChosen([]);
+    setLevelChosen(selected ? level : "");
     setResetSpecificLevels(true);
     setResetSubject(true);
     setResetTopics(true);
@@ -348,9 +385,11 @@ export default function Options() {
       setResetAssessments(true);
       setSchoolsChosen([]);
     } else {
-      setPapersChosen(papersWithoutAll);
-      setAssessmentsChosen(assessmentsWithoutAll);
-      setSchoolsChosen(schools);
+      if (!allLoading) {
+        setPapersChosen(papersWithoutAll);
+        setAssessmentsChosen(assessmentsWithoutAll);
+        setSchoolsChosen(schools);
+      }
     }
   }, [topicsChosen]);
 
@@ -423,6 +462,7 @@ export default function Options() {
         options={Object.keys(levels).map((level) => ({
           label: level,
           onChange: handleLevelChange(level),
+          preselected: levelChosen === level,
         }))}
       />
 
@@ -434,6 +474,7 @@ export default function Options() {
             .map((word) => word[0])
             .join(""),
           onChange: handleSpecificLevelChange(level),
+          preselected: specificLevelsChosen.includes(level),
         }))}
         multiselect={true}
         reset={resetSpecificLevels}
@@ -451,8 +492,10 @@ export default function Options() {
           subjects.map((subject) => ({
             label: subject,
             onChange: handleSubjectChange(subject),
+            preselected: subjectChosen === subject,
           })) || []
         }
+        allLoading={allLoading}
         reset={resetSubject}
         setReset={setResetSubject}
         disabled={subjects.map((s) => specificLevelsChosen.length === 0)}
@@ -463,9 +506,11 @@ export default function Options() {
         options={topics.map((topic) => ({
           label: topic,
           onChange: handleTopicChange(topic),
+          preselected: topicsChosen.includes(topic),
         }))}
         multiselect={true}
         showCondition={subjectChosen !== ""}
+        allLoading={allLoading}
         reset={resetTopics}
         setReset={setResetTopics}
         useCustomSelect={{
@@ -475,15 +520,15 @@ export default function Options() {
           })),
           setSelectedValues: (values: Option[]) =>
             setTopicsChosen(values.map((v) => v.value)),
-          allLoading: allLoading,
         }}
       />
 
       <RowSelect
         rowLabel="Papers"
         options={papers.map((paper) => ({
-          label: typeof paper === "number" ? `Paper ${paper}` : paper,
+          label: paper !== "All" ? `Paper ${paper}` : paper,
           onChange: handlePaperChange(paper),
+          preselected: papersChosen.includes(paper),
         }))}
         showCondition={subjectChosen !== ""}
         hasAllOption={true}
@@ -498,6 +543,7 @@ export default function Options() {
         options={assessments.map((assessment) => ({
           label: assessment,
           onChange: handleAssessmentChange(assessment),
+          preselected: assessmentsChosen.includes(assessment),
         }))}
         showCondition={subjectChosen !== ""}
         hasAllOption={true}
@@ -513,11 +559,13 @@ export default function Options() {
           schools.map((school) => ({
             label: school,
             onChange: (selected: boolean) => {},
+            preselected: schoolsChosen.includes(school),
           })) || []
         }
         showCondition={subjectChosen !== ""}
         multiselect={true}
         reset={resetSchools}
+        allLoading={allLoading}
         setReset={setResetSchools}
         useCustomSelect={{
           selectedValues: schoolsChosen.map((s) => ({
@@ -526,7 +574,6 @@ export default function Options() {
           })),
           setSelectedValues: (values: Option[]) =>
             setSchoolsChosen(values.map((v) => v.value)),
-          allLoading: allLoading,
         }}
       />
 

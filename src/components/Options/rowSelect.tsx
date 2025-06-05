@@ -45,6 +45,7 @@ export default function RowSelect({
   showCondition = true,
   multiselect = false,
   hasAllOption = false,
+  allLoading = false,
   reset = false,
   setReset = () => {},
   useCustomSelect = null,
@@ -54,16 +55,17 @@ export default function RowSelect({
   options: {
     label: string;
     onChange: (selected: boolean) => void;
+    preselected: boolean;
   }[];
   showCondition?: boolean;
   multiselect?: boolean;
   hasAllOption?: boolean;
+  allLoading?: boolean;
   reset?: boolean;
   setReset?: (value: boolean) => void;
   useCustomSelect?: {
     selectedValues: Option[];
     setSelectedValues: (values: Option[]) => void;
-    allLoading: boolean;
   } | null;
   disabled?: boolean[];
 }) {
@@ -76,8 +78,14 @@ export default function RowSelect({
   };
 
   const [selectedStates, setSelectedStates] = useState<boolean[]>(
-    handleAllOption(options.map(() => false))
+    handleAllOption(options.map((option) => option.preselected))
   );
+
+  useEffect(() => {
+    setSelectedStates(
+      handleAllOption(options.map((option) => option.preselected))
+    );
+  }, [allLoading]);
 
   useEffect(() => {
     if (reset) {
@@ -123,7 +131,7 @@ export default function RowSelect({
             <CustomSelect
               {...commonSelectSettings}
               haveSelectAll={true}
-              isLoading={useCustomSelect.allLoading}
+              isLoading={allLoading}
               placeholder={rowLabel}
               isSearchable={true}
               isMulti={multiselect}
