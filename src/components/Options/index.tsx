@@ -464,6 +464,7 @@ export default function Options() {
           onChange: handleLevelChange(level),
           preselected: levelChosen === level,
         }))}
+        showCondition={!allLoading}
       />
 
       <RowSelect
@@ -477,6 +478,7 @@ export default function Options() {
           preselected: specificLevelsChosen.includes(level),
         }))}
         multiselect={true}
+        showCondition={!allLoading}
         reset={resetSpecificLevels}
         setReset={setResetSpecificLevels}
         disabled={specificLevels.map(
@@ -495,6 +497,7 @@ export default function Options() {
             preselected: subjectChosen === subject,
           })) || []
         }
+        showCondition={!allLoading}
         allLoading={allLoading}
         reset={resetSubject}
         setReset={setResetSubject}
@@ -509,7 +512,7 @@ export default function Options() {
           preselected: topicsChosen.includes(topic),
         }))}
         multiselect={true}
-        showCondition={subjectChosen !== ""}
+        showCondition={!allLoading && subjectChosen !== ""}
         allLoading={allLoading}
         reset={resetTopics}
         setReset={setResetTopics}
@@ -533,7 +536,7 @@ export default function Options() {
               ? paper === "All"
               : papersChosen.includes(paper),
         }))}
-        showCondition={subjectChosen !== ""}
+        showCondition={!allLoading && subjectChosen !== ""}
         hasAllOption={true}
         multiselect={true}
         allLoading={allLoading}
@@ -552,7 +555,7 @@ export default function Options() {
               ? assessment === "All"
               : assessmentsChosen.includes(assessment),
         }))}
-        showCondition={subjectChosen !== ""}
+        showCondition={!allLoading && subjectChosen !== ""}
         hasAllOption={true}
         multiselect={true}
         allLoading={allLoading}
@@ -570,7 +573,7 @@ export default function Options() {
             preselected: schoolsChosen.includes(school),
           })) || []
         }
-        showCondition={subjectChosen !== ""}
+        showCondition={!allLoading && subjectChosen !== ""}
         multiselect={true}
         reset={resetSchools}
         allLoading={allLoading}
