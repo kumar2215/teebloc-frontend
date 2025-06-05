@@ -528,11 +528,15 @@ export default function Options() {
         options={papers.map((paper) => ({
           label: paper !== "All" ? `Paper ${paper}` : paper,
           onChange: handlePaperChange(paper),
-          preselected: papersChosen.includes(paper),
+          preselected:
+            papersChosen.length === papersWithoutAll.length
+              ? paper === "All"
+              : papersChosen.includes(paper),
         }))}
         showCondition={subjectChosen !== ""}
         hasAllOption={true}
         multiselect={true}
+        allLoading={allLoading}
         reset={resetPapers}
         setReset={setResetPapers}
         disabled={papers.map((p) => topicsChosen.length === 0)}
@@ -543,11 +547,15 @@ export default function Options() {
         options={assessments.map((assessment) => ({
           label: assessment,
           onChange: handleAssessmentChange(assessment),
-          preselected: assessmentsChosen.includes(assessment),
+          preselected:
+            assessmentsChosen.length === assessmentsWithoutAll.length
+              ? assessment === "All"
+              : assessmentsChosen.includes(assessment),
         }))}
         showCondition={subjectChosen !== ""}
         hasAllOption={true}
         multiselect={true}
+        allLoading={allLoading}
         reset={resetAssessments}
         setReset={setResetAssessments}
         disabled={assessments.map((a) => topicsChosen.length === 0)}

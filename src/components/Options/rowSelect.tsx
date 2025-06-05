@@ -69,27 +69,17 @@ export default function RowSelect({
   } | null;
   disabled?: boolean[];
 }) {
-  const handleAllOption = (input: boolean[]) => {
-    if (hasAllOption && !disabled[0]) {
-      input[0] = true;
-      return input;
-    }
-    return input;
-  };
-
   const [selectedStates, setSelectedStates] = useState<boolean[]>(
-    handleAllOption(options.map((option) => option.preselected))
+    options.map((option) => option.preselected)
   );
 
   useEffect(() => {
-    setSelectedStates(
-      handleAllOption(options.map((option) => option.preselected))
-    );
-  }, [allLoading]);
+    setSelectedStates(options.map((option) => option.preselected));
+  }, [allLoading, options]);
 
   useEffect(() => {
     if (reset) {
-      setSelectedStates(handleAllOption(options.map(() => false)));
+      setSelectedStates(options.map(() => false));
       setReset(false);
       if (useCustomSelect) {
         useCustomSelect.setSelectedValues([]);
