@@ -32,11 +32,6 @@ export const useQueryParamsState = (query: string, initialValue: any) => {
     if (searchParams) {
       questionsSearchParams(searchParams);
     }
-    const hasRefreshed = localStorage.getItem("hasRefreshed");
-    if (!hasRefreshed) {
-      localStorage.setItem("hasRefreshed", "true");
-      window.location.reload();
-    }
   }, []);
 
   const parsedValue = useMemo(() => {
@@ -86,7 +81,8 @@ export function useQueryUpdater() {
       console.log("queryString", queryString);
 
       questionsSearchParams(queryString);
-      localStorage.setItem("questionsSearchParams", queryString);
+      if (queryString !== "")
+        localStorage.setItem("questionsSearchParams", queryString);
     },
     [setLocation, location, searchParams]
   );
