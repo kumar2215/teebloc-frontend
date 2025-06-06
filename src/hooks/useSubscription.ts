@@ -13,7 +13,8 @@ export function useSubscription() {
   });
 
   const hasActiveSubscription =
-    data?.subscriptions?.[0]?.status === "active" || isAdmin;
+    ["active", "past_due"].includes(data?.subscriptions?.[0]?.status || "") ||
+    isAdmin;
 
   return {
     hasActiveSubscription,
