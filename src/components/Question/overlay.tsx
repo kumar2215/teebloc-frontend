@@ -15,7 +15,7 @@ function Overlay({
       onClick={onClose}
     >
       <div
-        className="bg-white p-5 max-w-[90%] max-h-[90%] overflow-y-auto rounded-lg shadow-md"
+        className="modal-box p-5 max-w-[90%] max-h-[90%] overflow-y-auto rounded-lg shadow-md"
         onClick={(e) => e.stopPropagation()}
       >
         {children}

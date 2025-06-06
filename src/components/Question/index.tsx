@@ -3,7 +3,7 @@ import { QuestionByIdType, QuestionType } from "../Questions";
 import { useLazyQuestionsQuery } from "../MyWorksheets/helpers";
 import { GET_QUESTIONS_BY_ID } from "../CreateWorksheet/data";
 import { useApolloClient } from "@apollo/client"; // <-- add useLazyQuery
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { memo } from "react";
 import posthog from "posthog-js";
 import { Link } from "wouter";
@@ -157,26 +157,13 @@ const Question = memo(function Question({
           >
             <div className="flex flex-col gap-4">
               <button
-                className="sticky top-0 self-end p-1 bg-gray-200 rounded-md hover:bg-gray-300"
+                className="btn btn-sm btn-circle btn-ghost sticky top-0 self-end"
                 onClick={() => {
                   setShowSimilarQuestions(false);
                   setCanScrollMain(true);
                 }}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                ✕
               </button>
               {similarQuestions.map((sq) => (
                 <Question
