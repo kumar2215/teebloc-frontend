@@ -381,14 +381,17 @@ export default function Options() {
 
   useEffect(() => {
     if (topicsChosen.length === 0) {
+      setPapersChosen([]);
       setResetPapers(true);
+      setAssessmentsChosen([]);
       setResetAssessments(true);
       setSchoolsChosen([]);
     } else {
       if (!allLoading) {
-        setPapersChosen(papersWithoutAll);
-        setAssessmentsChosen(assessmentsWithoutAll);
-        setSchoolsChosen(schools);
+        if (papersChosen.length === 0) setPapersChosen(papersWithoutAll);
+        if (assessmentsChosen.length === 0)
+          setAssessmentsChosen(assessmentsWithoutAll);
+        if (schoolsChosen.length === 0) setSchoolsChosen(schools);
       }
     }
   }, [topicsChosen]);
