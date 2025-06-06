@@ -396,6 +396,14 @@ export default function Options() {
     }
   }, [topicsChosen]);
 
+  useEffect(() => {
+    if (specificLevelsChosen.length > 0) {
+      setPapersChosen(papersWithoutAll);
+      setAssessmentsChosen(assessmentsWithoutAll);
+      setSchoolsChosen(schools);
+    }
+  }, [specificLevelsChosen]);
+
   // useEffect(() => {
   //   console.log("Specific levels chosen:", specificLevelsChosen);
   //   console.log("Subject chosen:", subjectChosen);
