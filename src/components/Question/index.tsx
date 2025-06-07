@@ -90,6 +90,11 @@ const Question = memo(function Question({
     });
   }
 
+  function handleCloseOverlay() {
+    setShowSimilarQuestions(false);
+    setCanScrollMain(true);
+  }
+
   return (
     <div
       key={q.id}
@@ -151,17 +156,11 @@ const Question = memo(function Question({
         )}
 
         {canShowSimilarQuestions && (
-          <Overlay
-            isOpen={showSimilarQuestions}
-            onClose={() => setShowSimilarQuestions(false)}
-          >
+          <Overlay isOpen={showSimilarQuestions} onClose={handleCloseOverlay}>
             <div className="flex flex-col gap-4">
               <button
                 className="btn btn-sm btn-circle btn-ghost sticky top-0 self-end"
-                onClick={() => {
-                  setShowSimilarQuestions(false);
-                  setCanScrollMain(true);
-                }}
+                onClick={handleCloseOverlay}
               >
                 ✕
               </button>
