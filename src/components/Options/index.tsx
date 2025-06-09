@@ -409,9 +409,7 @@ export default function Options() {
     if (selected) {
       if (paper === "All") {
         setPapersChosen(papersWithoutAll);
-      } else if (
-        JSON.stringify(papersChosen) === JSON.stringify(papersWithoutAll)
-      ) {
+      } else if (papersChosen.length === papersWithoutAll.length) {
         setPapersChosen([paper]);
       } else {
         setPapersChosen([...papersChosen, paper]);
@@ -430,10 +428,7 @@ export default function Options() {
       if (selected) {
         if (assessment === "All") {
           setAssessmentsChosen(assessmentsWithoutAll);
-        } else if (
-          JSON.stringify(assessmentsChosen) ===
-          JSON.stringify(assessmentsWithoutAll)
-        ) {
+        } else if (assessmentsChosen.length === assessmentsWithoutAll.length) {
           setAssessmentsChosen([assessment]);
         } else {
           setAssessmentsChosen([...assessmentsChosen, assessment]);
