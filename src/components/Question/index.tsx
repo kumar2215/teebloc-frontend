@@ -32,6 +32,11 @@ const Question = memo(function Question({
   isInCart,
   similarQuestionsPressed,
   setSimilarQuestionsPressed,
+  similarQuestionsFetched = [],
+  setSimilarQuestionsFetched = () => {},
+  actualTimes = [],
+  setActualTimes = () => {},
+  getEstimatedTime = (id: string) => 6000, // default estimate
   setCanScrollMain = () => {},
   canShowSimilarQuestions = true,
 }: {
@@ -39,6 +44,11 @@ const Question = memo(function Question({
   isInCart: boolean;
   similarQuestionsPressed: boolean;
   setSimilarQuestionsPressed: (pressed: boolean) => void;
+  similarQuestionsFetched?: String[];
+  setSimilarQuestionsFetched?: (fetched: String[]) => void;
+  actualTimes?: number[];
+  setActualTimes?: (times: number[]) => void;
+  getEstimatedTime?: (id: string) => number;
   setCanScrollMain?: (canScroll: boolean) => void;
   canShowSimilarQuestions?: boolean;
 }) {
@@ -57,6 +67,7 @@ const Question = memo(function Question({
     if (similarQuestionsPressed) return;
     setSimilarQuestionsPressed(true);
     setSimilarQuestionsLoading(true);
+    const start = performance.now();
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_API}/questions/similar/${q.questionimgs
         .map((img) => img.questionimgid)
@@ -80,6 +91,13 @@ const Question = memo(function Question({
       },
       similarQuestionsIds.length
     );
+    const end = performance.now();
+
+    if (!similarQuestionsFetched.includes(q.id)) {
+      setSimilarQuestionsFetched([...similarQuestionsFetched, q.id]);
+      setActualTimes([...actualTimes, end - start]);
+    }
+
     setShowSimilarQuestions(true);
     setCanScrollMain(false);
     setSimilarQuestions(similarQuestionsData.data.questions);
@@ -202,15 +220,36 @@ const Question = memo(function Question({
             <button
               onClick={getSimilarQuestions}
               disabled={similarQuestionsPressed}
-              className="btn btn-primary"
+              className="relative overflow-hidden btn btn-primary"
             >
-              {similarQuestionsLoading ? (
-                <>
-                  <span className="loading loading-spinner"></span> Loading
-                </>
-              ) : (
-                <span>See similar questions</span>
+              {similarQuestionsLoading && (
+                <span
+                  className="absolute top-0 left-0 z-0 h-full transition-all duration-500 bg-yellow-200"
+                  style={{
+                    width: "100%",
+                    transform: "scaleX(1)",
+                    animation: `fillBar ${(
+                      getEstimatedTime(q.id) * 1e-3
+                    ).toFixed(1)}s linear infinite`,
+                    transformOrigin: "left",
+                    pointerEvents: "none",
+                  }}
+                />
               )}
+              <style>
+                {`
+                  @keyframes fillBar {
+                    0% { width: 0; }
+                    100% { width: 100%; }
+                  }
+                `}
+              </style>
+              <span className="relative z-10 flex items-center gap-2">
+                {similarQuestionsLoading && (
+                  <span className="loading loading-spinner"></span>
+                )}
+                {similarQuestionsLoading ? "Loading" : "See similar questions"}
+              </span>
             </button>
           )}
           {isInCart ? (
