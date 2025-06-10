@@ -22,7 +22,7 @@ export default function Questions({
   const cartItems = useReactiveVar(cartItemsVar);
   const [similarQuestionsPressed, setSimilarQuestionsPressed] = useState(false);
   const [similarQuestionsFetched, setSimilarQuestionsFetched] = useState<
-    String[]
+    string[]
   >([]);
   const [canScrollMain, setCanScrollMain] = useState(true);
 
@@ -35,13 +35,13 @@ export default function Questions({
   // use exponential smoothing to estimate the time
   function getEstimatedTime(id: string): number {
     if (result && result[id]) return result[id];
-    if (estimatedTimes.length === 0) {
+    if (estimatedTimes.length === 0 || actualTimes.length === 0) {
       setEstimatedTimes([initialEstimatedTime]);
       setResult((prev) => ({
         ...prev,
         [id]: initialEstimatedTime,
       }));
-      return estimatedTimes[0];
+      return initialEstimatedTime;
     }
     const lastEstimatedTime = estimatedTimes[estimatedTimes.length - 1];
     const newEstimatedTime =

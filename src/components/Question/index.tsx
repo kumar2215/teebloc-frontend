@@ -44,8 +44,8 @@ const Question = memo(function Question({
   isInCart: boolean;
   similarQuestionsPressed: boolean;
   setSimilarQuestionsPressed: (pressed: boolean) => void;
-  similarQuestionsFetched?: String[];
-  setSimilarQuestionsFetched?: (fetched: String[]) => void;
+  similarQuestionsFetched?: string[];
+  setSimilarQuestionsFetched?: (fetched: string[]) => void;
   actualTimes?: number[];
   setActualTimes?: (times: number[]) => void;
   getEstimatedTime?: (id: string) => number;
