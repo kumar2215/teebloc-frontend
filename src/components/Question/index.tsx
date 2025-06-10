@@ -50,6 +50,8 @@ const Question = memo(function Question({
   );
   const worksheetsMapping = useWorksheetsMapping();
   const worksheets = worksheetsMapping[q.id] || [];
+  const [numberOfSimilarQuestionsToShow, setNumberOfSimilarQuestionsToShow] =
+    useState<number>(10);
 
   async function getSimilarQuestions() {
     if (similarQuestionsPressed) return;
@@ -58,7 +60,7 @@ const Question = memo(function Question({
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_API}/questions/similar/${q.questionimgs
         .map((img) => img.questionimgid)
-        .join(",")}`,
+        .join(",")}/${numberOfSimilarQuestionsToShow}`,
       {
         method: "GET",
       }
@@ -92,6 +94,7 @@ const Question = memo(function Question({
 
   function handleCloseOverlay() {
     setShowSimilarQuestions(false);
+    setNumberOfSimilarQuestionsToShow(10);
     setCanScrollMain(true);
   }
 
@@ -159,7 +162,7 @@ const Question = memo(function Question({
           <Overlay isOpen={showSimilarQuestions} onClose={handleCloseOverlay}>
             <div className="flex flex-col gap-4">
               <button
-                className="btn btn-sm btn-circle btn-ghost sticky top-0 self-end"
+                className="sticky top-0 self-end btn btn-sm btn-circle btn-ghost"
                 onClick={handleCloseOverlay}
               >
                 ✕
@@ -174,6 +177,22 @@ const Question = memo(function Question({
                   canShowSimilarQuestions={false}
                 />
               ))}
+              {similarQuestions.length > 0 && (
+                <button
+                  className="mb-16 btn btn-primary"
+                  onClick={() => {
+                    setNumberOfSimilarQuestionsToShow((prev) => prev + 10);
+                    getSimilarQuestions();
+                  }}
+                  disabled={similarQuestionsLoading}
+                  type="button"
+                >
+                  {similarQuestionsLoading && (
+                    <span className="loading loading-spinner"></span>
+                  )}
+                  {similarQuestionsLoading ? "Loading" : "Load more"}
+                </button>
+              )}
             </div>
           </Overlay>
         )}
