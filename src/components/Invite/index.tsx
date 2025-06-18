@@ -1,0 +1,130 @@
+import { useState } from "react";
+import { useUser } from "@clerk/clerk-react";
+import { ClipboardCopy, Check } from "lucide-react";
+
+function CreateInviteModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  if (!isOpen) return null;
+
+  const user = useUser();
+  const [email, setEmail] = useState("");
+  const [inviteUrl, setInviteUrl] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(inviteUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  const getInviteLink = async () => {
+    setLoading(true);
+    setError("");
+
+    if (!email || !email.includes("@")) {
+      setError("Please enter a valid email address.");
+      setLoading(false);
+      return;
+    }
+
+    const userId = user.user?.id;
+
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_API
+        }/generate-invite-link/${userId}/${email}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setInviteUrl(data.link);
+      } else if (response.status === 422) {
+        setError("Invalid email address. Please try again.");
+      } else {
+        setError("Failed to generate invite link. Please try again.");
+      }
+    } catch (error) {
+      setError("Error generating invite link.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <input
+        type="checkbox"
+        id="invite-modal"
+        className="modal-toggle"
+        checked={isOpen}
+        readOnly
+      />
+      <div className="modal">
+        <div className="relative modal-box">
+          <label
+            htmlFor="invite-modal"
+            className="absolute btn btn-sm btn-circle right-2 top-2"
+            onClick={onClose}
+          >
+            ✕
+          </label>
+          <h3 className="text-lg font-bold">
+            {!inviteUrl ? "Invite a User" : "Invite Link:"}
+          </h3>
+
+          {!inviteUrl ? (
+            <>
+              <input
+                type="email"
+                placeholder="Enter their email"
+                className="w-full mt-4 input input-bordered"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              {error && <p className="mt-2 text-error">{error}</p>}
+              <button
+                className="mt-4 btn btn-primary"
+                onClick={getInviteLink}
+                disabled={loading || !email}
+              >
+                {loading ? "Generating..." : "Generate Invite Link"}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="relative p-4 mt-4 text-white bg-gray-400 rounded-lg pt-7">
+                <button
+                  onClick={handleCopy}
+                  className="absolute top-2 right-2 hover:text-gray-300"
+                  aria-label="Copy invite link"
+                >
+                  {copied ? (
+                    <Check className="w-5 h-5" />
+                  ) : (
+                    <ClipboardCopy className="w-5 h-5" />
+                  )}
+                  <span
+                    className="absolute top-0 px-2 py-1 text-xs text-white transition-opacity duration-700 ease-in-out bg-black bg-opacity-75 rounded pointer-events-none right-10"
+                    style={{ opacity: copied ? 1 : 0 }}
+                  >
+                    Copied!
+                  </span>
+                </button>
+                <p className="break-all">{inviteUrl}</p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default CreateInviteModal;
