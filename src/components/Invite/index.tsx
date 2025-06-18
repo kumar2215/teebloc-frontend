@@ -76,11 +76,17 @@ function CreateInviteModal({
             ✕
           </label>
           <h3 className="text-lg font-bold">
-            {!inviteUrl ? "Invite a User" : "Invite Link:"}
+            {!inviteUrl
+              ? "Invite a friend to get 3 free worksheets"
+              : "Invite Link:"}
           </h3>
 
           {!inviteUrl ? (
             <>
+              <p className="text-sm mt-4 text-gray-500">
+                Enter the email of the user you want to invite. You will receive
+                3 free worksheets once they sign up using the invite link.
+              </p>
               <input
                 type="email"
                 placeholder="Enter their email"
@@ -99,6 +105,11 @@ function CreateInviteModal({
             </>
           ) : (
             <>
+              <p className="text-sm mt-4 text-gray-500">
+                Copy the invite link and send it to the user you would like to
+                invite! Once they sign up, refresh to receive your 3 free
+                worksheets.
+              </p>
               <div className="relative p-4 mt-4 text-white bg-gray-400 rounded-lg pt-7">
                 <button
                   onClick={handleCopy}
