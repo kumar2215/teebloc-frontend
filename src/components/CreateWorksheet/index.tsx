@@ -402,10 +402,10 @@ export default function CreateWorksheet() {
               )}
             </button>
             <button
-              className="btn btn-neutral btn-lg btn-outline"
+              className="btn btn-neutral btn-lg btn-outline w-56"
               onClick={() => setOpenInviteModal(true)}
             >
-              Refer to get more
+              Refer to get more free worksheets
             </button>
           </>
         )}
