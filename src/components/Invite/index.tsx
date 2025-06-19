@@ -58,7 +58,7 @@ function CreateInviteModal({
   };
 
   return (
-    <>
+    <div>
       <input
         type="checkbox"
         id="invite-modal"
@@ -134,7 +134,7 @@ function CreateInviteModal({
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
