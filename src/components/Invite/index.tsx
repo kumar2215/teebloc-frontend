@@ -24,11 +24,25 @@ function CreateInviteModal({
     setTimeout(() => setCopied(false), 1500);
   };
 
+  /**
+   * Does a basic client-side validation of the email address format.
+   * @param email The email address to validate.
+   * @returns True if the email is valid, false otherwise.
+   *
+   * @source https://stackoverflow.com/questions/46155/how-to-validate-an-email-address-in-javascript
+   */
+  const validateEmail = (email: string) => {
+    const re =
+      /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+
+    return re.test(email);
+  };
+
   const getInviteLink = async () => {
     setLoading(true);
     setError("");
 
-    if (!email || !email.includes("@")) {
+    if (!email || !validateEmail(email)) {
       setError("Please enter a valid email address.");
       setLoading(false);
       return;
