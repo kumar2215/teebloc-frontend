@@ -70,7 +70,7 @@ function CreateInviteModal({
         <div className="relative modal-box">
           <label
             htmlFor="invite-modal"
-            className="absolute btn btn-sm btn-circle right-2 top-2"
+            className="absolute btn btn-sm btn-circle btn-ghost right-2 top-2"
             onClick={onClose}
           >
             ✕
@@ -83,7 +83,7 @@ function CreateInviteModal({
 
           {!inviteUrl ? (
             <>
-              <p className="text-sm mt-4 text-gray-500">
+              <p className="mt-4 text-sm text-gray-500">
                 Enter the email of the user you want to invite. You will receive
                 3 free worksheets once they sign up using the invite link.
               </p>
@@ -105,7 +105,7 @@ function CreateInviteModal({
             </>
           ) : (
             <>
-              <p className="text-sm mt-4 text-gray-500">
+              <p className="mt-4 text-sm text-gray-500">
                 Copy the invite link and send it to the user you would like to
                 invite! Once they sign up, refresh to receive your 3 free
                 worksheets.
