@@ -17,6 +17,8 @@ function CreateInviteModal({
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState("");
 
   const handleCopy = () => {
     navigator.clipboard.writeText(inviteUrl);
@@ -62,10 +64,13 @@ function CreateInviteModal({
       } else if (response.status === 422) {
         setError("Invalid email address. Please try again.");
       } else {
-        setError("Failed to generate invite link. Please try again.");
+        const data = await response.json();
+        setErrorModalMessage(data.error || "An error occurred.");
+        setShowErrorModal(true);
       }
     } catch (error) {
-      setError("Error generating invite link.");
+      setErrorModalMessage("Error generating invite link.");
+      setShowErrorModal(true);
     } finally {
       setLoading(false);
     }
@@ -81,73 +86,113 @@ function CreateInviteModal({
         readOnly
       />
       <div className="modal">
-        <div className="relative modal-box">
-          <label
-            htmlFor="invite-modal"
-            className="absolute btn btn-sm btn-circle btn-ghost right-2 top-2"
-            onClick={onClose}
-          >
-            ✕
-          </label>
-          <h3 className="text-lg font-bold">
-            {!inviteUrl
-              ? "Invite a friend to get 3 free worksheets"
-              : "Invite Link:"}
-          </h3>
+        {showErrorModal ? (
+          <LinkGenerationFailedModal
+            setShowErrorModal={setShowErrorModal}
+            errorMessage={errorModalMessage}
+          />
+        ) : (
+          <div className="relative modal-box">
+            <label
+              htmlFor="invite-modal"
+              className="absolute btn btn-sm btn-circle btn-ghost right-2 top-2"
+              onClick={onClose}
+            >
+              ✕
+            </label>
+            <h3 className="text-lg font-bold">
+              {!inviteUrl
+                ? "Invite a friend to get 3 free worksheets"
+                : "Invite Link:"}
+            </h3>
 
-          {!inviteUrl ? (
-            <>
-              <p className="mt-4 text-sm text-gray-500">
-                Enter the email of the user you want to invite. You will receive
-                3 free worksheets once they sign up using the invite link.
-              </p>
-              <input
-                type="email"
-                placeholder="Enter their email"
-                className="w-full mt-4 input input-bordered"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              {error && <p className="mt-2 text-error">{error}</p>}
-              <button
-                className="mt-4 btn btn-primary"
-                onClick={getInviteLink}
-                disabled={loading || !email}
-              >
-                {loading ? "Generating..." : "Generate Invite Link"}
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="mt-4 text-sm text-gray-500">
-                Copy the invite link and send it to the user you would like to
-                invite! Once they sign up, refresh to receive your 3 free
-                worksheets.
-              </p>
-              <div className="relative p-4 mt-4 text-white bg-gray-400 rounded-lg pt-7">
+            {!inviteUrl ? (
+              <>
+                <p className="mt-4 text-sm text-gray-500">
+                  Enter the email of the user you want to invite. You will
+                  receive 3 free worksheets once they sign up using the invite
+                  link.
+                </p>
+                <input
+                  type="email"
+                  placeholder="Enter their email"
+                  className="w-full mt-4 input input-bordered"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                {error && <p className="mt-2 text-error">{error}</p>}
                 <button
-                  onClick={handleCopy}
-                  className="absolute top-2 right-2 hover:text-gray-300"
-                  aria-label="Copy invite link"
+                  className="mt-4 btn btn-primary"
+                  onClick={getInviteLink}
+                  disabled={loading || !email}
                 >
-                  {copied ? (
-                    <Check className="w-5 h-5" />
-                  ) : (
-                    <ClipboardCopy className="w-5 h-5" />
-                  )}
-                  <span
-                    className="absolute top-0 px-2 py-1 text-xs text-white transition-opacity duration-700 ease-in-out bg-black bg-opacity-75 rounded pointer-events-none right-10"
-                    style={{ opacity: copied ? 1 : 0 }}
-                  >
-                    Copied!
-                  </span>
+                  {loading ? "Generating..." : "Generate Invite Link"}
                 </button>
-                <p className="break-all">{inviteUrl}</p>
-              </div>
-            </>
-          )}
-        </div>
+              </>
+            ) : (
+              <>
+                <p className="mt-4 text-sm text-gray-500">
+                  Copy the invite link and send it to the user you would like to
+                  invite! Once they sign up, refresh to receive your 3 free
+                  worksheets.
+                </p>
+                <div className="relative p-4 mt-4 text-white bg-gray-400 rounded-lg pt-7">
+                  <button
+                    onClick={handleCopy}
+                    className="absolute top-2 right-2 hover:text-gray-300"
+                    aria-label="Copy invite link"
+                  >
+                    {copied ? (
+                      <Check className="w-5 h-5" />
+                    ) : (
+                      <ClipboardCopy className="w-5 h-5" />
+                    )}
+                    <span
+                      className="absolute top-0 px-2 py-1 text-xs text-white transition-opacity duration-700 ease-in-out bg-black bg-opacity-75 rounded pointer-events-none right-10"
+                      style={{ opacity: copied ? 1 : 0 }}
+                    >
+                      Copied!
+                    </span>
+                  </button>
+                  <p className="break-all">{inviteUrl}</p>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+function LinkGenerationFailedModal({
+  setShowErrorModal,
+  errorMessage,
+}: {
+  setShowErrorModal: (showErrorModal: boolean) => void;
+  errorMessage: string;
+}) {
+  return (
+    <div>
+      <div className="w-full text-center modal-box">
+        <h3 className="mb-4 text-2xl font-bold">
+          Invite Link Generation Failed!
+        </h3>
+        <p className="mb-4">{errorMessage}</p>
+        <button
+          className="btn btn-primary"
+          onClick={() => setShowErrorModal(false)}
+        >
+          Continue
+        </button>
+      </div>
+      <form
+        method="dialog"
+        className="modal-backdrop"
+        onClick={() => setShowErrorModal(false)}
+      >
+        <button>close</button>
+      </form>
     </div>
   );
 }
