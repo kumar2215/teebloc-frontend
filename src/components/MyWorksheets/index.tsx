@@ -256,7 +256,6 @@ export default function MyWorksheets() {
                       "Delete Worksheet"
                     )}
                   </button>
-                  )
                 </div>
               </div>
             </div>
