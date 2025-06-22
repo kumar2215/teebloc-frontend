@@ -33,7 +33,8 @@ const styles = StyleSheet.create({
   questionImage: {
     // Using width: "70%" sometimes causes the PDF rendering to take infinitely long.
     // width: "70%",
-    width: 400,
+    width: 300,
+    // width: 400,
   },
   answersPage: {
     flexDirection: "column",
@@ -53,11 +54,9 @@ const styles = StyleSheet.create({
     borderBottom: "1px solid black",
   },
   answerNumber: {
-    position: "absolute",
     fontSize: 30,
   },
   answerImage: {
-    marginLeft: 50,
     width: 400,
     marginBottom: 20,
   },
@@ -73,6 +72,7 @@ export function PDFDocument({
   if (!questionsData) return null;
 
   let questions = JSON.parse(JSON.stringify(questionsData.questions));
+  console.log(questions);
 
   // Add metadata to the sortedQuestions: for the images, add image_url in the form of
   // https://equally-clean-dogfish.ngrok-free.app/images/question/{questionimgid}
@@ -148,7 +148,6 @@ export function PDFDocument({
                 })
                 .map((answerImage, index) => (
                   <View
-                    wrap={false}
                     key={answerImage.answerimgid}
                     style={styles.answerImageContainer}
                   >
