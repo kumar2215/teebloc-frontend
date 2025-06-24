@@ -245,19 +245,17 @@ export default function MyWorksheets() {
                     </button>
                   )}
                   <PDFDownloadButton worksheet={w} client={client} />
-                  {isAdmin && (
-                    <button
-                      className="btn btn-error"
-                      disabled={deletingWorksheet[w.id]}
-                      onClick={() => deleteWorksheetById(w.id)}
-                    >
-                      {deletingWorksheet[w.id] ? (
-                        <span className="loading loading-spinner"></span>
-                      ) : (
-                        "Delete Worksheet"
-                      )}
-                    </button>
-                  )}
+                  <button
+                    className="btn btn-error"
+                    disabled={deletingWorksheet[w.id]}
+                    onClick={() => deleteWorksheetById(w.id)}
+                  >
+                    {deletingWorksheet[w.id] ? (
+                      <span className="loading loading-spinner"></span>
+                    ) : (
+                      "Delete Worksheet"
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
