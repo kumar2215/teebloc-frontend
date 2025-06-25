@@ -289,11 +289,13 @@ function NavItems({
                 </a>
               </li>
             )}
-            <li>
-              <button onClick={() => setOpenInviteModal(true)}>
-                Generate invite link
-              </button>
-            </li>
+            {!hasActiveSubscription && (
+              <li>
+                <button onClick={() => setOpenInviteModal(true)}>
+                  Generate invite link
+                </button>
+              </li>
+            )}
             {hasActiveSubscription && (
               <li>
                 <button onClick={() => setOpenPromoCodeModal(true)}>
