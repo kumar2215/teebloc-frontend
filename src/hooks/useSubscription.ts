@@ -10,6 +10,7 @@ export function useSubscription() {
   const { data, loading, refetch } = useQuery(GET_USER_SUBSCRIPTION, {
     variables: { userId: user?.id },
     skip: !user?.id,
+    fetchPolicy: "network-only",
   });
 
   const hasActiveSubscription =

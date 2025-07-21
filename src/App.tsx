@@ -32,11 +32,9 @@ function App() {
         <Route path="/">
           <Redirect to="/practice" />
         </Route>
-
         <Route path="/marked/:id">
           {(params) => <Feedback id={params.id} />}
         </Route>
-
         <SignedIn>
           <Route path="/practice" nest>
             <Route path="/">
