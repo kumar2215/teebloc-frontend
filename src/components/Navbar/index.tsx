@@ -15,6 +15,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSubscription } from "../../hooks/useSubscription.ts";
 import CreateInviteModal from "../Invite/index.tsx";
 import PromoCodeModal from "../Subscribe/modal.tsx";
+import GetRoleSurvey from "../Survey/getRole";
 
 export default function Navbar() {
   const { signOut } = useClerk();
@@ -182,17 +183,88 @@ function NavItems({
     });
   };
 
+  const SURVEY_ID = import.meta.env.VITE_USER_ROLE_SURVEY_ID;
+  const SURVEY_QUESTION_ID = import.meta.env.VITE_USER_ROLE_SURVEY_QUESTION_ID;
+
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [showThanks, setShowThanks] = useState(false);
+  const [hasDoneSurvey, setHasDoneSurvey] = useState(
+    localStorage.getItem(`hasInteractedWithSurvey_${SURVEY_ID}`) === "true"
+  );
+  const [surveyClosed, setSurveyClosed] = useState(false);
+
+  const CustomSignUpButton = () => {
+    return (
+      <button className="btn btn-outline" onClick={() => setShowSurvey(true)}>
+        Sign up
+      </button>
+    );
+  };
+
+  const onClose = () => {
+    setShowSurvey(false);
+    setShowThanks(false);
+    setSurveyClosed(true);
+  };
+
+  const onSurveySubmit = (role: string, isNoResponse: boolean = false) => {
+    setHasDoneSurvey(true);
+    setShowSurvey(false);
+    if (!isNoResponse) setShowThanks(true);
+
+    const responseKey = `$survey_response_${SURVEY_QUESTION_ID}`;
+
+    posthog.capture("survey sent", {
+      $survey_id: SURVEY_ID,
+      [responseKey]: isNoResponse ? "No response" : role,
+    });
+
+    localStorage.setItem(`hasInteractedWithSurvey_${SURVEY_ID}`, "true");
+  };
+
+  useEffect(() => {
+    if (surveyClosed) {
+      const signUpBtn = document.getElementById("sign-up-button");
+      if (signUpBtn) {
+        signUpBtn.click();
+      }
+    }
+  }, [surveyClosed]);
+
   return (
     <>
       <SignedOut>
         <SignInButton>
           <a className="btn">Log in</a>
         </SignInButton>
-        <SignUpButton>
-          <a className="btn btn-outline">Sign up</a>
-        </SignUpButton>
+        {hasDoneSurvey || surveyClosed ? (
+          <SignUpButton>
+            <a id="sign-up-button" className="btn btn-outline">
+              Sign up
+            </a>
+          </SignUpButton>
+        ) : (
+          <CustomSignUpButton />
+        )}
       </SignedOut>
+      {(showSurvey || showThanks) && (
+        <GetRoleSurvey
+          submitHandler={onSurveySubmit}
+          onClose={onClose}
+          onCancel={onClose}
+          hasDoneSurvey={hasDoneSurvey}
+        />
+      )}
       <SignedIn>
+        {!hasDoneSurvey && (
+          <GetRoleSurvey
+            submitHandler={onSurveySubmit}
+            onClose={onClose}
+            onCancel={() => onSurveySubmit("", true)}
+            hasDoneSurvey={hasDoneSurvey}
+            showCrossButton={true}
+          />
+        )}
         {practiceMatch && (
           <>
             <Link href="/practice/worksheets">
