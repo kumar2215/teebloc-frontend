@@ -28,7 +28,6 @@ export default function CustomWorksheetAnswers() {
     error: worksheetError,
   } = useQuery(GET_WORKSHEET_BY_ID, {
     variables: { worksheetId: parseInt(worksheetId!, 10) },
-    fetchPolicy: "network-only", // TODO: Remove this later
   });
 
   const worksheet = worksheetData?.worksheets[0];
@@ -40,7 +39,6 @@ export default function CustomWorksheetAnswers() {
     data: questionImagesData,
     error: questionImagesError,
   } = useQuery(GET_QUESTION_IMAGES, {
-    fetchPolicy: "network-only", // TODO: Remove this later
     variables: {
       ids: questionIds,
     },
