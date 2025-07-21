@@ -168,10 +168,10 @@ const MobileToolbarContent = ({
 );
 
 export function SimpleEditor({
-  initialContent = "",
+  initialContent,
   updateCustomAnswer,
 }: {
-  initialContent?: string;
+  initialContent: string;
   updateCustomAnswer: (value: string, isUpToDate?: boolean) => void;
 }) {
   const isMobile = useMobile();
@@ -229,16 +229,15 @@ export function SimpleEditor({
   }, [isMobile, mobileView]);
 
   React.useEffect(() => {
-    const emptyContent = "<p></p>";
     if (editor) {
       const content = editor.getHTML();
-      if (content === initialContent || (content === emptyContent && initialContent === "")) {
-        updateCustomAnswer(initialContent, true);
+      if (content === initialContent) {
+        updateCustomAnswer(content, true);
         return;
       }
       updateCustomAnswer(content);
     }
-  }, [editor?.getHTML()]);
+  }, [editor?.getHTML(), initialContent]);
 
   return (
     <EditorContext.Provider value={{ editor }}>
