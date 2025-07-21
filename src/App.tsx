@@ -9,6 +9,7 @@ import Writing from "./components/writing/Writing";
 import Feedback from "./components/writing/Feedback";
 import Subscribe from "./components/Subscribe";
 import CreateWorksheet from "./components/CreateWorksheet";
+import CustomWorksheetAnswers from "./components/Author";
 
 function App() {
   const { isSignedIn, user, isLoaded } = useUser();
@@ -50,6 +51,9 @@ function App() {
             <Route path="/subscribe">
               <Subscribe />
             </Route>
+            <Route path="/author">
+              <CustomWorksheetAnswers />
+            </Route>
           </Route>
           <Route path="/writing" nest>
             <Route path="/">
@@ -70,7 +74,7 @@ function TelegramPromotionBanner() {
         href="https://t.me/+73EyKsz68qBmMzFl"
         target="_blank"
         rel="noopener noreferrer"
-        className="hover:underline flex items-center justify-center gap-1"
+        className="flex items-center justify-center gap-1 hover:underline"
       >
         <svg
           role="img"
