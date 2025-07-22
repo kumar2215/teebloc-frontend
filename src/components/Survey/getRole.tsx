@@ -49,7 +49,7 @@ function CloseButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function choiceOption(
+function ChoiceOption(
   role: string,
   id: number,
   selected: string,
@@ -150,7 +150,7 @@ export default function GetRoleSurvey({
                   role="radiogroup"
                 >
                   {roles.map((role, index) =>
-                    choiceOption(role, index, selectedRole, setSelectedRole)
+                    ChoiceOption(role, index, selectedRole, setSelectedRole)
                   )}
                 </div>
               </div>

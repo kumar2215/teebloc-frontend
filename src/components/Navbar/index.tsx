@@ -189,14 +189,6 @@ function NavItems({
   );
   const [surveyClosed, setSurveyClosed] = useState(false);
 
-  const CustomSignUpButton = () => {
-    return (
-      <button className="btn btn-outline" onClick={() => setShowSurvey(true)}>
-        Sign up
-      </button>
-    );
-  };
-
   const onClose = () => {
     setShowSurvey(false);
     setShowThanks(false);
@@ -240,7 +232,12 @@ function NavItems({
             </a>
           </SignUpButton>
         ) : (
-          <CustomSignUpButton />
+          <button
+            className="btn btn-outline"
+            onClick={() => setShowSurvey(true)}
+          >
+            Sign up
+          </button>
         )}
       </SignedOut>
       {(showSurvey || showThanks) && (
