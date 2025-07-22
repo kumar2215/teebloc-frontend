@@ -37,7 +37,7 @@ function processImages(customAnswerForQuestion: Record<string, any>, newImageUrl
 async function saveCustomAnswerImages(
   authorId: string,
   questionId: string,
-  imageBlobs: Record<string, Record<string, string[]>>,
+  imageUrls: Record<string, Record<string, string[]>>,
   operation: "insert" | "update" | "delete"
 ) {
   return await fetch(`${import.meta.env.VITE_BACKEND_API}/updateCustomAnswerImages`, {
@@ -48,7 +48,7 @@ async function saveCustomAnswerImages(
     body: JSON.stringify({
       authorId,
       questionId,
-      imageBlobs,
+      imageUrls,
       operation,
     }),
   }).then((response) => {

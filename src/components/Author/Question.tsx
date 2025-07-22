@@ -96,7 +96,7 @@ export default function Question({
   const [customAnswer, setCustomAnswer] = useState(getCustomWorksheetAnswers([worksheetId!, questionId!]));
 
   const getCustomAnswerUpdater = (part: string, type: string) => {
-    return async (value: string, isUpToDate: boolean = false) => {
+    return (value: string, isUpToDate: boolean = false) => {
       if (getCustomWorksheetAnswers([worksheetId!, "refresh"])) setRefreshCustomAnswer(true);
       setCustomAnswer((prev: any) => ({
         ...prev,

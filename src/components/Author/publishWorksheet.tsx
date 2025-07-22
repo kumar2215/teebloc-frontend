@@ -113,7 +113,7 @@ export default function PublishWorksheet({
         publishRef.current = false; // Reset for next execution
       }, 100);
     }
-  }, [executePublish, isCurrentlyPublished, worksheetId]);
+  }, [executePublish, isCurrentlyPublished]);
 
   return null;
 }
