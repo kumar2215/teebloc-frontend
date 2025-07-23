@@ -22,7 +22,6 @@ export default function Navbar({
     hasDoneSurvey: boolean;
     surveyClosed: boolean;
     onSurveySubmit: (role: string, isNoResponse?: boolean) => void;
-    onClose: () => void;
     setShowSurvey: (show: boolean) => void;
   };
 }) {
@@ -172,7 +171,6 @@ function NavItems({
     hasDoneSurvey: boolean;
     surveyClosed: boolean;
     onSurveySubmit: (role: string, isNoResponse?: boolean) => void;
-    onClose: () => void;
     setShowSurvey: (show: boolean) => void;
   };
 }) {
@@ -199,7 +197,7 @@ function NavItems({
     });
   };
 
-  const { hasDoneSurvey, surveyClosed, onSurveySubmit, onClose, setShowSurvey } = surveyVariables;
+  const { hasDoneSurvey, surveyClosed, onSurveySubmit, setShowSurvey } = surveyVariables;
 
   return (
     <>
@@ -207,7 +205,7 @@ function NavItems({
         <SignInButton>
           <a className="btn">Log in</a>
         </SignInButton>
-        {hasDoneSurvey || surveyClosed ? (
+        {(hasDoneSurvey || surveyClosed) ? (
           <SignUpButton>
             <a id="sign-up-button" className="btn btn-outline">
               Sign up
@@ -226,7 +224,6 @@ function NavItems({
         {!hasDoneSurvey && (
           <GetRoleSurvey
             submitHandler={onSurveySubmit}
-            onClose={onClose}
             onCancel={() => onSurveySubmit("", true)}
             hasDoneSurvey={hasDoneSurvey}
             showCrossButton={true}

@@ -29,22 +29,14 @@ function App() {
   const SURVEY_QUESTION_ID = import.meta.env.VITE_USER_ROLE_SURVEY_QUESTION_ID;
 
   const [showSurvey, setShowSurvey] = useState(false);
-  const [showThanks, setShowThanks] = useState(false);
   const [hasDoneSurvey, setHasDoneSurvey] = useState(
     localStorage.getItem(`hasInteractedWithSurvey_${SURVEY_ID}`) === "true"
   );
   const [surveyClosed, setSurveyClosed] = useState(false);
 
-  const onClose = () => {
-    setShowSurvey(false);
-    setShowThanks(false);
-    setSurveyClosed(true);
-  };
-
   const onSurveySubmit = (role: string, isNoResponse: boolean = false) => {
     setHasDoneSurvey(true);
     setShowSurvey(false);
-    if (!isNoResponse) setShowThanks(true);
 
     const responseKey = `$survey_response_${SURVEY_QUESTION_ID}`;
 
@@ -54,6 +46,7 @@ function App() {
     });
 
     localStorage.setItem(`hasInteractedWithSurvey_${SURVEY_ID}`, "true");
+    setSurveyClosed(true);
   };
 
   useEffect(() => {
@@ -69,7 +62,6 @@ function App() {
     hasDoneSurvey,
     surveyClosed,
     onSurveySubmit,
-    onClose,
     setShowSurvey,
   };
   
@@ -77,11 +69,10 @@ function App() {
     <div>
       {(isSignedIn || !showSurvey) && <TelegramPromotionBanner />}
       {!isMarkedRoute && (isSignedIn || !showSurvey) && <Navbar surveyVariables={surveyVariables} />}
-      {(showSurvey || showThanks) && (
+      {showSurvey && (
         <GetRoleSurvey
           submitHandler={onSurveySubmit}
-          onClose={onClose}
-          onCancel={onClose}
+          onCancel={() => setSurveyClosed(true)}
           hasDoneSurvey={hasDoneSurvey}
         />
       )}
