@@ -1,5 +1,6 @@
 import { SignedIn } from "@clerk/clerk-react";
 import { Redirect, Route, Switch, useRoute } from "wouter";
+import { useState, useEffect } from "react";
 import MyWorksheets from "./components/MyWorksheets";
 import Navbar from "./components/Navbar";
 import Options from "./components/Options";
@@ -9,6 +10,7 @@ import Writing from "./components/writing/Writing";
 import Feedback from "./components/writing/Feedback";
 import Subscribe from "./components/Subscribe";
 import CreateWorksheet from "./components/CreateWorksheet";
+import GetRoleSurvey from "./components/Survey/getRole";
 
 function App() {
   const { isSignedIn, user, isLoaded } = useUser();
@@ -23,10 +25,66 @@ function App() {
     });
   }
 
+  const SURVEY_ID = import.meta.env.VITE_USER_ROLE_SURVEY_ID;
+  const SURVEY_QUESTION_ID = import.meta.env.VITE_USER_ROLE_SURVEY_QUESTION_ID;
+
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [showThanks, setShowThanks] = useState(false);
+  const [hasDoneSurvey, setHasDoneSurvey] = useState(
+    localStorage.getItem(`hasInteractedWithSurvey_${SURVEY_ID}`) === "true"
+  );
+  const [surveyClosed, setSurveyClosed] = useState(false);
+
+  const onClose = () => {
+    setShowSurvey(false);
+    setShowThanks(false);
+    setSurveyClosed(true);
+  };
+
+  const onSurveySubmit = (role: string, isNoResponse: boolean = false) => {
+    setHasDoneSurvey(true);
+    setShowSurvey(false);
+    if (!isNoResponse) setShowThanks(true);
+
+    const responseKey = `$survey_response_${SURVEY_QUESTION_ID}`;
+
+    posthog.capture("survey sent", {
+      $survey_id: SURVEY_ID,
+      [responseKey]: isNoResponse ? "No response" : role,
+    });
+
+    localStorage.setItem(`hasInteractedWithSurvey_${SURVEY_ID}`, "true");
+  };
+
+  useEffect(() => {
+    if (surveyClosed) {
+      const signUpBtn = document.getElementById("sign-up-button");
+      if (signUpBtn) {
+        signUpBtn.click();
+      }
+    }
+  }, [surveyClosed]);
+
+  const surveyVariables = {
+    hasDoneSurvey,
+    surveyClosed,
+    onSurveySubmit,
+    onClose,
+    setShowSurvey,
+  };
+  
   return (
     <div>
-      <TelegramPromotionBanner />
-      {!isMarkedRoute && <Navbar />}
+      {(isSignedIn || !showSurvey) && <TelegramPromotionBanner />}
+      {!isMarkedRoute && (isSignedIn || !showSurvey) && <Navbar surveyVariables={surveyVariables} />}
+      {(showSurvey || showThanks) && (
+        <GetRoleSurvey
+          submitHandler={onSurveySubmit}
+          onClose={onClose}
+          onCancel={onClose}
+          hasDoneSurvey={hasDoneSurvey}
+        />
+      )}
       <Switch>
         <Route path="/">
           <Redirect to="/practice" />
