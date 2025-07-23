@@ -1,6 +1,6 @@
 import { useApolloClient, useQuery, useMutation } from "@apollo/client";
 import { useUser } from "@clerk/clerk-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, memo } from "react";
 import { GET_USER_WORKSHEETS, UPDATE_WORKSHEET_NAME } from "./data";
 import { useIsAdmin } from "../../hooks/useIsAdmin";
 import PDFDownloadButton from "./pdfDownloadButton";
@@ -96,6 +96,7 @@ export default function MyWorksheets() {
       />
     );
   }, [worksheets]);
+  const MemoPDFDownloadButton = useMemo(() => memo(PDFDownloadButton), []);
 
   // Highlight logic using wouter's useSearch
   const [searchParams] = useSearchParams();
@@ -244,7 +245,7 @@ export default function MyWorksheets() {
                       Edit name
                     </button>
                   )}
-                  <PDFDownloadButton worksheet={w} client={client} />
+                  <MemoPDFDownloadButton worksheet={w} client={client} />
                   <button
                     className="btn btn-error"
                     disabled={deletingWorksheet[w.id]}
