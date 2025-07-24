@@ -20,7 +20,6 @@ export default function Navbar({
 }: {
   surveyVariables: {
     hasDoneSurvey: boolean;
-    surveyClosed: boolean;
     onSurveySubmit: (role: string, isNoResponse?: boolean) => void;
     setShowSurvey: (show: boolean) => void;
   };
@@ -169,7 +168,6 @@ function NavItems({
   onSignOut: () => void;
   surveyVariables: {
     hasDoneSurvey: boolean;
-    surveyClosed: boolean;
     onSurveySubmit: (role: string, isNoResponse?: boolean) => void;
     setShowSurvey: (show: boolean) => void;
   };
@@ -197,7 +195,7 @@ function NavItems({
     });
   };
 
-  const { hasDoneSurvey, surveyClosed, onSurveySubmit, setShowSurvey } = surveyVariables;
+  const { hasDoneSurvey, onSurveySubmit, setShowSurvey } = surveyVariables;
 
   return (
     <>
@@ -205,7 +203,7 @@ function NavItems({
         <SignInButton>
           <a className="btn">Log in</a>
         </SignInButton>
-        {(hasDoneSurvey || surveyClosed) ? (
+        {hasDoneSurvey ? (
           <SignUpButton>
             <a id="sign-up-button" className="btn btn-outline">
               Sign up

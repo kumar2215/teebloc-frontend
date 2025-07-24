@@ -32,12 +32,9 @@ function App() {
   const [hasDoneSurvey, setHasDoneSurvey] = useState(
     localStorage.getItem(`hasInteractedWithSurvey_${SURVEY_ID}`) === "true"
   );
-  const [surveyClosed, setSurveyClosed] = useState(false);
 
   const onSurveySubmit = (role: string, isNoResponse: boolean = false) => {
     setHasDoneSurvey(true);
-    setShowSurvey(false);
-
     const responseKey = `$survey_response_${SURVEY_QUESTION_ID}`;
 
     posthog.capture("survey sent", {
@@ -46,21 +43,13 @@ function App() {
     });
 
     localStorage.setItem(`hasInteractedWithSurvey_${SURVEY_ID}`, "true");
-    setSurveyClosed(true);
+    window.location.href = `${import.meta.env.VITE_SIGN_UP_URL}?redirectUrl=${encodeURIComponent(
+      window.location.href
+    )}`;
   };
-
-  useEffect(() => {
-    if (surveyClosed) {
-      const signUpBtn = document.getElementById("sign-up-button");
-      if (signUpBtn) {
-        signUpBtn.click();
-      }
-    }
-  }, [surveyClosed]);
 
   const surveyVariables = {
     hasDoneSurvey,
-    surveyClosed,
     onSurveySubmit,
     setShowSurvey,
   };
@@ -72,7 +61,6 @@ function App() {
       {showSurvey && (
         <GetRoleSurvey
           submitHandler={onSurveySubmit}
-          onCancel={() => setSurveyClosed(true)}
           hasDoneSurvey={hasDoneSurvey}
         />
       )}

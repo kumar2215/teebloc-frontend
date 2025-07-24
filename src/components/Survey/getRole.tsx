@@ -92,7 +92,7 @@ export default function GetRoleSurvey({
   showCrossButton = false,
 }: {
   submitHandler: (role: string) => void;
-  onCancel: () => void;
+  onCancel?: () => void;
   hasDoneSurvey: boolean;
   showCrossButton?: boolean;
 }) {
@@ -118,7 +118,7 @@ export default function GetRoleSurvey({
               submitHandler(selectedRole);
             }}
           >
-            {showCrossButton && <CloseButton onClick={onCancel} />}
+            {showCrossButton && <CloseButton onClick={onCancel!} />}
             <div className="survey-box">
               <div className="question-container">
                 <div className="question-header">
