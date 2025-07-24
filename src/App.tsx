@@ -1,10 +1,9 @@
-import { SignedIn } from "@clerk/clerk-react";
+import { SignedIn, useUser } from "@clerk/clerk-react";
 import { Redirect, Route, Switch, useRoute } from "wouter";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import MyWorksheets from "./components/MyWorksheets";
 import Navbar from "./components/Navbar";
 import Options from "./components/Options";
-import { useUser } from "@clerk/clerk-react";
 import posthog from "posthog-js";
 import Writing from "./components/writing/Writing";
 import Feedback from "./components/writing/Feedback";
