@@ -8,6 +8,8 @@ import FilterBar from "./filterBar";
 import { useDeleteWorksheet } from "./helpers";
 import { useSearchParams } from "wouter-search";
 
+const MemoPDFDownloadButton = memo(PDFDownloadButton);
+
 export default function MyWorksheets() {
   const client = useApolloClient();
   const { user } = useUser();
@@ -96,7 +98,6 @@ export default function MyWorksheets() {
       />
     );
   }, [worksheets]);
-  const MemoPDFDownloadButton = useMemo(() => memo(PDFDownloadButton), []);
 
   // Highlight logic using wouter's useSearch
   const [searchParams] = useSearchParams();
