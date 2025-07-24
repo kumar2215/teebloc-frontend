@@ -43,9 +43,11 @@ function App() {
     });
 
     localStorage.setItem(`hasInteractedWithSurvey_${SURVEY_ID}`, "true");
-    window.location.href = `${import.meta.env.VITE_SIGN_UP_URL}?redirectUrl=${encodeURIComponent(
-      window.location.href
-    )}`;
+    if (!isSignedIn) { // Redirect to sign up if not signed in
+      window.location.href = `${import.meta.env.VITE_SIGN_UP_URL}?redirectUrl=${encodeURIComponent(
+        window.location.href
+      )}`;
+    }
   };
 
   const surveyVariables = {
