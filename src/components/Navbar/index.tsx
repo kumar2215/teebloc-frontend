@@ -16,9 +16,9 @@ import { useSubscription } from "../../hooks/useSubscription.ts";
 import GetRoleSurvey from "../Survey/getRole";
 
 export default function Navbar({
-  surveyVariables,
+  surveyProps,
 }: {
-  surveyVariables: {
+  surveyProps: {
     hasDoneSurvey: boolean;
     onSurveySubmit: (role: string, isNoResponse?: boolean) => void;
     setShowSurvey: (show: boolean) => void;
@@ -137,7 +137,7 @@ export default function Navbar({
                 location={location}
                 cartItems={cartItems}
                 onSignOut={onSignOut}
-                surveyVariables={surveyVariables}
+                surveyProps={surveyProps}
               />
             </div>
           )}
@@ -148,7 +148,7 @@ export default function Navbar({
             location={location}
             cartItems={cartItems}
             onSignOut={onSignOut}
-            surveyVariables={surveyVariables}
+            surveyProps={surveyProps}
           />
         </div>
       </div>
@@ -161,12 +161,12 @@ function NavItems({
   location,
   cartItems,
   onSignOut,
-  surveyVariables,
+  surveyProps,
 }: {
   location: string;
   cartItems: any[]; // Replace 'any' with the correct type if known
   onSignOut: () => void;
-  surveyVariables: {
+  surveyProps: {
     hasDoneSurvey: boolean;
     onSurveySubmit: (role: string, isNoResponse?: boolean) => void;
     setShowSurvey: (show: boolean) => void;
@@ -195,7 +195,7 @@ function NavItems({
     });
   };
 
-  const { hasDoneSurvey, onSurveySubmit, setShowSurvey } = surveyVariables;
+  const { hasDoneSurvey, onSurveySubmit, setShowSurvey } = surveyProps;
 
   return (
     <>

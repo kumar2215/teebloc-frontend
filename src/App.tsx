@@ -1,5 +1,6 @@
 import { SignedIn, useUser } from "@clerk/clerk-react";
 import { Redirect, Route, Switch, useRoute } from "wouter";
+import { useSurvey } from "./hooks/useSurvey";
 import { useState } from "react";
 import MyWorksheets from "./components/MyWorksheets";
 import Navbar from "./components/Navbar";
@@ -24,41 +25,21 @@ function App() {
     });
   }
 
-  const SURVEY_ID = import.meta.env.VITE_USER_ROLE_SURVEY_ID;
-  const SURVEY_QUESTION_ID = import.meta.env.VITE_USER_ROLE_SURVEY_QUESTION_ID;
+  const { showSurvey, hasDoneSurvey, onSurveySubmit, setShowSurvey } =
+    useSurvey();
 
-  const [showSurvey, setShowSurvey] = useState(false);
-  const [hasDoneSurvey, setHasDoneSurvey] = useState(
-    localStorage.getItem(`hasInteractedWithSurvey_${SURVEY_ID}`) === "true"
-  );
-
-  const onSurveySubmit = (role: string, isNoResponse: boolean = false) => {
-    setHasDoneSurvey(true);
-    const responseKey = `$survey_response_${SURVEY_QUESTION_ID}`;
-
-    posthog.capture("survey sent", {
-      $survey_id: SURVEY_ID,
-      [responseKey]: isNoResponse ? "No response" : role,
-    });
-
-    localStorage.setItem(`hasInteractedWithSurvey_${SURVEY_ID}`, "true");
-    if (!isSignedIn) { // Redirect to sign up if not signed in
-      window.location.href = `${import.meta.env.VITE_SIGN_UP_URL}?redirectUrl=${encodeURIComponent(
-        window.location.href
-      )}`;
-    }
-  };
-
-  const surveyVariables = {
-    hasDoneSurvey,
-    onSurveySubmit,
-    setShowSurvey,
-  };
-  
   return (
     <div>
       {(isSignedIn || !showSurvey) && <TelegramPromotionBanner />}
-      {!isMarkedRoute && (isSignedIn || !showSurvey) && <Navbar surveyVariables={surveyVariables} />}
+      {!isMarkedRoute && (isSignedIn || !showSurvey) && (
+        <Navbar
+          surveyProps={{
+            hasDoneSurvey,
+            onSurveySubmit,
+            setShowSurvey,
+          }}
+        />
+      )}
       {showSurvey && (
         <GetRoleSurvey
           submitHandler={onSurveySubmit}
