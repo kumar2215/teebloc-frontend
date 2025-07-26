@@ -15,7 +15,15 @@ import { useState, useEffect, useRef } from "react";
 import { useSubscription } from "../../hooks/useSubscription.ts";
 import GetRoleSurvey from "../Survey/getRole";
 
-export default function Navbar() {
+export default function Navbar({
+  surveyProps,
+}: {
+  surveyProps: {
+    hasDoneSurvey: boolean;
+    onSurveySubmit: (role: string, isNoResponse?: boolean) => void;
+    setShowSurvey: (show: boolean) => void;
+  };
+}) {
   const { signOut } = useClerk();
   const cartItems = useReactiveVar(cartItemsVar);
   const [location, setLocation] = useLocation();
@@ -55,9 +63,9 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-10 p-4">
       <div className="navbar bg-primary rounded-box">
-        <div className="navbar-start flex items-center">
+        <div className="flex items-center navbar-start">
           <Link href={`/practice${queryString ? `?${queryString}` : ""}`}>
-            <div className="text-xl mr-2">Teebloc</div>
+            <div className="mr-2 text-xl">Teebloc</div>
           </Link>
           <div className="dropdown">
             <label tabIndex={0} className="m-1 btn btn-ghost">
@@ -129,6 +137,7 @@ export default function Navbar() {
                 location={location}
                 cartItems={cartItems}
                 onSignOut={onSignOut}
+                surveyProps={surveyProps}
               />
             </div>
           )}
@@ -139,6 +148,7 @@ export default function Navbar() {
             location={location}
             cartItems={cartItems}
             onSignOut={onSignOut}
+            surveyProps={surveyProps}
           />
         </div>
       </div>
@@ -151,10 +161,16 @@ function NavItems({
   location,
   cartItems,
   onSignOut,
+  surveyProps,
 }: {
   location: string;
   cartItems: any[]; // Replace 'any' with the correct type if known
   onSignOut: () => void;
+  surveyProps: {
+    hasDoneSurvey: boolean;
+    onSurveySubmit: (role: string, isNoResponse?: boolean) => void;
+    setShowSurvey: (show: boolean) => void;
+  };
 }) {
   const { getToken } = useAuth();
   const [writingMatch] = useRoute("/writing");
@@ -179,45 +195,7 @@ function NavItems({
     });
   };
 
-  const SURVEY_ID = import.meta.env.VITE_USER_ROLE_SURVEY_ID;
-  const SURVEY_QUESTION_ID = import.meta.env.VITE_USER_ROLE_SURVEY_QUESTION_ID;
-
-  const [showSurvey, setShowSurvey] = useState(false);
-  const [showThanks, setShowThanks] = useState(false);
-  const [hasDoneSurvey, setHasDoneSurvey] = useState(
-    localStorage.getItem(`hasInteractedWithSurvey_${SURVEY_ID}`) === "true"
-  );
-  const [surveyClosed, setSurveyClosed] = useState(false);
-
-  const onClose = () => {
-    setShowSurvey(false);
-    setShowThanks(false);
-    setSurveyClosed(true);
-  };
-
-  const onSurveySubmit = (role: string, isNoResponse: boolean = false) => {
-    setHasDoneSurvey(true);
-    setShowSurvey(false);
-    if (!isNoResponse) setShowThanks(true);
-
-    const responseKey = `$survey_response_${SURVEY_QUESTION_ID}`;
-
-    posthog.capture("survey sent", {
-      $survey_id: SURVEY_ID,
-      [responseKey]: isNoResponse ? "No response" : role,
-    });
-
-    localStorage.setItem(`hasInteractedWithSurvey_${SURVEY_ID}`, "true");
-  };
-
-  useEffect(() => {
-    if (surveyClosed) {
-      const signUpBtn = document.getElementById("sign-up-button");
-      if (signUpBtn) {
-        signUpBtn.click();
-      }
-    }
-  }, [surveyClosed]);
+  const { hasDoneSurvey, onSurveySubmit, setShowSurvey } = surveyProps;
 
   return (
     <>
@@ -225,7 +203,7 @@ function NavItems({
         <SignInButton>
           <a className="btn">Log in</a>
         </SignInButton>
-        {hasDoneSurvey || surveyClosed ? (
+        {hasDoneSurvey ? (
           <SignUpButton>
             <a id="sign-up-button" className="btn btn-outline">
               Sign up
@@ -240,19 +218,10 @@ function NavItems({
           </button>
         )}
       </SignedOut>
-      {(showSurvey || showThanks) && (
-        <GetRoleSurvey
-          submitHandler={onSurveySubmit}
-          onClose={onClose}
-          onCancel={onClose}
-          hasDoneSurvey={hasDoneSurvey}
-        />
-      )}
       <SignedIn>
         {!hasDoneSurvey && (
           <GetRoleSurvey
             submitHandler={onSurveySubmit}
-            onClose={onClose}
             onCancel={() => onSurveySubmit("", true)}
             hasDoneSurvey={hasDoneSurvey}
             showCrossButton={true}

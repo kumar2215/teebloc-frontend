@@ -87,14 +87,12 @@ function ChoiceOption(
 
 export default function GetRoleSurvey({
   submitHandler,
-  onClose,
   onCancel,
   hasDoneSurvey,
   showCrossButton = false,
 }: {
   submitHandler: (role: string) => void;
-  onClose: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
   hasDoneSurvey: boolean;
   showCrossButton?: boolean;
 }) {
@@ -111,24 +109,7 @@ export default function GetRoleSurvey({
   return (
     <div className="ph-survey">
       <div className="survey-container">
-        {hasDoneSurvey ? (
-          <div className="thank-you-message">
-            <CloseButton onClick={onClose} />
-            <div className="thank-you-message-container">
-              <h3 className="thank-you-message-header">
-                Thank you for your feedback!
-              </h3>
-              <button
-                className="form-submit"
-                aria-label="Submit survey"
-                type="button"
-                onClick={onCancel}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        ) : (
+        {!hasDoneSurvey && (
           <form
             className="survey-form"
             name="surveyForm"
@@ -137,7 +118,7 @@ export default function GetRoleSurvey({
               submitHandler(selectedRole);
             }}
           >
-            {showCrossButton && <CloseButton onClick={onCancel} />}
+            {showCrossButton && <CloseButton onClick={onCancel!} />}
             <div className="survey-box">
               <div className="question-container">
                 <div className="question-header">

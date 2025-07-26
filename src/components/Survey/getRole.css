@@ -77,27 +77,17 @@
   transform: translate(50%, -50%) scale(1.1);
 }
 
-.survey-box,
-.thank-you-message-container {
+.survey-box {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.question-container,
-.thank-you-message-container {
+.question-container {
   animation: 0.25s ease-out forwards;
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.thank-you-message-header {
-  color: var(--ph-survey-text-primary-color);
-  font-size: 16px;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 10px;
 }
 
 .survey-question {
