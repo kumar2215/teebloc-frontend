@@ -7,6 +7,7 @@ import {
 import { EMPTY_HTML } from "./helpers";
 import MCQAnswerSelector from "./MCQSelector";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
+import SplitPane from "./splitPlane";
 
 export default function Question({
   index,
@@ -134,7 +135,8 @@ export default function Question({
   return (
     <div key={questionId} className={`flex flex-row gap-2 ${index !== currentQuestionIndex ? "hidden" : ""}`}>
       <h3 className="text-4xl font-semibold text-center">{index + 1}</h3>
-      <div key={index} className="grid grid-cols-2 gap-10">
+      {/* <div key={index} className="grid grid-cols-2 gap-10"> */}
+      <SplitPane>
         <div className="flex flex-col">
           {question.questionimgIds.map((id: number, imgIndex: number) => (
             <img
@@ -232,7 +234,7 @@ export default function Question({
             </div>
           )}
         </div>
-      </div>
+      </SplitPane>
     </div>
   );
 }
