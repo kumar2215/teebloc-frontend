@@ -60,7 +60,7 @@ export default function Navbar() {
       <div
         className={`navbar ${
           onAuthorPage ? "bg-sky-100" : "bg-primary"
-        } rounded-box`}
+        } rounded-box min-h-[72px]`}
       >
         <div className="flex items-center navbar-start">
           <Link href={`/practice${queryString ? `?${queryString}` : ""}`}>
@@ -277,7 +277,7 @@ function NavItems({
           />
         )}
         {onAuthorPage ? (
-          <div className="flex flex-row items-center flex-shrink-0 gap-4 mr-2">
+          <div className="flex flex-row items-center flex-shrink-0 space-x-2">
             <WorksheetActions
               executeCancel={executeCancel}
               executeSave={executeSave}
@@ -304,7 +304,7 @@ function NavItems({
               )}
             </button>
             <button
-              className="w-36 btn btn-primary"
+              className="btn btn-primary"
               onClick={() => setExecuteSave(true)}
             >
               {executeSave ? (
@@ -317,7 +317,7 @@ function NavItems({
               )}
             </button>
             <button
-              className="w-36 btn btn-primary"
+              className="btn btn-primary"
               onClick={() => setExecuteCancel(true)}
             >
               Cancel
