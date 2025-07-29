@@ -52,21 +52,17 @@ export default function CustomWorksheetAnswers() {
   >({});
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
-  const [getCustomWorksheetAnswers, ] = useCustomWorksheetAnswers();
+  const [getCustomWorksheetAnswers, setCustomWorksheetAnswers] = useCustomWorksheetAnswers();
+
+  setCustomWorksheetAnswers([worksheetId!, "questionIds"], questionIds);
 
   const handleTransition = (toIndex: number) => {
     const questionId = questionIds[currentQuestionIndex];
     const saved = getCustomWorksheetAnswers([worksheetId!, questionId, "isUpToDate"]);
-    if (saved) {
-      setCurrentQuestionIndex(toIndex);
-    } else {
-      const confirmTransition = window.confirm(
-        "You have unsaved changes. Are you sure you want to switch questions?"
-      );
-      if (confirmTransition) {
-        setCurrentQuestionIndex(toIndex);
-      }
+    if (!saved) {
+      setCustomWorksheetAnswers([worksheetId!, questionId, "useLocalStorage"], true);
     }
+    setCurrentQuestionIndex(toIndex);
   };
 
   useEffect(() => {
@@ -155,17 +151,19 @@ export default function CustomWorksheetAnswers() {
 
   return (
     <div className="flex flex-col mx-6">
-      {questionData[questionIds[currentQuestionIndex]] && (
+      {[...Array(questionIds.length)].map((_, index) => (
+        questionData[questionIds[index]] && (
         <Question
-          index={currentQuestionIndex}
+          index={index}
           userId={user?.id || ""}
-          questionIds={questionIds}
+          question={questionData[questionIds[index]]}
+          questionId={questionIds[index]}
           worksheetId={worksheetId!}
-          questionData={questionData}
           questionPartsData={questionPartsData}
           setQuestionPartsData={setQuestionPartsData}
+          currentQuestionIndex={currentQuestionIndex}
         />
-      )}
+      )))}
       <div className="relative bottom-4 max-w-[80%] mt-20 mx-auto overflow-x-auto join">
         {[...Array(questionIds.length)].map((_, index) => (
           <button

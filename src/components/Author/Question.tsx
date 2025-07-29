@@ -11,26 +11,24 @@ import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor
 export default function Question({
   index,
   userId,
-  questionIds,
+  question,
+  questionId,
   worksheetId,
-  questionData,
   questionPartsData,
   setQuestionPartsData,
+  currentQuestionIndex,
 } : { 
   index: number,
   userId: string,
-  questionIds: string[],
+  question: Record<string, any>,
+  questionId: string,
   worksheetId: string,
-  questionData: Record<string, any>,
   questionPartsData: Record<string, string[]>,
   setQuestionPartsData: React.Dispatch<React.SetStateAction<Record<string, string[]>>>,
+  currentQuestionIndex: number,
 }) {
-  const questionId = questionIds[index];
-  const question = questionData[questionId];
   const [getCustomWorksheetAnswers, setCustomWorksheetAnswers] = useCustomWorksheetAnswers();
-
-  const [questionPartsLoading, setQuestionPartsLoading] =
-    useState<boolean>(false);
+  const [questionPartsLoading, setQuestionPartsLoading] = useState<boolean>(false);
 
   const { loading, data, refetch } = useQuery(GET_CUSTOM_ANSWER, {
     variables: {
@@ -39,6 +37,9 @@ export default function Question({
     },
     fetchPolicy: "network-only", // Intentionally bypass cache for fresh data
   });
+
+  const customAnswerExists = (data?.custom_answers_for_worksheets.length || 0) > 0;
+  const customAnswerData = data?.custom_answers_for_worksheets[0]?.answer || {};
 
   useEffect(() => {
     // Fetch question parts if not already loaded
@@ -49,7 +50,7 @@ export default function Question({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...questionData[questionId], questionId }),
+        body: JSON.stringify({ ...question, questionId }),
       })
         .then((response) => response.json())
         .then((data) => {
@@ -62,12 +63,12 @@ export default function Question({
           setQuestionPartsLoading(false);
         });
     }
-    // Refetch custom answer data when questionId changes
+    // Refetch custom answer data when currentQuestionIndex changes
     refetch({
       authorId: userId,
       questionId: questionId,
     });
-  }, [questionId]);
+  }, [currentQuestionIndex]);
 
   // This is needed to refresh the custom answer data to keep its initial values
   // in sync with the latest data saved to the DB.
@@ -84,34 +85,41 @@ export default function Question({
     }
   }, [refreshCustomAnswer]);
 
-  const customAnswerExists = (data?.custom_answers_for_worksheets ?? []).length > 0;
-  const customAnswerData = data?.custom_answers_for_worksheets[0]?.answer || {};
-
-  setCustomWorksheetAnswers([worksheetId!, "questionIds"], questionIds);
   setCustomWorksheetAnswers(
-    [worksheetId!, questionId!, "operation"],
+    [worksheetId, questionId, "operation"],
     customAnswerExists ? "update" : "insert"
   );
 
-  const [customAnswer, setCustomAnswer] = useState(getCustomWorksheetAnswers([worksheetId!, questionId!]));
+  const [customAnswer, setCustomAnswer] = useState(getCustomWorksheetAnswers([worksheetId, questionId]));
 
+  const getCurrentCustomAnswer = (part: string, type: string) => {
+    return (initialValue: string) => {
+      // useLocalStorage is used to determine if the custom answer should be taken from local storage or from the DB
+      const useLocalStorage = getCustomWorksheetAnswers([worksheetId, questionId, "useLocalStorage"]);
+      return useLocalStorage
+        ? getCustomWorksheetAnswers([worksheetId, questionId, part, type])
+        : initialValue;
+    };
+  };
+  
   const getCustomAnswerUpdater = (part: string, type: string) => {
     return (value: string, isUpToDate: boolean = false) => {
-      if (getCustomWorksheetAnswers([worksheetId!, "refresh"])) setRefreshCustomAnswer(true);
+      if (getCustomWorksheetAnswers([worksheetId, "refresh"])) setRefreshCustomAnswer(true);
       setCustomAnswer((prev: any) => ({
         ...prev,
         [part]: {
           ...(prev?.[part] || {}),
           [type]: value,
         },
-        isUpToDate: isUpToDate,
+        isUpToDate: isUpToDate && (prev?.isUpToDate ?? true),
         operation: customAnswerExists ? "update" : "insert",
+        useLocalStorage: getCustomWorksheetAnswers([worksheetId, questionId, "useLocalStorage"]),
       }));
     };
   };
 
   useEffect(() => {
-    setCustomWorksheetAnswers([worksheetId!, questionId!], customAnswer);
+    setCustomWorksheetAnswers([worksheetId, questionId], customAnswer);
   }, [customAnswer]);
 
   if (loading || !data) {
@@ -124,7 +132,7 @@ export default function Question({
   }
 
   return (
-    <div key={questionId} className="flex flex-row gap-2">
+    <div key={questionId} className={`flex flex-row gap-2 ${index !== currentQuestionIndex ? "hidden" : ""}`}>
       <h3 className="text-4xl font-semibold text-center">{index + 1}</h3>
       <div key={index} className="grid grid-cols-2 gap-10">
         <div className="flex flex-col">
@@ -156,6 +164,7 @@ export default function Question({
               <h2 className="mt-4 mb-2 font-bold">Your Answer</h2>
               <MCQAnswerSelector
                 initialValue={customAnswerData["option"]?.["answer"] || ""}
+                getCustomAnswer={getCurrentCustomAnswer("option", "answer")}
                 updateCustomAnswer={getCustomAnswerUpdater("option", "answer")}
               />
               <div className="flex flex-row mt-4 mb-2">
@@ -164,6 +173,7 @@ export default function Question({
               </div>
               <SimpleEditor
                 initialContent={customAnswerData["option"]?.["explanation"] || EMPTY_HTML}
+                getCustomAnswer={getCurrentCustomAnswer("option", "explanation")}
                 updateCustomAnswer={getCustomAnswerUpdater("option", "explanation")}
               />
             </div>
@@ -181,6 +191,7 @@ export default function Question({
                       <h2 className="mt-4 mb-2 font-bold">{`Answer for ${part}`}</h2>
                       <SimpleEditor
                         initialContent={customAnswerData[part]?.["answer"] || EMPTY_HTML}
+                        getCustomAnswer={getCurrentCustomAnswer(part, "answer")}
                         updateCustomAnswer={getCustomAnswerUpdater(part, "answer")}
                       />
                       <div className="flex flex-row mt-4 mb-2">
@@ -191,6 +202,7 @@ export default function Question({
                       </div>
                       <SimpleEditor
                         initialContent={customAnswerData[part]?.["explanation"] || EMPTY_HTML}
+                        getCustomAnswer={getCurrentCustomAnswer(part, "explanation")}
                         updateCustomAnswer={getCustomAnswerUpdater(part, "explanation")}
                       />
                     </div>
@@ -201,6 +213,7 @@ export default function Question({
                   <h2 className="mt-4 mb-2 font-bold">Answer</h2>
                   <SimpleEditor
                     initialContent={customAnswerData["main"]?.["answer"] || EMPTY_HTML}
+                    getCustomAnswer={getCurrentCustomAnswer("main", "answer")}
                     updateCustomAnswer={getCustomAnswerUpdater("main", "answer")}
                   />
                   <div className="flex flex-row mt-4 mb-2">
@@ -211,6 +224,7 @@ export default function Question({
                   </div>
                   <SimpleEditor
                     initialContent={customAnswerData["main"]?.["explanation"] || EMPTY_HTML}
+                    getCustomAnswer={getCurrentCustomAnswer("main", "explanation")}
                     updateCustomAnswer={getCustomAnswerUpdater("main", "explanation")}
                   />
                 </div>

@@ -2,18 +2,23 @@ import { useUser } from "@clerk/clerk-react";
 import { useCustomWorksheetAnswers } from "@/hooks/useCustomWorksheetAnswers";
 import PublishWorksheet from "./publishWorksheet";
 import SaveWorksheet from "./saveWorksheet";
+import CancelWorksheet from "./cancelWorksheet";
 
 export default function WorksheetActions({
+  executeCancel,
   executeSave,
   executePublish,
   isCurrentlyPublished,
+  setExecuteCancel,
   setExecuteSave,
   setExecutePublish,
   setIsCurrentlyPublished
 }: {
+  executeCancel: boolean;
   executeSave: boolean;
   executePublish: boolean;
   isCurrentlyPublished: boolean;
+  setExecuteCancel: (value: boolean) => void;
   setExecuteSave: (value: boolean) => void;
   setExecutePublish: (value: boolean) => void;
   setIsCurrentlyPublished: (value: boolean) => void;
@@ -42,6 +47,13 @@ export default function WorksheetActions({
         setCustomWorksheetAnswers={setCustomWorksheetAnswers}
         executeSave={executeSave}
         setExecuteSave={setExecuteSave}
+      />
+      <CancelWorksheet
+        worksheetId={worksheetId!}
+        getCustomWorksheetAnswers={getCustomWorksheetAnswers}
+        setCustomWorksheetAnswers={setCustomWorksheetAnswers}
+        executeCancel={executeCancel}
+        setExecuteCancel={setExecuteCancel}
       />
     </>
   );

@@ -138,7 +138,6 @@ export default function Navbar() {
                 location={location}
                 cartItems={cartItems}
                 onSignOut={onSignOut}
-                setLocation={setLocation}
               />
             </div>
           )}
@@ -149,7 +148,6 @@ export default function Navbar() {
             location={location}
             cartItems={cartItems}
             onSignOut={onSignOut}
-            setLocation={setLocation}
           />
         </div>
       </div>
@@ -162,17 +160,16 @@ function NavItems({
   location,
   cartItems,
   onSignOut,
-  setLocation,
 }: {
   location: string;
   cartItems: any[]; // Replace 'any' with the correct type if known
   onSignOut: () => void;
-  setLocation: (value: string) => void;
 }) {
   const { getToken } = useAuth();
   const [writingMatch] = useRoute("/writing");
   const practiceMatch = location.startsWith("/practice");
   const onAuthorPage = location === "/practice/author";
+  const [executeCancel, setExecuteCancel] = useState(false);
   const [executeSave, setExecuteSave] = useState(false);
   const [executePublish, setExecutePublish] = useState(false);
   const [isCurrentlyPublished, setIsCurrentlyPublished] = useState(false);
@@ -282,9 +279,11 @@ function NavItems({
         {onAuthorPage ? (
           <div className="flex flex-row items-center flex-shrink-0 gap-4 mr-2">
             <WorksheetActions
+              executeCancel={executeCancel}
               executeSave={executeSave}
               executePublish={executePublish}
               isCurrentlyPublished={isCurrentlyPublished}
+              setExecuteCancel={setExecuteCancel}
               setExecuteSave={setExecuteSave}
               setExecutePublish={setExecutePublish}
               setIsCurrentlyPublished={setIsCurrentlyPublished}
@@ -319,7 +318,7 @@ function NavItems({
             </button>
             <button
               className="w-36 btn btn-primary"
-              onClick={() => setLocation("/practice/worksheets")}
+              onClick={() => setExecuteCancel(true)}
             >
               Cancel
             </button>

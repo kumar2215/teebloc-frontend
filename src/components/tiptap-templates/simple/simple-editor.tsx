@@ -169,9 +169,11 @@ const MobileToolbarContent = ({
 
 export function SimpleEditor({
   initialContent,
+  getCustomAnswer,
   updateCustomAnswer,
 }: {
   initialContent: string;
+  getCustomAnswer: (initialValue: string) => string;
   updateCustomAnswer: (value: string, isUpToDate?: boolean) => void;
 }) {
   const isMobile = useMobile();
@@ -214,7 +216,7 @@ export function SimpleEditor({
       TrailingNode,
       Link.configure({ openOnClick: false }),
     ],
-    content: initialContent,
+    content: getCustomAnswer(initialContent),
   });
 
   const bodyRect = useCursorVisibility({

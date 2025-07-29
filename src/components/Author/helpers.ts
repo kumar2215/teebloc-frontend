@@ -1,6 +1,7 @@
 
 export const EMPTY_HTML = "<p></p>";
 export const isEmpty = (value: string) => value === EMPTY_HTML || value.trim() === "";
+export const metadataKeys = ["isUpToDate", "useLocalStorage", "operation"];
 
 function processImages(customAnswerForQuestion: Record<string, any>, newImageUrls: Record<string, Record<string, number[]>> | undefined) {
   const parser = new DOMParser();
@@ -68,7 +69,7 @@ export default async function saveWorksheet(customAnswers: Record<string, any>, 
     if (!customAnswerForQuestion || customAnswerForQuestion.isUpToDate) continue; // Skip the question
 
     const operation = customAnswerForQuestion.operation;
-    const parts = Object.keys(customAnswerForQuestion).filter(key => key !== "operation" && key !== "isUpToDate");
+    const parts = Object.keys(customAnswerForQuestion).filter(key => !metadataKeys.includes(key));
     const answers = parts.map(part => customAnswerForQuestion[part].answer);
     const explanations = parts.map(part => customAnswerForQuestion[part].explanation);
     const allEmpty = answers.every(isEmpty) && explanations.every(isEmpty);
@@ -76,13 +77,14 @@ export default async function saveWorksheet(customAnswers: Record<string, any>, 
     const answerJson = { ...customAnswerForQuestion };
     delete answerJson.operation;
     delete answerJson.isUpToDate;
+    delete answerJson.useLocalStorage;
 
     const imageUrls = processImages(answerJson, undefined);
 
     if (allEmpty && operation === "update") {
       saveOperations.delete(questionId); // delete the record as all parts are empty
       saveCustomAnswerImages(userId, questionId, imageUrls, "delete");
-    } else if (operation === "insert") {
+    } else if (!allEmpty && operation === "insert") {
       const newImageUrls = await saveCustomAnswerImages(userId, questionId, imageUrls, "insert");
       const newAnswerJson = processImages(answerJson, newImageUrls);
       saveOperations.insert(questionId, newAnswerJson);

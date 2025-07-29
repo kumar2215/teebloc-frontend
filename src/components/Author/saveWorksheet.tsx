@@ -1,5 +1,5 @@
 import { useMutation } from "@apollo/client";
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   INSERT_CUSTOM_ANSWER,
   UPDATE_CUSTOM_ANSWER,
@@ -23,21 +23,18 @@ export default function SaveWorksheet({
   executeSave: boolean;
   setExecuteSave: (value: boolean) => void;
 }) {
+  const [questionsSaved, setQuestionsSaved] = useState<Record<string, boolean>>({});
+
   const onSaveComplete = () => {
     setCustomWorksheetAnswers([worksheetId, "refresh"], true);
+    setQuestionsSaved({});
     setExecuteSave(false);
     window.alert("Custom answers saved successfully!");
   }
 
-  const [insertCustomAnswer] = useMutation(INSERT_CUSTOM_ANSWER, {
-    onCompleted: onSaveComplete,
-  });
-  const [updateCustomAnswer] = useMutation(UPDATE_CUSTOM_ANSWER, {
-    onCompleted: onSaveComplete,
-  });
-  const [deleteCustomAnswer] = useMutation(DELETE_CUSTOM_ANSWER, {
-    onCompleted: onSaveComplete,
-  });
+  const [insertCustomAnswer] = useMutation(INSERT_CUSTOM_ANSWER);
+  const [updateCustomAnswer] = useMutation(UPDATE_CUSTOM_ANSWER);
+  const [deleteCustomAnswer] = useMutation(DELETE_CUSTOM_ANSWER);
 
   const saveOperations = {
     insert: (questionId: string, answerJson: any) => {
@@ -52,8 +49,10 @@ export default function SaveWorksheet({
         ...getCustomWorksheetAnswers([worksheetId, questionId]),
         isUpToDate: true,
         operation: "update",
+        useLocalStorage: undefined,
       };
       setCustomWorksheetAnswers([worksheetId, questionId], newCustomAnswers);
+      setQuestionsSaved((prev) => ({ ...prev, [questionId]: true }));
     },
     update: (questionId: string, answerJson: any) => {
       updateCustomAnswer({
@@ -64,6 +63,8 @@ export default function SaveWorksheet({
         },
       });
       setCustomWorksheetAnswers([worksheetId, questionId, "isUpToDate"], true);
+      setCustomWorksheetAnswers([worksheetId, questionId, "useLocalStorage"], undefined);
+      setQuestionsSaved((prev) => ({ ...prev, [questionId]: true }));
     },
     delete: (questionId: string) => {
       deleteCustomAnswer({
@@ -77,6 +78,7 @@ export default function SaveWorksheet({
       };
       delete newCustomWorksheetAnswers[worksheetId][questionId];
       setCustomWorksheetAnswers([], newCustomWorksheetAnswers);
+      setQuestionsSaved((prev) => ({ ...prev, [questionId]: true }));
     },
   };
 
@@ -91,6 +93,11 @@ export default function SaveWorksheet({
         window.alert("All custom answers are up to date. No changes to save.");
         setExecuteSave(false);
       } else {
+        const saved: Record<string, boolean> = {};
+        questionIds.forEach((id: string) => {
+          saved[id] = customAnswers[id]?.isUpToDate !== false;
+        });
+        setQuestionsSaved(saved);
         saveWorksheet(customAnswers, saveOperations, userId);
       }
       setTimeout(() => {
@@ -98,6 +105,12 @@ export default function SaveWorksheet({
       }, 100);
     }
   }, [executeSave]);
+
+  useEffect(() => {
+    if (executeSave && Object.values(questionsSaved).every((saved) => saved)) {
+      onSaveComplete();
+    }
+  }, [questionsSaved]);
 
   return null;
 }

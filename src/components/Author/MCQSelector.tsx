@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 
 export default function MCQAnswerSelector({
   initialValue = "",
+  getCustomAnswer,
   updateCustomAnswer,
 } : {
   initialValue?: string;
+  getCustomAnswer: (initialValue: string) => string;
   updateCustomAnswer: (value: string, isUpToDate?: boolean) => void;
 }
 ) {
-  const [selectedAnswer, setSelectedAnswer] = useState(initialValue);
+  const [selectedAnswer, setSelectedAnswer] = useState(getCustomAnswer(initialValue));
 
   useEffect(() => {
     if (selectedAnswer === initialValue) {

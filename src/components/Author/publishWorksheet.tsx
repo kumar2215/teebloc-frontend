@@ -5,7 +5,7 @@ import {
   GET_PUBLISHED_STATUS,
   SET_PUBLISHED_STATUS,
 } from "./data";
-import { isEmpty } from "./helpers";
+import { isEmpty, metadataKeys } from "./helpers";
 
 // Empty component used to publish worksheet
 export default function PublishWorksheet({
@@ -65,7 +65,7 @@ export default function PublishWorksheet({
   const allQuestionPartsAnswered = (customAnswers: Record<string, any>, questionIds: string[]) => {
     return questionIds.every((questionId) => {
       const customAnswerForQuestion = customAnswers[questionId];
-      const parts = Object.keys(customAnswerForQuestion).filter(key => key !== "operation" && key !== "isUpToDate");
+      const parts = Object.keys(customAnswerForQuestion).filter(key => !metadataKeys.includes(key));
       const answers = parts.map(part => customAnswerForQuestion[part].answer);
       return !answers.some(isEmpty);
     });
