@@ -32,6 +32,7 @@ export default function PublishWorksheet({
       authorId: userId,
       worksheetId: Number(worksheetId),
     },
+    fetchPolicy: "no-cache", // Ensure fresh data
   });
 
   useEffect(() => {
