@@ -42,7 +42,7 @@ export default function SplitPane({
     const container = containerRef.current;
     if (!container) return;
 
-    const maxLeft = container.clientWidth - minRight - 8; // 8px for the handle
+    const maxLeft = container.clientWidth - minRight - 4; // 4px for the handle
     let newLeft = startLeftWidth.current + dx;
     newLeft = Math.max(newLeft, minLeft);
     newLeft = Math.min(newLeft, maxLeft);
