@@ -1,15 +1,17 @@
-import { SignedIn } from "@clerk/clerk-react";
+import { SignedIn, useUser } from "@clerk/clerk-react";
 import { Redirect, Route, Switch, useRoute } from "wouter";
+import { useSurvey } from "./hooks/useSurvey";
+import { useState } from "react";
 import MyWorksheets from "./components/MyWorksheets";
 import Navbar from "./components/Navbar";
 import Options from "./components/Options";
-import { useUser } from "@clerk/clerk-react";
 import posthog from "posthog-js";
 import Writing from "./components/writing/Writing";
 import Feedback from "./components/writing/Feedback";
 import Subscribe from "./components/Subscribe";
 import CreateWorksheet from "./components/CreateWorksheet";
 import CustomWorksheetAnswers from "./components/Author";
+import GetRoleSurvey from "./components/Survey/getRole";
 
 function App() {
   const { isSignedIn, user, isLoaded } = useUser();
@@ -24,10 +26,27 @@ function App() {
     });
   }
 
+  const { showSurvey, hasDoneSurvey, onSurveySubmit, setShowSurvey } =
+    useSurvey();
+
   return (
     <div>
-      <TelegramPromotionBanner />
-      {!isMarkedRoute && <Navbar />}
+      {(isSignedIn || !showSurvey) && <TelegramPromotionBanner />}
+      {!isMarkedRoute && (isSignedIn || !showSurvey) && (
+        <Navbar
+          surveyProps={{
+            hasDoneSurvey,
+            onSurveySubmit,
+            setShowSurvey,
+          }}
+        />
+      )}
+      {showSurvey && (
+        <GetRoleSurvey
+          submitHandler={onSurveySubmit}
+          hasDoneSurvey={hasDoneSurvey}
+        />
+      )}
       <Switch>
         <Route path="/">
           <Redirect to="/practice" />
