@@ -135,7 +135,6 @@ export default function Question({
   return (
     <div key={questionId} className={`flex flex-row gap-2 ${index !== currentQuestionIndex ? "hidden" : ""}`}>
       <h3 className="text-4xl font-semibold text-center">{index + 1}</h3>
-      {/* <div key={index} className="grid grid-cols-2 gap-10"> */}
       <SplitPane>
         <div className="flex flex-col">
           {question.questionimgIds.map((id: number, imgIndex: number) => (

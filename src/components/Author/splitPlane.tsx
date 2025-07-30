@@ -13,22 +13,42 @@ export default function SplitPane({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [leftWidth, setLeftWidth] = useState<number | null>(null);
+  const [rightWidth, setRightWidth] = useState<number | null>(null);
   const startX = useRef(0);
   const startLeftWidth = useRef(0);
+  const startRightWidth = useRef(0);
+  const HANDLE_WIDTH = 4; // px
+  const hasDragged = useRef(false);
 
-  // on mount, set initial width
+  // Use ResizeObserver to set initial width and respond to container resizes
   useEffect(() => {
     const container = containerRef.current;
-    if (container && leftWidth === null) {
-      setLeftWidth(container.clientWidth * initialLeft);
-    }
-  }, [initialLeft, leftWidth]);
+    if (!container) return;
+    const setInitialWidths = () => {
+      if (hasDragged.current) return; // Don't reset if user has dragged
+      const computedStyle = window.getComputedStyle(container);
+      const gapPx = parseFloat(computedStyle.columnGap || computedStyle.gap || '0');
+      const totalWidth = container.clientWidth - gapPx - HANDLE_WIDTH;
+      const left = totalWidth * initialLeft;
+      const right = totalWidth - left;
+      setLeftWidth(left);
+      setRightWidth(right);
+    };
+    setInitialWidths();
+    const observer = new window.ResizeObserver(() => {
+      setInitialWidths();
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [initialLeft]);
 
   // Handle drag events
   const onDragStart = (e) => {
     e.preventDefault();
+    hasDragged.current = true;
     startX.current = e.touches ? e.touches[0].pageX : e.pageX;
     startLeftWidth.current = leftWidth ?? 0;
+    startRightWidth.current = rightWidth ?? 0;
     window.addEventListener('mousemove', onDrag);
     window.addEventListener('mouseup', onDragEnd);
     window.addEventListener('touchmove', onDrag, { passive: false });
@@ -41,13 +61,25 @@ export default function SplitPane({
     const dx = clientX - startX.current;
     const container = containerRef.current;
     if (!container) return;
-
-    const maxLeft = container.clientWidth - minRight - 4; // 4px for the handle
+    const computedStyle = window.getComputedStyle(container);
+    const gapPx = parseFloat(computedStyle.columnGap || computedStyle.gap || '0');
+    const totalWidth = container.clientWidth - gapPx - HANDLE_WIDTH;
     let newLeft = startLeftWidth.current + dx;
+    let newRight = totalWidth - newLeft;
     newLeft = Math.max(newLeft, minLeft);
-    newLeft = Math.min(newLeft, maxLeft);
-
+    newRight = Math.max(newRight, minRight);
+    if (newLeft + newRight > totalWidth) {
+      // Adjust to fit
+      if (dx > 0) {
+        newLeft = totalWidth - minRight;
+        newRight = minRight;
+      } else {
+        newLeft = minLeft;
+        newRight = totalWidth - minLeft;
+      }
+    }
     setLeftWidth(newLeft);
+    setRightWidth(newRight);
   };
 
   const onDragEnd = () => {
@@ -67,7 +99,7 @@ export default function SplitPane({
       {/* Left pane */}
       <div
         className="overflow-auto"
-        style={{ flex: `0 0 ${leftWidth}px`, minWidth: `${minLeft}px` }}
+        style={{ flex: `0 0 ${leftWidth}px`, minWidth: `${minLeft}px`, maxWidth: `${leftWidth}px` }}
       >
         {leftContent}
       </div>
@@ -75,14 +107,15 @@ export default function SplitPane({
       {/* Drag handle */}
       <div
         className="w-1 cursor-col-resize bg-gray-100 hover:bg-gray-200"
+        style={{ width: `${HANDLE_WIDTH}px`, minWidth: `${HANDLE_WIDTH}px`, maxWidth: `${HANDLE_WIDTH}px` }}
         onMouseDown={onDragStart}
         onTouchStart={onDragStart}
       />
 
       {/* Right pane */}
       <div
-        className="flex-1 overflow-auto"
-        style={{ minWidth: `${minRight}px` }}
+        className="overflow-auto"
+        style={{ flex: `0 0 ${rightWidth}px`, minWidth: `${minRight}px`, maxWidth: `${rightWidth}px` }}
       >
         {rightContent}
       </div>
