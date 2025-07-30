@@ -125,7 +125,7 @@ export default function Question({
 
   if (loading || !data) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className={`flex items-center justify-center h-screen ${index !== currentQuestionIndex ? "hidden" : ""}`}>
         <span className="loading loading-spinner"></span>
         {"Loading custom answer..."}
       </div>
