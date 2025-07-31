@@ -619,7 +619,7 @@ export default function Options() {
           placeholder="0"
           min="0"
           value={topXQuestionsToAdd}
-          onChange={(e) => setTopXQuestionsToAdd(parseInt(e.target.value, 10))}
+          onChange={(e) => setTopXQuestionsToAdd(parseInt(e.target.value, 10) || 0)}
         />
         <fieldset className="fieldset">
           <button
@@ -635,11 +635,11 @@ export default function Options() {
               ];
               cartItemsVar(newCartItems);
             }}
-            disabled={!topXQuestionsToAdd || (cartItems.length + topXQuestionsToAdd - 1 >= MAX_QUESTIONS_FOR_WORKSHEET)}
+            disabled={!topXQuestionsToAdd || (cartItems.length + topXQuestionsToAdd > MAX_QUESTIONS_FOR_WORKSHEET)}
           >
             Add to Worksheet
           </button>
-          {cartItems.length + topXQuestionsToAdd - 1 >= MAX_QUESTIONS_FOR_WORKSHEET && (
+          {cartItems.length + topXQuestionsToAdd > MAX_QUESTIONS_FOR_WORKSHEET && (
             <span className="label text-red-500 text-xs">
               You can only add up to {MAX_QUESTIONS_FOR_WORKSHEET} questions to a worksheet.
             </span>
