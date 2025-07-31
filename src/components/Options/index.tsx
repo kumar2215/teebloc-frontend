@@ -591,60 +591,61 @@ export default function Options() {
         }}
       />
 
-      <span className="text-xs text-gray-500">
-        All schools are selected by default
-      </span>
+      <div className="flex flex-col gap-0 py-8">
+        {/* Add the toggle switch right after Instructions */}
+        <div className="flex items-center flex-row gap-4">
+          <label className="gap-4 cursor-pointer label">
+            <span>Exclude questions included in my worksheets</span>
+            <input
+              type="checkbox"
+              className="checkbox"
+              checked={excludeUsedQuestions}
+              onChange={(e) => setExcludeUsedQuestions(e.target.checked)}
+            />
+          </label>
+        </div>
 
-      {/* Add the toggle switch right after Instructions */}
-      <div className="form-control w-fit">
-        <label className="gap-4 cursor-pointer label">
-          <span className="label-text">
-            Exclude questions included in my worksheets
-          </span>
+        <div className="flex items-center flex-row gap-4">
+          <label>Add top x results to your worksheet:</label>
           <input
-            type="checkbox"
-            className="checkbox"
-            checked={excludeUsedQuestions}
-            onChange={(e) => setExcludeUsedQuestions(e.target.checked)}
+            type="number"
+            className="grow input input-bordered max-w-20 max-h-10"
+            style={{ outline: "none" }}
+            // placeholder="0"
+            min="0"
+            value={topXQuestionsToAdd === 0 ? "" : topXQuestionsToAdd}
+            onChange={(e) =>
+              setTopXQuestionsToAdd(parseInt(e.target.value, 10) || 0)
+            }
           />
-        </label>
-      </div>
-
-      <div className="flex flex-row gap-4">
-        <label className="font-medium my-2">Add top x results to your worksheet:</label>
-        <input
-          type="number"
-          className="grow input input-bordered max-w-20 max-h-10 my-1"
-          style={{ outline: "none" }}
-          placeholder="0"
-          min="0"
-          value={topXQuestionsToAdd}
-          onChange={(e) => setTopXQuestionsToAdd(parseInt(e.target.value, 10) || 0)}
-        />
-        <fieldset className="fieldset">
-          <button
-            className="btn btn-neutral"
-            onClick={() => {
-              const questionIdsToAdd = displayedQuestions
-                .filter((q) => !cartItems.includes(q.id))
-                .map((q) => q.id)
-                .slice(0, topXQuestionsToAdd);
-              const newCartItems = [
-                ...cartItems,
-                ...questionIdsToAdd,
-              ];
-              cartItemsVar(newCartItems);
-            }}
-            disabled={!topXQuestionsToAdd || (cartItems.length + topXQuestionsToAdd > MAX_QUESTIONS_FOR_WORKSHEET)}
-          >
-            Add to Worksheet
-          </button>
-          {cartItems.length + topXQuestionsToAdd > MAX_QUESTIONS_FOR_WORKSHEET && (
-            <span className="label text-red-500 text-xs">
-              You can only add up to {MAX_QUESTIONS_FOR_WORKSHEET} questions to a worksheet.
-            </span>
-          )}
-        </fieldset>
+          <fieldset className="fieldset">
+            <button
+              className="btn btn-neutral"
+              onClick={() => {
+                const questionIdsToAdd = displayedQuestions
+                  .filter((q) => !cartItems.includes(q.id))
+                  .map((q) => q.id)
+                  .slice(0, topXQuestionsToAdd);
+                const newCartItems = [...cartItems, ...questionIdsToAdd];
+                cartItemsVar(newCartItems);
+              }}
+              disabled={
+                !topXQuestionsToAdd ||
+                cartItems.length + topXQuestionsToAdd >
+                  MAX_QUESTIONS_FOR_WORKSHEET
+              }
+            >
+              Add to Worksheet
+            </button>
+            {cartItems.length + topXQuestionsToAdd >
+              MAX_QUESTIONS_FOR_WORKSHEET && (
+              <span className="absolute label text-red-500 text-xs">
+                You can only add up to {MAX_QUESTIONS_FOR_WORKSHEET} questions
+                to a worksheet.
+              </span>
+            )}
+          </fieldset>
+        </div>
       </div>
 
       {q_loading && (!q_data?.questions || q_data.questions.length === 0) && (
