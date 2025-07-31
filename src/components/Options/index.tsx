@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useQuery } from "@apollo/client";
+import { useQuery, useReactiveVar } from "@apollo/client";
 import { useUser } from "@clerk/clerk-react";
 import Questions from "../Questions";
 import {
@@ -23,6 +23,7 @@ export interface Option {
   readonly label: string;
 }
 
+export const MAX_QUESTIONS_FOR_WORKSHEET = 30;
 const levels = {
   Primary: [
     "Primary 1",
@@ -43,7 +44,10 @@ export default function Options() {
   const { data: allData, loading: allLoading } = useQuery(GET_ALL_OPTIONS);
 
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
+  const [topXQuestionsToAdd, setTopXQuestionsToAdd] = useState(0);
   const [downloadLoading, setDownloadLoading] = useState(false);
+
+  const cartItems = useReactiveVar(cartItemsVar);
 
   const [levelChosen, setLevelChosen] = useState<string>(
     useQueryParamsState("level", "")
@@ -604,6 +608,43 @@ export default function Options() {
             onChange={(e) => setExcludeUsedQuestions(e.target.checked)}
           />
         </label>
+      </div>
+
+      <div className="flex flex-row gap-4">
+        <label className="font-medium my-2">Add top x results to your worksheet:</label>
+        <input
+          type="number"
+          className="grow input input-bordered max-w-20 max-h-10 my-1"
+          style={{ outline: "none" }}
+          placeholder="0"
+          min="0"
+          value={topXQuestionsToAdd}
+          onChange={(e) => setTopXQuestionsToAdd(parseInt(e.target.value, 10))}
+        />
+        <fieldset className="fieldset">
+          <button
+            className="btn btn-neutral"
+            onClick={() => {
+              const questionIdsToAdd = displayedQuestions
+                .filter((q) => !cartItems.includes(q.id))
+                .map((q) => q.id)
+                .slice(0, topXQuestionsToAdd);
+              const newCartItems = [
+                ...cartItems,
+                ...questionIdsToAdd,
+              ];
+              cartItemsVar(newCartItems);
+            }}
+            disabled={!topXQuestionsToAdd || (cartItems.length + topXQuestionsToAdd - 1 >= MAX_QUESTIONS_FOR_WORKSHEET)}
+          >
+            Add to Worksheet
+          </button>
+          {cartItems.length + topXQuestionsToAdd - 1 >= MAX_QUESTIONS_FOR_WORKSHEET && (
+            <span className="label text-red-500 text-xs">
+              You can only add up to {MAX_QUESTIONS_FOR_WORKSHEET} questions to a worksheet.
+            </span>
+          )}
+        </fieldset>
       </div>
 
       {q_loading && (!q_data?.questions || q_data.questions.length === 0) && (
