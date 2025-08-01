@@ -608,15 +608,17 @@ export default function Options() {
         <div className="flex items-center flex-row gap-4">
           <label>Add top x results to your worksheet:</label>
           <input
-            type="number"
+            type="text"
             className="grow input input-bordered max-w-20 max-h-10"
             style={{ outline: "none" }}
             // placeholder="0"
             min="0"
             value={topXQuestionsToAdd === 0 ? "" : topXQuestionsToAdd}
-            onChange={(e) =>
-              setTopXQuestionsToAdd(parseInt(e.target.value, 10) || 0)
-            }
+            onChange={(e) => {
+              let value = parseInt(e.target.value, 10);
+              if (isNaN(value) || value < 0) value = 0;
+              setTopXQuestionsToAdd(value);
+            }}
           />
           <fieldset className="fieldset">
             <button
@@ -632,18 +634,25 @@ export default function Options() {
               disabled={
                 !topXQuestionsToAdd ||
                 cartItems.length + topXQuestionsToAdd >
-                  MAX_QUESTIONS_FOR_WORKSHEET
+                  MAX_QUESTIONS_FOR_WORKSHEET ||
+                cartItems.length + topXQuestionsToAdd >
+                (excludeUsedQuestions ? totalExcludingUsed : totalQuestions)
               }
             >
               Add to Worksheet
             </button>
-            {cartItems.length + topXQuestionsToAdd >
-              MAX_QUESTIONS_FOR_WORKSHEET && (
-              <span className="absolute label text-red-500 text-xs">
-                You can only add up to {MAX_QUESTIONS_FOR_WORKSHEET} questions
-                to a worksheet.
-              </span>
-            )}
+            {cartItems.length + topXQuestionsToAdd > MAX_QUESTIONS_FOR_WORKSHEET
+              ? (
+                <span className="absolute label text-red-500 text-xs">
+                  {`You can only add up to ${MAX_QUESTIONS_FOR_WORKSHEET} questions to a worksheet.`}
+                </span>
+              )
+              : topXQuestionsToAdd > (excludeUsedQuestions ? totalExcludingUsed : totalQuestions) && (
+                <span className="absolute label text-red-500 text-xs">
+                  {`${topXQuestionsToAdd} exceeds number of questions in the result`}
+                </span>
+              )
+            }
           </fieldset>
         </div>
       </div>
