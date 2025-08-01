@@ -15,12 +15,16 @@ export default function Questions({
   loading,
   searchIncludedQuestionsLength,
   searchIncludedQuestionsDisplayCount,
+  normalQuestionsLength,
+  normalQuestionsDisplayCount,
   onLoadMore,
 }: {
   questions: QuestionType[] | QuestionByIdType[];
   loading: boolean;
   searchIncludedQuestionsLength: number;
   searchIncludedQuestionsDisplayCount: number;
+  normalQuestionsLength: number;
+  normalQuestionsDisplayCount: number;
   onLoadMore: () => void;
 }) {
   const cartItems = useReactiveVar(cartItemsVar);
@@ -94,7 +98,7 @@ export default function Questions({
       </div>
       {(searchIncludedQuestionsLength
         ? searchIncludedQuestionsDisplayCount < searchIncludedQuestionsLength
-        : questions.length > 0) && (
+        : normalQuestionsDisplayCount < normalQuestionsLength) && (
         <button
           className="mb-16 btn btn-primary"
           onClick={onLoadMore}

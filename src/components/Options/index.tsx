@@ -25,6 +25,7 @@ export interface Option {
 }
 
 export const MAX_QUESTIONS_FOR_WORKSHEET = 30;
+const QUESTIONS_PER_PAGE = 20;
 const levels = {
   Primary: [
     "Primary 1",
@@ -191,12 +192,11 @@ export default function Options() {
     loading: q_loading,
     error: q_error,
     data: q_data,
-    fetchMore,
   } = useQuery(GET_QUESTIONS, {
     notifyOnNetworkStatusChange: true,
     variables: {
       offset: 0,
-      limit: 20,
+      limit: QUESTIONS_PER_PAGE,
       topics: topicsChosen || [],
       levels: specificLevelsChosen || [],
       papers: papersChosen || [],
@@ -283,11 +283,16 @@ export default function Options() {
   const [
     searchIncludedQuestionsDisplayCount,
     setSearchIncludedQuestionsDisplayCount,
-  ] = useState<number>(Math.min(20, searchIncludedQuestions.length));
+  ] = useState<number>(Math.min(QUESTIONS_PER_PAGE, searchIncludedQuestions.length));
+
+  const [
+    normalQuestionsDisplayCount,
+    setNormalQuestionsDisplayCount,
+  ] = useState<number>(Math.min(QUESTIONS_PER_PAGE, excludeUsedQuestions ? totalExcludingUsed : totalQuestions));
 
   useEffect(() => {
     setSearchIncludedQuestionsDisplayCount(
-      Math.min(20, searchIncludedQuestions.length)
+      Math.min(QUESTIONS_PER_PAGE, searchIncludedQuestions.length)
     );
     // console.log(searchIncludedQuestions.map((q) => q.id));
   }, [searchIncludedQuestions]);
@@ -302,7 +307,7 @@ export default function Options() {
   useEffect(() => {
     if (searchQuery.length > 0 && questionIdsFromSearch.length > 0) {
       const searchResults = [...searchIncludedQuestions];
-      searchResults.length = Math.max(20, searchIncludedQuestionsDisplayCount);
+      searchResults.length = Math.max(QUESTIONS_PER_PAGE, searchIncludedQuestionsDisplayCount);
       setDisplayedQuestions(searchResults);
     } else if (
       topicsChosen.length > 0 &&
@@ -310,11 +315,11 @@ export default function Options() {
       assessmentsChosen.length > 0 &&
       schoolsChosen.length > 0
     ) {
-      setDisplayedQuestions(
-        excludeUsedQuestions
+      const filteredQuestions = excludeUsedQuestions
           ? (q_data?.questions || []).filter((q) => !usedIDs.includes(q.id))
-          : q_data?.questions || []
-      );
+          : q_data?.questions || [];
+      const len = Math.max(QUESTIONS_PER_PAGE, normalQuestionsDisplayCount);
+      setDisplayedQuestions(filteredQuestions.slice(0, len));
     } else {
       setDisplayedQuestions([]);
     }
@@ -326,6 +331,7 @@ export default function Options() {
     searchQuery,
     searchIncludedQuestions,
     searchIncludedQuestionsDisplayCount,
+    normalQuestionsDisplayCount
   ]);
 
   // PDF download logic
@@ -731,8 +737,12 @@ export default function Options() {
                 !topXQuestionsToAdd ||
                 cartItems.length + topXQuestionsToAdd >
                   MAX_QUESTIONS_FOR_WORKSHEET ||
-                cartItems.length + topXQuestionsToAdd >
-                (excludeUsedQuestions ? totalExcludingUsed : totalQuestions)
+                topXQuestionsToAdd > (
+                  searchQuery
+                ? searchIncludedQuestions.length
+                : excludeUsedQuestions
+                ? totalExcludingUsed
+                : totalQuestions)
               }
             >
               Add to Worksheet
@@ -743,11 +753,16 @@ export default function Options() {
                   {`You can only add up to ${MAX_QUESTIONS_FOR_WORKSHEET} questions to a worksheet.`}
                 </span>
               )
-              : topXQuestionsToAdd > (excludeUsedQuestions ? totalExcludingUsed : totalQuestions) && (
-                <span className="absolute label text-red-500 text-xs">
-                  {`${topXQuestionsToAdd} exceeds number of questions in the result`}
-                </span>
-              )
+              : topXQuestionsToAdd > (
+                  searchQuery
+                ? searchIncludedQuestions.length
+                : excludeUsedQuestions
+                ? totalExcludingUsed
+                : totalQuestions) && (
+                  <span className="absolute label text-red-500 text-xs">
+                    {`${topXQuestionsToAdd} exceeds number of questions in the result`}
+                  </span>
+                )
             }
           </fieldset>
         </div>
@@ -799,17 +814,20 @@ export default function Options() {
           searchIncludedQuestionsDisplayCount={
             searchIncludedQuestionsDisplayCount
           }
+          normalQuestionsLength={excludeUsedQuestions ? totalExcludingUsed : totalQuestions}
+          normalQuestionsDisplayCount={normalQuestionsDisplayCount}
           onLoadMore={() => {
             if (searchQuery.length === 0) {
-              fetchMore({
-                variables: {
-                  offset: q_data?.questions.length,
-                },
-              });
+              setNormalQuestionsDisplayCount(
+                Math.min(
+                  normalQuestionsDisplayCount + QUESTIONS_PER_PAGE,
+                  excludeUsedQuestions ? totalExcludingUsed : totalQuestions
+                )
+              );
             } else {
               setSearchIncludedQuestionsDisplayCount(
                 Math.min(
-                  searchIncludedQuestionsDisplayCount + 20,
+                  searchIncludedQuestionsDisplayCount + QUESTIONS_PER_PAGE,
                   searchIncludedQuestions.length
                 )
               );
