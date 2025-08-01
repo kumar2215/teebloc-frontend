@@ -47,6 +47,8 @@ export default function Options() {
 
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
   const [topXQuestionsToAdd, setTopXQuestionsToAdd] = useState(0);
+  const [mainAddToWorksheetClicked, setMainAddToWorksheetClicked] = useState(false);
+  const [mainAddToWorksheetClickedQueued, setMainAddToWorksheetClickedQueued] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
 
   const cartItems = useReactiveVar(cartItemsVar);
@@ -294,7 +296,6 @@ export default function Options() {
     setSearchIncludedQuestionsDisplayCount(
       Math.min(QUESTIONS_PER_PAGE, searchIncludedQuestions.length)
     );
-    // console.log(searchIncludedQuestions.map((q) => q.id));
   }, [searchIncludedQuestions]);
 
   // Once you have totalExcludingUsed, you can filter your displayedQuestions
@@ -306,9 +307,8 @@ export default function Options() {
 
   useEffect(() => {
     if (searchQuery.length > 0 && questionIdsFromSearch.length > 0) {
-      const searchResults = [...searchIncludedQuestions];
-      searchResults.length = Math.max(QUESTIONS_PER_PAGE, searchIncludedQuestionsDisplayCount);
-      setDisplayedQuestions(searchResults);
+      const len = Math.max(QUESTIONS_PER_PAGE, searchIncludedQuestionsDisplayCount);
+      setDisplayedQuestions(searchIncludedQuestions.slice(0, len));
     } else if (
       topicsChosen.length > 0 &&
       papersChosen.length > 0 &&
@@ -331,8 +331,22 @@ export default function Options() {
     searchQuery,
     searchIncludedQuestions,
     searchIncludedQuestionsDisplayCount,
-    normalQuestionsDisplayCount
+    normalQuestionsDisplayCount,
   ]);
+
+  useEffect(() => {
+    if (mainAddToWorksheetClickedQueued) setMainAddToWorksheetClicked(true);
+    if (mainAddToWorksheetClicked) {
+      const questionIdsToAdd = displayedQuestions
+        .filter((q) => !cartItems.includes(q.id))
+        .map((q) => q.id)
+        .slice(0, topXQuestionsToAdd);
+      const newCartItems = [...cartItems, ...questionIdsToAdd];
+      cartItemsVar(newCartItems);
+      setMainAddToWorksheetClicked(false);
+      setMainAddToWorksheetClickedQueued(false);
+    }
+  }, [displayedQuestions, mainAddToWorksheetClicked, mainAddToWorksheetClickedQueued]);
 
   // PDF download logic
   async function downloadPDF() {
@@ -726,12 +740,15 @@ export default function Options() {
             <button
               className="btn btn-neutral"
               onClick={() => {
-                const questionIdsToAdd = displayedQuestions
-                  .filter((q) => !cartItems.includes(q.id))
-                  .map((q) => q.id)
-                  .slice(0, topXQuestionsToAdd);
-                const newCartItems = [...cartItems, ...questionIdsToAdd];
-                cartItemsVar(newCartItems);
+                const existingDisplayedQuestionsInCart = cartItems
+                  .filter((id: string) => displayedQuestions.find((q) => q.id === id))
+                  .length;
+                const totalToAdd = topXQuestionsToAdd + existingDisplayedQuestionsInCart;
+                if (displayedQuestions.length < totalToAdd) {
+                  if (searchQuery.length > 0) setSearchIncludedQuestionsDisplayCount(totalToAdd);
+                  else setNormalQuestionsDisplayCount(totalToAdd);
+                }
+                setMainAddToWorksheetClickedQueued(true);
               }}
               disabled={
                 !topXQuestionsToAdd ||
